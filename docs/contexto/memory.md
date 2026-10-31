@@ -104,3 +104,6 @@ Mockup aprovado. `core/xlsx.js` (ZIP sem compressão + XML; só texto e números
 
 ## 2026-10-31 — 0.12.0: Relatório da turma
 Decisões: (1) seleção das UCs num painel próprio (Shadow DOM) em vez de caixas dentro dos cartões do Moodle — mais robusto a mudanças de layout e sem mexer na página; (2) lê só o livro de notas de cada UC (`ALN.reader.readGradebookFor`, sem participantes), em ordem, com pausa, cancelar e falha parcial (aba Avisos); (3) agrupa por categoria do cartão (`.categoryname`); sem categoria = "Turma sem identificação"; (4) faixas de situação = `ALN.DEFAULTS`; (5) **cartões do `/my/` não trazem data de início**, então a exclusão automática de UCs futuras prometida no mockup não foi feita — orientar o filtro "Em andamento" do Moodle (possível melhoria: ler a vigência de cada UC); (6) `tipoDaPagina` ganhou `meus-cursos` (`/my/`, `/my/index.php`, `/my/courses.php`). Sem permissão nova. Não homologado em Moodle real (os seletores `.course-summaryitem`, `.coursename`, `.categoryname` vêm do projeto do Julio Alves e do simulado).
+
+## 2026-10-31 — Regra de publicação
+Decisão do usuário: **não enviar ao GitHub (push/release) a cada etapa**. Desenvolver 0.13 a 0.16 (e 1.0 só após homologação) com commits locais e **enviar apenas quando todas terminarem ou quando o usuário pedir**. Última versão publicada: v0.12.0.

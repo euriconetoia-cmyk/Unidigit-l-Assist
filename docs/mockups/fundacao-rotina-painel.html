@@ -1,0 +1,102 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>0.13 a 0.16</title>
+<style>
+:root{--p:#0b5cad;--m:#5b6b7c;--line:#dbe3ec;--card:#f8fafd;--ok:#157a4c;--okbg:#e1f5ec;--wn:#a86400;--wnbg:#fff3d6;--er:#b3261e;--erbg:#fde8e5;--new:#6a3fd1;--newbg:#eee9fb}
+*{box-sizing:border-box}body{margin:0;padding:24px;background:#eef2f7;font:14px/1.4 system-ui,sans-serif;color:#14202e;width:1500px}
+h1{font-size:20px;margin:0 0 4px}.lead{color:var(--m);margin:0 0 14px}
+h3{margin:18px 0 8px;font-size:15px;color:var(--new)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 10px 26px rgba(29,42,74,.09)}
+.tag{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#fff;background:var(--new);border-radius:6px;padding:2px 8px;margin-bottom:6px}
+h2{margin:0 0 4px;font-size:15.5px}.sub{color:var(--m);font-size:12.5px;margin:0 0 8px}
+.it{display:flex;gap:8px;align-items:center;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 10px;margin-top:5px;font-size:13px}.it b{flex:1}.it small{color:var(--m)}
+.pill{font-size:11.5px;padding:1px 9px;border-radius:999px;background:var(--line);color:var(--m);white-space:nowrap}.ok{background:var(--okbg);color:var(--ok)}.wn{background:var(--wnbg);color:var(--wn)}.er{background:var(--erbg);color:var(--er)}.pu{background:var(--newbg);color:var(--new)}
+button{font:inherit;min-height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer}button.pri{background:var(--p);color:#fff;border-color:var(--p)}
+.bar{height:9px;border-radius:5px;background:var(--line);overflow:hidden;margin:4px 0}.bar i{display:block;height:100%;background:var(--p)}
+table{border-collapse:collapse;width:100%;font-size:12.5px}th{background:#eef2f7;text-align:left;padding:4px 8px}td{padding:4px 8px;border-bottom:1px solid var(--line)}
+.up{color:var(--ok);font-weight:700}.dn{color:var(--er);font-weight:700}.eq{color:var(--m)}
+textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit;font-size:12.5px;min-height:74px;resize:none}
+code{background:#eef2f7;padding:1px 5px;border-radius:5px}.k{display:inline-block;background:var(--newbg);color:var(--new);border-radius:6px;padding:0 6px;font-size:12px;margin:1px}
+.big{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}.big div{border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;background:var(--card)}.big b{display:block;font-size:20px}
+</style>
+<h1>Unidigit@l Assist — mockup das versões 0.13, 0.15 e 0.16</h1>
+<p class="lead">Dados fictícios. A 0.14 (Ferramentas + Kahoot) já foi aprovada. Nada será enviado ao GitHub até você pedir.</p>
+
+<h3>0.13 · Fundação — confiança, dados e atualização</h3>
+<div class="grid">
+<div class="panel"><span class="tag">Compatibilidade</span><h2>Diagnóstico desta página</h2><p class="sub">Sem nome, nota ou e-mail de aluno. Só o que a extensão reconheceu.</p>
+<div class="it"><b>Página</b><span class="pill">Curso (livro de notas)</span></div>
+<div class="it"><b>Tabela do livro de notas</b><span class="pill ok">reconhecida</span></div>
+<div class="it"><b>Coluna “Total do curso”</b><span class="pill ok">encontrada</span></div>
+<div class="it"><b>Linhas de alunos</b><span class="pill ok">28</span></div>
+<div class="it"><b>Cartões de “Meus cursos”</b><span class="pill er">não encontrados</span></div>
+<div class="it"><b>Paginação</b><span class="pill wn">1 de 2 páginas</span></div>
+<div style="margin-top:8px;display:flex;gap:8px"><button class="pri">Copiar diagnóstico</button><button>Fechar</button></div>
+<p class="sub" style="margin-top:8px">Você cola o resultado para mim e eu corrijo o que não bater, sem ver dados de aluno.</p></div>
+
+<div class="panel"><span class="tag">Sobre</span><h2>Unidigit@l Assist 0.13.0</h2><p class="sub">Por Eurico Cirilo · coautor Julio Alves · MIT</p>
+<div class="it"><b>Versão instalada</b><span class="pill">0.13.0</span></div>
+<div class="it"><b>Novidades desta versão</b><small>Compatibilidade, Sobre, Meus dados</small></div>
+<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="pri">Ver se há versão nova</button><button>Novidades</button><button>Ajuda</button></div>
+<p class="sub" style="margin-top:8px">“Ver se há versão nova” só abre a página de releases no GitHub. A extensão não consulta a internet sozinha.</p>
+<div class="it" style="margin-top:8px"><b>Como atualizar</b><small>extrair o ZIP na mesma pasta → recarregar em chrome://extensions</small></div></div>
+
+<div class="panel"><span class="tag">Meus dados</span><h2>O que está guardado neste navegador</h2><p class="sub">Só neste computador e neste perfil. Nada vai para a nuvem.</p>
+<div class="it"><b>Contatos</b><small>182 registros</small><span class="pill">64 KB</span></div>
+<div class="it"><b>Retornos e modelos</b><small>12 · 5</small><span class="pill">8 KB</span></div>
+<div class="it"><b>Leituras (comparativo)</b><small>10 UCs × 12</small><span class="pill">310 KB</span></div>
+<div class="bar"><i style="width:4%"></i></div><p class="sub">Uso: 382 KB de 10 MB (4%). Aviso automático a 70%.</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="pri">Exportar backup</button><button>Importar</button><button>Apagar tudo…</button></div>
+<p class="sub" style="margin-top:6px">Dados antigos expiram: leituras em 12 semanas, contatos em 12 meses (você ajusta).</p></div>
+</div>
+
+<h3>0.15 · Rotina do tutor — modelos, retornos e comparativo</h3>
+<div class="grid">
+<div class="panel"><span class="tag">Modelos de mensagem</span><h2>Textos prontos com campos</h2><p class="sub">Usados na mensagem individual e na fila de envio.</p>
+<div style="margin-bottom:6px"><span class="k">{nome}</span><span class="k">{uc}</span><span class="k">{nota}</span><span class="k">{dias_sem_acesso}</span><span class="k">{pendencias}</span></div>
+<div class="it"><b>Sem acesso há muitos dias</b><span class="pill pu">padrão p/ nível Alto</span></div>
+<div class="it"><b>Nota abaixo da média</b><span class="pill pu">padrão p/ Recuperação</span></div>
+<div class="it"><b>Atividades pendentes</b><span class="pill">editar</span></div>
+<textarea>Olá, {nome}, tudo bem? Na UC {uc}, vi que seu último acesso foi há {dias_sem_acesso} dias. Posso ajudar?</textarea>
+<div style="margin-top:6px"><button class="pri">Salvar modelo</button> <button>Novo</button></div></div>
+
+<div class="panel"><span class="tag">Retornos agendados</span><h2>Retornos de hoje</h2><p class="sub">Ao enviar mensagem você escolhe “ver de novo em…”.</p>
+<div style="margin-bottom:8px">Ver de novo em: <button>3 dias</button> <button class="pri">7 dias</button> <button>escolher data</button></div>
+<div class="it"><b>Fábio Rocha</b><small>combinado há 7 dias</small><span class="pill er">hoje</span></div>
+<div class="it"><b>Diego Martins</b><small>3 dias</small><span class="pill wn">amanhã</span></div>
+<div class="it"><b>Camila Ferreira</b><small>7 dias</small><span class="pill">06/11</span></div>
+<div style="margin-top:8px"><button>Marcar como feito</button> <button>Adiar</button></div>
+<p class="sub" style="margin-top:8px">Fica só no seu navegador. Sem notificações: aparece no Resumo do dia e no Acompanhamento.</p></div>
+
+<div class="panel"><span class="tag">Comparativo</span><h2>Desde a leitura de 24/10</h2><p class="sub">Compara números guardados, sem texto de aluno.</p>
+<table><tr><th>Aluno</th><th>Nota</th><th>Acesso</th><th>Pend.</th></tr>
+<tr><td>Camila Ferreira</td><td class="up">58 ▲ +6</td><td>ontem</td><td class="up">2 ▼</td></tr>
+<tr><td>Diego Martins</td><td class="eq">47 =</td><td class="dn">16 dias ▲</td><td class="dn">3 ▲</td></tr>
+<tr><td>Fábio Rocha</td><td class="dn">31 ▼ −4</td><td class="dn">23 dias</td><td class="eq">3 =</td></tr></table>
+<div class="it" style="margin-top:8px"><b>Média da turma</b><span class="pill ok">63,8 ▲ +1,9</span></div>
+<p class="sub" style="margin-top:8px">Guarda até 12 leituras por UC. Aparece na aba Acompanhamento e no Relatório da UC.</p></div>
+</div>
+
+<h3>0.16 · Painel e ajustes — resumo do dia, ajustes por UC e régua de nota</h3>
+<div class="grid">
+<div class="panel"><span class="tag">Resumo do dia</span><h2>Segurança em Redes</h2><p class="sub">Primeira tela ao abrir “Alunos e notas”. Usa a última leitura guardada.</p>
+<div class="big"><div><b>6</b><small>alunos</small></div><div><b style="color:var(--er)">2</b><small>risco alto</small></div><div><b style="color:var(--wn)">3</b><small>sem acesso +15d</small></div><div><b>5</b><small>a corrigir</small></div></div>
+<div class="it"><b>Retornos de hoje</b><span class="pill er">1</span></div>
+<div class="it"><b>Piorou desde a última leitura</b><span class="pill wn">2</span></div>
+<div class="it"><b>Leitura</b><small>há 6 dias — atualizar?</small><button>Ler agora</button></div></div>
+
+<div class="panel"><span class="tag">Ajustes</span><h2>Por UC (ou padrão para todas)</h2><p class="sub">Vale no relatório, no Acompanhamento e no Excel.</p>
+<table><tr><th>Ajuste</th><th>Padrão</th><th>Esta UC</th></tr>
+<tr><td>Nota mínima (média)</td><td>60</td><td><b>60</b></td></tr>
+<tr><td>Recuperação a partir de</td><td>40</td><td><b>40</b></td></tr>
+<tr><td>Dias sem acesso (atenção)</td><td>7</td><td><b>10</b></td></tr>
+<tr><td>Pausa entre mensagens</td><td>2 s</td><td><b>2 s</b></td></tr>
+<tr><td>Validade das leituras</td><td>12 sem.</td><td><b>12</b></td></tr></table>
+<div style="margin-top:8px"><button class="pri">Salvar</button> <button>Voltar ao padrão</button></div></div>
+
+<div class="panel"><span class="tag">Régua de nota</span><h2>Na Correção, com prévia</h2><p class="sub">Define uma régua e vê o efeito <b>antes</b> de aplicar. Nada é gravado sem a sua confirmação.</p>
+<div class="it"><b>Régua</b><span class="pill pu">generosa</span><button>trocar</button></div>
+<table style="margin-top:6px"><tr><th>Aluno</th><th>Antes</th><th>Depois</th></tr>
+<tr><td>Ana</td><td>8,5</td><td class="up">9,0</td></tr><tr><td>Bruno</td><td>6,0</td><td class="up">6,5</td></tr><tr><td>Camila</td><td>4,5</td><td class="up">5,0</td></tr></table>
+<p class="sub" style="margin-top:6px">Sem nota continua sem nota. O CSV da Correção passa pela mesma prévia e confirmação de hoje; a régua só altera o valor sugerido.</p>
+<button class="pri">Aplicar na prévia da Correção</button></div>
+</div>
