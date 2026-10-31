@@ -42,3 +42,9 @@ Trabalhar uma por vez, na ordem. Decisões importantes vão para `memory.md`.
 - [x] P2. Relatório da UC por aluno (cartões por urgência) + ficha do aluno.
 - [x] P3. Ler as tarefas (envio/prazo por atividade, com "Continuar") e mensagem de pendências com atividades marcáveis.
 - [x] P4. HTML baixável do relatório e da ficha (N2).
+
+## Versão 0.10.0
+- [x] Q1. Fila de envio de mensagens com revisão, parada e "Tentar de novo" só nas falhas (mockup `docs/mockups/fila-mensagens.html` aprovado).
+- [ ] Q2. Nome e ícone Unidigit@l Assist na barra do Importar Notas dentro do hub.
+- [ ] Q3. N3: "Ajustar datas Moodle" (aguardando ZIP).
+- [ ] Q4. Homologar em Moodle real.

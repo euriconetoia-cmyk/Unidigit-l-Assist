@@ -6,6 +6,7 @@
     "vendor/adapters.js",
     "core/report.js",
     "core/filters.js",
+    "core/fila.js",
     "core/report-html.js",
     "messenger.js",
     "reader.js",

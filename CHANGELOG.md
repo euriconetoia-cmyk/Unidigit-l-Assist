@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.0 — 2026-10-31
+
+### Novo
+- **Fila de envio de mensagens** (aba Acompanhamento → "Enviar em fila"): você revisa e edita o texto de cada aluno, marca "Revisei" e a fila envia **um por vez**, com pausa de 2 s e conferência de cada envio. Dá para **parar** a qualquer momento. Quem já foi contatado hoje vem desmarcado.
+- **Tentar de novo:** reenvia só quem falhou; quem já foi enviado nunca é repetido. Após 3 falhas seguidas a fila para (ex.: sessão do Moodle expirada).
+
 ## 0.9.0 — 2026-10-31
 
 ### Novo

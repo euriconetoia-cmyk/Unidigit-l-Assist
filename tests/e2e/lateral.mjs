@@ -239,6 +239,28 @@ try {
   await pg.keyboard.press('Escape');
   check('Esc fecha só o modal, o painel continua aberto', !(await shadow('.modal').count()) && await shadow('.drawer').isVisible());
 
+  // ---- fila de envio (Acompanhamento): revisar, enviar um a um, falha de um aluno, tentar de novo só nele ----
+  const antes = state.sent.length;
+  await shadow('nav button:has-text("Acompanhamento")').click();
+  await pg.screenshot({ path: path.join(SHOTS, '29-antes-fila.png') });
+  await shadow('.bar button:has-text("Enviar em fila")').click();
+  await shadow('.modal .fl').waitFor();
+  const goFila = shadow('.modal .btn.pri');
+  check('fila abre só para revisão: nada enviado e botão travado até marcar "Revisei"', state.sent.length === antes && await goFila.isDisabled());
+  check('quem já foi contatado hoje vem desmarcado', await shadow('.modal .fl .it:has(.st:has-text("já contatado hoje")) input[type=checkbox]').first().isChecked() === false);
+  await pg.screenshot({ path: path.join(SHOTS, '30-fila-revisao.png') });
+  await shadow('.modal label:has-text("Revisei as mensagens") input').check();
+  state.failNext = true; // o 1º da fila será recusado pelo Moodle
+  await goFila.click();
+  await shadow('.modal .btn:has-text("Tentar de novo")').waitFor({ timeout: 40000 });
+  const enviadas1 = state.sent.length - antes; const totalDepoisFila = state.sent.length + 1;
+  check('fila envia um por vez, o recusado aparece como "falhou" e as outras seguem', enviadas1 >= 1 && (await shadow('.modal .st.falhou').count()) === 1 && (await shadow('.modal .st.enviada').count()) === enviadas1);
+  await pg.screenshot({ path: path.join(SHOTS, '31-fila-resultado.png') });
+  await shadow('.modal .btn:has-text("Tentar de novo")').click();
+  await shadow('.modal .btn:has-text("Fechar")').waitFor({ timeout: 20000 });
+  check('"Tentar de novo" reenvia só a que falhou (as já enviadas não se repetem)', state.sent.length - antes === enviadas1 + 1 && (await shadow('.modal .st.falhou').count()) === 0);
+  await shadow('.modal .btn:has-text("Fechar")').click();
+
 
   await shadow('nav button:has-text("Relatório da UC")').click();
   const rel = await shadow('.body').textContent();
@@ -313,7 +335,7 @@ try {
   await shadow('.modal .pend label:has-text("AV3") input').uncheck();
   const msg2 = await shadow('.modal textarea').inputValue();
   check('desmarcar uma atividade tira só ela do texto', !/AV3 Serviços/.test(msg2) && /AV2 Endereçamento/.test(msg2));
-  check('nada foi enviado nessa conferência', state.sent.length === 1);
+  check('nada foi enviado nessa conferência', state.sent.length === totalDepoisFila);
   await shadow('.modal .btn:has-text("Cancelar")').click().catch(async () => { await pg.keyboard.press('Escape'); });
   // ---- exportar HTML ----
   await shadow('.bar .btn:has-text("Voltar")').click();

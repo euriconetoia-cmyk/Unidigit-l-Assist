@@ -86,3 +86,6 @@ Repositório `euriconetoia-cmyk/Unidigit-l-Assist` (público). Decisões: (1) no
 
 ## 2026-10-31 — 0.9.0: nome na extensão, licença MIT e pedido de ⭐
 Decisões do usuário: repositório continua **público**; licença **MIT** (© Eurico Cirilo); pedido de estrela **aprovado**; nome **Unidigit@l Assist** aplicado dentro da extensão. Implementação: (1) `manifest.name`/descrição, título e rótulos do launcher; (2) **revisado no mesmo dia:** o cartão da ⭐ dentro da extensão foi **removido** a pedido do usuário; o pedido fica só como 1º passo da instalação no README; (3) rodapé do HTML exportado com crédito e endereço do projeto. Ícone da extensão não foi alterado. Ainda sem homologação em Moodle real.
+
+## 2026-10-31 — 0.10.0: fila de envio de mensagens
+Mockup aprovado pelo usuário. Decisões: (1) lógica pura em `core/fila.js` (um por vez, pausa de 2 s, nunca reenvia `enviada`, "tentar de novo" só `falhou`, para após 3 falhas seguidas); (2) reaproveita `messenger.send` (conferência por leitura de volta) e o registro de contatos; (3) mantém a regra de nunca pular revisão/confirmação: botão só libera após "Revisei" e texto de cada aluno editável; (4) quem já foi contatado hoje vem desmarcado; (5) sem permissão nova. e2e 70/70; não homologado em Moodle real.

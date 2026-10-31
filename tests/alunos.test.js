@@ -490,3 +490,34 @@ test('mensagem lista só as atividades pendentes escolhidas e mantém o texto an
   assert.match(com, /Atividades pendentes:\n• AV2 Endereçamento \(prazo 12\/10\)\n• AV4 Segurança\n/);
   assert.equal(w.ALN.messenger.buildMessage(st, 'Redes', undefined, []), sem);
 });
+
+test('fila de envio: um por vez, não reenvia enviadas, tentar de novo só nas falhas e para após 3 falhas seguidas', async () => {
+  const w = load();
+  const F = w.ALN.fila;
+  const mk = n => F.novoItem({ key: `id:${n}`, name: `Aluno ${n}`, userId: n, text: `oi ${n}` });
+  const items = [mk(1), mk(2), mk(3)];
+  const calls = []; let falha = new Set([2]);
+  const send = async ({ userId }) => { calls.push(userId); if (falha.has(userId)) throw new Error('sem resposta do Moodle'); return { at: 1, msgid: userId, confirmed: true, note: '' }; };
+  const sleeps = [];
+  const r1 = await F.runQueue({ items, send, sleep: async ms => sleeps.push(ms), gapMs: 2000 });
+  assert.equal(r1.parou, false);
+  assert.deepEqual(calls, [1, 2, 3]);
+  assert.deepEqual(sleeps, [2000, 2000]);
+  assert.deepEqual(items.map(i => i.state), ['enviada', 'falhou', 'enviada']);
+  assert.equal(items[1].error, 'sem resposta do Moodle');
+  falha = new Set();
+  F.prepararNovaTentativa(items);
+  assert.deepEqual(items.map(i => i.state), ['enviada', 'fila', 'enviada']);
+  await F.runQueue({ items, send, sleep: async () => {} });
+  assert.deepEqual(calls, [1, 2, 3, 2]); // só o 2 foi reenviado
+  assert.equal(F.resumo(items).enviada, 3);
+  // parada pelo usuário e falhas seguidas
+  const b = [mk(4), mk(5), mk(6), mk(7)]; let n = 0;
+  const rs = await F.runQueue({ items: b, send, sleep: async () => {}, shouldStop: () => n++ >= 3 });
+  assert.equal(rs.parou, true);
+  assert.ok(b.some(i => i.state === 'fila'));
+  const c = [mk(8), mk(9), mk(10), mk(11)]; falha = new Set([8, 9, 10, 11]);
+  const rf = await F.runQueue({ items: c, send, sleep: async () => {} });
+  assert.equal(rf.parou, true);
+  assert.equal(c[3].state, 'fila');
+});

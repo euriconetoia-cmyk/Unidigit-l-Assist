@@ -50,6 +50,10 @@ th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--bd);font-si
 .modal h3{margin:0 0 2px;font-size:17px}.modal textarea{width:100%;min-height:150px;border:1px solid var(--bd);border-radius:var(--r1);padding:10px;font:inherit;resize:vertical;margin-top:8px}
 .modal .note{background:var(--wnbg);border:1px solid var(--wnbd);border-radius:var(--r1);padding:8px 10px;font-size:12.5px;margin:8px 0}
 .modal .row2{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}.modal label{display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:13px}
+.fl{display:grid;gap:6px;margin-top:10px;max-height:44vh;overflow:auto}.fl .it{border:1px solid var(--bd);border-radius:var(--r1);padding:6px 10px;background:var(--s2,var(--s))}
+.fl .top{display:flex;gap:8px;align-items:center}.fl .top b{flex:1}.fl .top label{margin:0}.fl details summary{cursor:pointer;color:var(--m);font-size:12.5px}.fl textarea{min-height:110px}
+.fl .st{font-size:12px;padding:2px 9px;border-radius:8px;white-space:nowrap;background:var(--bd);color:var(--m)}.fl .st.enviada{background:var(--okbg);color:var(--ok)}.fl .st.falhou{background:var(--erbg);color:var(--er)}.fl .st.enviando{background:var(--wnbg);color:var(--wn)}.fl .err{color:var(--er);font-size:12.5px;margin:2px 0 0}
+.fbar{height:10px;border-radius:6px;background:var(--bd);overflow:hidden;margin:10px 0 2px}.fbar i{display:block;height:100%;background:var(--p,#0b5cad);width:0;transition:width .3s}
 .res{margin-top:10px;padding:8px 10px;border-radius:var(--r1);font-size:13px}.res.ok{background:var(--okbg);color:var(--ok)}.res.warn{background:var(--wnbg);color:var(--wn)}.res.bad{background:var(--erbg);color:var(--er)}
 
 nav button.off{opacity:.55}
@@ -269,7 +273,8 @@ nav button.off{opacity:.55}
       const counts = LEVELS.reduce((o, k) => (o[k] = (st.data.students.filter(s => s.risk.level === k)).length, o), {});
       const sel = h('select', { 'aria-label': 'Filtrar por nível', onchange: e => { st.fLevel = e.target.value; renderBody(); } },
         ['todos', ...LEVELS].map(k => h('option', { value: k, selected: k === st.fLevel }, k === 'todos' ? 'Precisam de atenção' : ALN.LEVEL_LABEL[k])));
-      const toolbar = h('div', { class: 'bar' }, search(), sel, readBtn(), csvBtn('Exportar lista de contato em CSV', () => download(`acompanhamento-${slug(st.data.course.name)}.csv`, ALN.riskCsv(list.length ? list : all))));
+      const filaBtn = list.some(canSend) ? iconBtn('btn', 'send', `Enviar mensagem a todos os ${list.filter(canSend).length} alunos desta lista, em fila`, () => openFila(list), `Enviar em fila (${list.filter(canSend).length})`) : null;
+      const toolbar = h('div', { class: 'bar' }, search(), sel, readBtn(), filaBtn, csvBtn('Exportar lista de contato em CSV', () => download(`acompanhamento-${slug(st.data.course.name)}.csv`, ALN.riskCsv(list.length ? list : all))));
       const cards = h('div', { class: 'cards' }, LEVELS.map(k => h('div', { class: 'card' }, h('b', {}, counts[k]), h('span', {}, ALN.LEVEL_LABEL[k]))));
       const table = h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Aluno'), h('th', {}, 'Nível'), h('th', {}, 'Motivos e próxima ação'), h('th', {}, ''))),
         h('tbody', {}, list.map(s => h('tr', {}, h('td', {}, h('b', {}, s.name), contactMark(s)), h('td', {}, pill(s.risk.level, ALN.LEVEL_LABEL[s.risk.level])),
@@ -446,6 +451,78 @@ nav button.off{opacity:.55}
       st.modal = s.key;
       drawer.append(back);
       area.focus();
+    }
+
+
+    // Fila de envio: revisão → envio um a um (com conferência de cada) → resultado com "Tentar de novo" só para quem falhou.
+    function openFila(list) {
+      const alvo = list.filter(canSend);
+      if (!alvo.length) return;
+      opener = shadow.activeElement; closeModal(); ensureOv();
+      const hoje = s => { const l = lastContact(s); return l && new Date(l.at).toDateString() === new Date().toDateString(); };
+      const textFor = s => { const pend = s.ov && s.ov.readEntregas ? s.ov.pendencias : []; return ALN.messenger.buildMessage(s, st.data.course.name, settings, pend.map(x => ({ name: x.name, dueText: x.due ? dayOf(x.due).slice(0, 5) : '' }))); };
+      const rows = alvo.map(s => ({ s, on: !hoje(s), item: ALN.fila.novoItem({ key: s.key, name: s.name, userId: ALN.messenger.studentId(s), text: textFor(s) }), area: null }));
+      let fase = 'revisao', parar = false;
+      const body = h('div', {}), foot = h('div', { class: 'row2' }), head = h('h3', {}), sub = h('span', { class: 'why' }), res = h('div', { role: 'status', 'aria-live': 'polite' });
+      const bar = h('div', { class: 'fbar', role: 'progressbar', 'aria-label': 'Progresso do envio' }, h('i'));
+      const ok = h('input', { type: 'checkbox', id: 'aln-fila-ok' });
+      const ativos = () => rows.filter(r => r.on);
+      const label = { fila: 'na fila', enviando: 'enviando…', enviada: 'enviada ✓', falhou: 'falhou' };
+      function draw() {
+        body.replaceChildren();
+        if (fase === 'revisao') {
+          head.textContent = `Enviar a ${ativos().length} aluno(s)`;
+          sub.textContent = 'Um por vez, com pausa de 2 s entre mensagens e conferência de cada envio. Vai pela mensagem do Moodle, com a sua conta. Não dá para desfazer.';
+          body.append(h('div', { class: 'fl' }, rows.map(r => {
+            const area = h('textarea', { 'aria-label': `Mensagem para ${r.s.name}`, maxlength: ALN.messenger.MAX_TEXT }, r.item.text);
+            area.addEventListener('input', () => { r.item.text = area.value; syncFila(); });
+            r.area = area;
+            const chk = h('input', { type: 'checkbox', checked: r.on, onchange: e => { r.on = e.target.checked; head.textContent = `Enviar a ${ativos().length} aluno(s)`; syncFila(); } });
+            return h('div', { class: 'it' }, h('div', { class: 'top' }, h('label', {}, chk, h('b', {}, r.s.name)), hoje(r.s) ? h('span', { class: 'st' }, 'já contatado hoje') : null), h('details', {}, h('summary', {}, 'Ver / editar mensagem'), area));
+          })), h('label', {}, ok, 'Revisei as mensagens e quero enviar a fila.'));
+        } else {
+          const rs = ALN.fila.resumo(ativos().map(r => r.item));
+          const tot = ativos().length, feitos = rs.enviada + rs.falhou;
+          head.textContent = fase === 'enviando' ? `Enviando… ${Math.min(feitos + 1, tot)} de ${tot}` : (rs.falhou ? `${rs.enviada} enviada(s), ${rs.falhou} falharam` : `${rs.enviada} enviada(s)`);
+          sub.textContent = fase === 'enviando' ? 'Pausa de 2 s entre mensagens para não sobrecarregar o Moodle. Pode parar a qualquer momento.' : 'Só as que falharam são reenviadas; as já enviadas ficam registradas e não se repetem.';
+          bar.firstChild.style.width = `${tot ? Math.round((feitos / tot) * 100) : 0}%`;
+          body.append(bar, h('div', { class: 'fl' }, ativos().map(r => h('div', { class: 'it' }, h('div', { class: 'top' }, h('b', {}, r.s.name), h('span', { class: `st ${r.item.state}` }, label[r.item.state])),
+            r.item.state === 'falhou' ? h('p', { class: 'err' }, r.item.error) : (r.item.state === 'enviada' && !r.item.out.confirmed ? h('p', { class: 'err' }, r.item.out.note || 'Enviada, mas não conferida. Confira no Moodle.') : null)))));
+        }
+        foot.replaceChildren(...buttons());
+      }
+      const syncFila = () => { if (fase === 'revisao' && go) go.disabled = !(ok.checked && ativos().length && ativos().every(r => r.item.text.trim())); };
+      ok.addEventListener('change', syncFila);
+      let go = null;
+      const cancel = h('button', { class: 'btn', type: 'button', onclick: () => { if (fase !== 'enviando') closeModal(); } }, 'Cancelar');
+      function buttons() {
+        if (fase === 'revisao') { go = h('button', { class: 'btn pri', type: 'button', disabled: true, onclick: () => rodar() }, svg('send'), `Enviar fila (${ativos().length})`); syncFila(); cancel.textContent = 'Cancelar'; return [cancel, go]; }
+        if (fase === 'enviando') return [h('button', { class: 'btn', type: 'button', onclick: e => { parar = true; e.currentTarget.disabled = true; e.currentTarget.textContent = 'Parando…'; } }, 'Parar fila')];
+        const falhas = ativos().filter(r => r.item.state === 'falhou').length, resto = ativos().filter(r => r.item.state === 'fila').length;
+        cancel.textContent = 'Fechar';
+        return [cancel, (falhas || resto) ? h('button', { class: 'btn pri', type: 'button', onclick: () => { ALN.fila.prepararNovaTentativa(ativos().map(r => r.item)); rodar(); } }, falhas ? `Tentar de novo (${falhas + resto})` : `Continuar (${resto})`) : null];
+      }
+      async function rodar() {
+        fase = 'enviando'; parar = false; st.modalBusy = true; res.textContent = ''; res.className = ''; draw();
+        const out = await ALN.fila.runQueue({
+          items: ativos().map(r => r.item),
+          send: ({ userId, text }) => ALN.messenger.send({ userId, text }),
+          shouldStop: () => parar,
+          onUpdate: async item => {
+            const r = rows.find(x => x.item === item);
+            if (item.state === 'enviada' && r) { try { st.contacts = await ALN.messenger.addLog(st.data.course, r.s.key, { at: item.out.at, msgid: item.out.msgid, confirmed: item.out.confirmed, text: item.text.trim(), nivel: r.s.risk.level }); } catch (_) { /* o registro é só conveniência */ } }
+            if (fase === 'enviando') draw();
+          }
+        });
+        fase = 'resultado'; st.modalBusy = false;
+        if (out.parou) { res.className = 'res warn'; res.textContent = `Fila interrompida: ${out.motivo}.`; }
+        draw(); renderBodyKeepModal();
+      }
+      const renderBodyKeepModal = () => { const m = shadow.querySelector('.mback'); renderBody(); if (m && !shadow.querySelector('.mback')) drawer.append(m); };
+      const dialog = h('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Enviar mensagens em fila', style: 'width:min(640px,100%)',
+        onkeydown: e => { if (e.key === 'Escape') { e.stopPropagation(); if (fase !== 'enviando') closeModal(); } } }, head, sub, body, res, foot);
+      const back = h('div', { class: 'mback', onclick: e => { if (e.target === back && fase !== 'enviando') closeModal(); } }, dialog);
+      st.modal = 'fila'; drawer.append(back); draw();
     }
 
     const diagBtn = () => h('button', { type: 'button', class: 'linkbtn', onclick: copyDiag }, 'Copiar diagnóstico');
