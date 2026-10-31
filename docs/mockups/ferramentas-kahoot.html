@@ -1,0 +1,84 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Ferramentas + Kahoot</title>
+<style>
+:root{--p:#0b5cad;--m:#5b6b7c;--line:#dbe3ec;--card:#f8fafd;--ok:#157a4c;--okbg:#e1f5ec;--wn:#a86400;--wnbg:#fff3d6;--er:#b3261e;--erbg:#fde8e5;--new:#6a3fd1;--newbg:#eee9fb}
+*{box-sizing:border-box}body{margin:0;padding:24px;background:#eef2f7;font:14px/1.4 system-ui,sans-serif;color:#14202e;width:1500px}
+h1{font-size:20px;margin:0 0 4px}.lead{color:var(--m);margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:18px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 10px 30px rgba(29,42,74,.1)}
+.tag{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#fff;background:var(--p);border-radius:6px;padding:2px 8px;margin-bottom:8px}.tag.n{background:var(--new)}
+h2{margin:0 0 4px;font-size:16px}.sub{color:var(--m);font-size:12.5px;margin:0 0 10px}
+.sec{font-size:11px;color:var(--m);text-transform:uppercase;letter-spacing:.07em;margin:10px 4px 2px}
+.app{display:flex;gap:10px;align-items:center;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:8px 10px;margin-top:6px}
+.sym{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-weight:700;flex:none}
+.a{background:#e3f0fc;color:var(--p)}.b{background:var(--okbg);color:var(--ok)}.c{background:var(--newbg);color:var(--new)}
+.app small{display:block;color:var(--m);font-size:12px}.app b{display:block}
+.chev{margin-left:auto;color:var(--m);font-size:18px}.cnt{margin-left:auto;font-size:11px;background:var(--new);color:#fff;border-radius:999px;padding:1px 9px}
+.soon{border-style:dashed;opacity:.72}.tg{margin-left:auto;font-size:11px;background:var(--line);color:var(--m);border-radius:8px;padding:1px 8px;white-space:nowrap}
+.back{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:6px}.back span{width:28px;height:28px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center}
+button{font:inherit;min-height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer}button.pri{background:var(--p);color:#fff;border-color:var(--p)}
+.kh{background:#46178f;color:#fff;border-radius:10px;padding:12px;font-size:12.5px}.kh .btn{display:inline-block;background:var(--p);color:#fff;border-radius:6px;padding:6px 14px;font-weight:700;margin-top:6px}
+.kh .row{display:flex;gap:8px;align-items:center}.kh .box{background:rgba(255,255,255,.14);border-radius:8px;padding:6px 10px;flex:1}
+.perm{background:var(--wnbg);border:1px solid #f0d28a;border-radius:10px;padding:10px;font-size:13px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}th{background:#eef2f7;text-align:left;padding:5px 8px}td{padding:4px 8px;border-bottom:1px solid var(--line)}
+.ok{color:var(--ok);font-weight:600}.er{color:var(--er);font-weight:600}
+.prog{height:10px;border-radius:6px;background:var(--line);overflow:hidden;margin:8px 0}.prog i{display:block;width:40%;height:100%;background:var(--p)}
+code{background:#eef2f7;padding:1px 5px;border-radius:5px}
+</style>
+<h1>Unidigit@l Assist — grupo “Ferramentas” e Kahoot</h1>
+<p class="lead">Mockup para validar antes de implementar. Dados fictícios. Roxo = novo.</p>
+
+<div class="grid">
+<div class="panel"><span class="tag n">1 · Menu principal</span><h2>Um item “Ferramentas” que abre uma gaveta</h2><p class="sub">O menu principal não cresce: tudo que não é do dia a dia da correção fica dentro de Ferramentas.</p>
+<div class="sec">Correção</div>
+<div class="app"><span class="sym a">◷</span><span><b>Pendências</b><small>Buscar o que falta corrigir</small></span></div>
+<div class="app"><span class="sym a">✎</span><span><b>Correção</b><small>Lançar notas e feedback</small></span></div>
+<div class="sec">Alunos</div>
+<div class="app"><span class="sym b">▤</span><span><b>Alunos e notas</b><small>Lista, boletim, acompanhamento</small></span></div>
+<div class="app"><span class="sym b">▥</span><span><b>Relatórios</b><small>UC e turma, com Excel</small></span></div>
+<div class="sec">Mais</div>
+<div class="app" style="border-color:var(--new);background:#f7f3ff"><span class="sym c">⚒</span><span><b>Ferramentas</b><small>Kahoot e outras utilidades</small></span><span class="cnt">3</span><span class="chev">›</span></div>
+</div>
+
+<div class="panel"><span class="tag n">2 · Dentro de Ferramentas</span><h2>Lista própria, com voltar</h2><p class="sub">Cada ferramenta diz onde funciona. As que não se aplicam à página aparecem esmaecidas, como no menu atual.</p>
+<div class="back"><span>‹</span>Ferramentas</div>
+<div class="app" style="border-color:var(--new)"><span class="sym c">?</span><span><b>Kahoot — importar perguntas</b><small>Planilha CSV → editor do Kahoot · funciona em create.kahoot.it</small></span></div>
+<div class="app"><span class="sym c">⇆</span><span><b>Modelo de perguntas (CSV)</b><small>Baixa a planilha-modelo do Kahoot, em qualquer página</small></span></div>
+<div class="app soon"><span class="sym c">⏱</span><span><b>Ajustar datas do Moodle</b><small>Mover prazos de várias atividades</small></span><span class="tg">em breve</span></div>
+<div class="app soon"><span class="sym c">▦</span><span><b>Automação por blocos</b><small>Montar rotinas visualmente</small></span><span class="tg">em breve</span></div>
+<p class="sub" style="margin-top:10px">Novas utilidades entram aqui sem mexer no menu principal.</p></div>
+
+<div class="panel"><span class="tag n">3 · Primeira vez no Kahoot</span><h2>Permissão só quando você usar</h2><p class="sub">A extensão continua só com os dois Moodles. O Kahoot é pedido ao clicar, uma vez, pelo próprio Chrome.</p>
+<div class="perm"><b>Permitir que o Unidigit@l Assist acesse create.kahoot.it?</b><br><span style="color:var(--m)">Usado apenas para preencher o editor quando você clicar em Importar. Pode revogar em chrome://extensions.</span><div style="margin-top:8px;display:flex;gap:8px"><button class="pri">Permitir</button><button>Agora não</button></div></div>
+<p class="sub" style="margin-top:10px">Sem permitir, nada acontece no Kahoot e o resto da extensão segue igual. Nada roda sozinho: o botão só aparece depois da permissão e só age ao clicar.</p>
+<div class="sec">Regras que continuam valendo</div>
+<table><tr><td>Hosts fixos</td><td class="ok">+ Kahoot só opcional</td></tr><tr><td>Script na página</td><td class="ok">só ao clicar</td></tr><tr><td>Dados saem do navegador</td><td class="ok">nunca</td></tr></table></div>
+</div>
+
+<div class="grid">
+<div class="panel"><span class="tag n">4 · No editor do Kahoot</span><h2>Botão “Importar!” ao lado do Add</h2><p class="sub">Aparece no editor depois que você abre a ferramenta pelo menu.</p>
+<div class="kh"><div class="row"><div class="box">Pergunta 1 · Quiz</div><div class="box">+ Add</div></div><div class="btn">Importar!</div></div>
+<p class="sub" style="margin-top:10px">Mesmo tamanho e estilo do botão nativo, para não destoar da página.</p></div>
+
+<div class="panel"><span class="tag n">5 · Validar o arquivo</span><h2>Conferir antes de preencher</h2><p class="sub">Aceita CSV com ; ou , e nomes de coluna variados (pergunta, enunciado, gabarito…).</p>
+<table><tr><th>#</th><th>Pergunta</th><th>Correta</th><th></th></tr>
+<tr><td>1</td><td>Qual é a capital de Goiás?</td><td>A · Goiânia</td><td class="ok">ok</td></tr>
+<tr><td>2</td><td>O que é um DNS?</td><td>C</td><td class="ok">ok</td></tr>
+<tr><td>3</td><td>Porta padrão do HTTPS?</td><td>—</td><td class="er">falta a correta</td></tr>
+<tr><td>4</td><td>Camada de transporte…</td><td>B</td><td class="er">só 3 opções</td></tr></table>
+<p class="sub" style="margin-top:8px">2 de 4 prontas. Só avança com tudo certo, ou você escolhe “Importar só as válidas”.</p>
+<label style="font-size:13px"><input type="checkbox" checked> Substituir a pergunta em branco atual</label></div>
+
+<div class="panel"><span class="tag n">6 · Preenchendo</span><h2>Progresso, tempo e cancelar</h2><p class="sub">Preenche pergunta por pergunta, com intervalo de 0,9 s para o Kahoot acompanhar.</p>
+<p style="margin:0"><b>Pergunta 8 de 20</b> · 1 min 12 s</p><div class="prog"><i></i></div>
+<button>Cancelar</button> <button>Ocultar</button>
+<p class="sub" style="margin-top:10px">Se algum campo do Kahoot não for encontrado (o layout mudou), a importação para e diz exatamente em qual pergunta e campo, sem deixar quiz pela metade sem avisar.</p>
+<p class="sub">Nos nossos testes o Kahoot é simulado, como já fazemos com o Moodle.</p></div>
+</div>
+
+<div class="panel"><h2>O que muda e o que não muda</h2>
+<table><tr><th></th><th>Hoje (0.10.0)</th><th>Depois</th></tr>
+<tr><td>Menu</td><td>5 itens + “em breve”</td><td class="ok">agora com grupo “Ferramentas” (gaveta com voltar)</td></tr>
+<tr><td>Kahoot</td><td>—</td><td class="ok">importa perguntas por CSV, com validação, progresso e cancelar</td></tr>
+<tr><td>Sites com acesso</td><td>2 Moodles</td><td class="ok">2 Moodles + Kahoot <b>só se você permitir</b></td></tr>
+<tr><td>Ajustar datas / Blocos</td><td>soltos ou ausentes</td><td class="ok">moram em Ferramentas, “em breve”</td></tr></table>
+<p class="sub" style="margin-top:10px"><b>Ordem proposta:</b> primeiro Excel e Relatório da turma (etapas A–C), depois a gaveta “Ferramentas”, depois o Kahoot. Cada etapa é uma versão para você testar antes da próxima. Créditos: o fluxo do Kahoot parte da ideia do projeto “SENAI Extensões” (Julio Alves, MIT), reescrito e testado aqui.</p></div>
