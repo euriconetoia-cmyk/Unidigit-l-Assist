@@ -1,0 +1,27 @@
+<!doctype html><meta charset="utf-8"><title>Plano de ação</title><style>
+:root{--p:#0b5cad;--m:#5b6b7c;--line:#dbe3ec;--ok:#157a4c;--new:#6a3fd1;--wn:#a86400}
+*{box-sizing:border-box}body{margin:0;padding:24px;background:#eef2f7;font:14px/1.4 system-ui,sans-serif;color:#14202e;width:1400px}
+h1{font-size:20px;margin:0 0 4px}.lead{color:var(--m);margin:0 0 16px}
+.row{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;position:relative}
+.v{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:0 8px 22px rgba(29,42,74,.08);position:relative}
+.v h2{margin:0;font-size:18px;color:var(--p)}.v .t{font-weight:700;margin:2px 0 6px}.v ul{margin:0;padding-left:16px;font-size:12.5px}.v li{margin:2px 0}
+.v small{display:block;color:var(--m);margin-top:6px;font-size:11.5px}
+.gate{background:#fff3d6;border:2px dashed #e0b44d;border-radius:12px;padding:10px;font-size:12.5px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.gate b{color:var(--wn)}
+.final{border-color:var(--ok)}.final h2{color:var(--ok)}
+.k{display:inline-block;font-size:10.5px;padding:1px 7px;border-radius:999px;background:#e3f0fc;color:var(--p);margin-right:4px}
+.bar{height:6px;border-radius:4px;margin-bottom:8px;background:var(--p)}.f{background:var(--new)}.g{background:var(--ok)}
+.foot{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px}.foot div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12.5px}.foot b{display:block;margin-bottom:4px}
+</style>
+<h1>Unidigit@l Assist — plano de ação 0.11 → 1.0</h1><p class="lead">Uma etapa por vez · mockup aprovado antes do código · cada versão vira release com ZIP.</p>
+<div class="row">
+<div class="v"><div class="bar"></div><h2>0.11</h2><div class="t">Excel</div><ul><li>Gerador .xlsx</li><li>Botões nas telas</li></ul><small>mockup ✔</small></div>
+<div class="v"><div class="bar"></div><h2>0.12</h2><div class="t">Relatório da turma</div><ul><li>“Meus cursos”</li><li>Abas por turma</li><li>Aba Situação</li></ul><small>mockup ✔</small></div>
+<div class="v"><div class="bar f"></div><h2>0.13</h2><div class="t">Fundação</div><ul><li>Compatibilidade</li><li>Sobre</li><li>Meus dados + backup</li><li>Chave fixa</li></ul><small>mockup a fazer</small></div>
+<div class="gate"><b>PARADA</b>Você testa no Moodle real e me manda o diagnóstico. Corrijo antes de seguir.</div>
+<div class="v"><div class="bar"></div><h2>0.14</h2><div class="t">Ferramentas + Kahoot</div><ul><li>Gaveta no menu</li><li>Permissão no clique</li></ul><small>mockup ✔</small></div>
+<div class="v"><div class="bar f"></div><h2>0.15</h2><div class="t">Rotina do tutor</div><ul><li>Modelos de mensagem</li><li>Retornos agendados</li><li>Comparativo</li></ul><small>mockup a fazer</small></div>
+<div class="v"><div class="bar f"></div><h2>0.16</h2><div class="t">Painel e ajustes</div><ul><li>Resumo do dia</li><li>Ajustes por UC</li><li>Régua de nota</li></ul><small>mockup a fazer</small></div>
+</div>
+<div class="row" style="grid-template-columns:1fr;margin-top:10px"><div class="v final"><div class="bar g"></div><h2>1.0.0 · Homologada</h2><div class="t">Teste final no Moodle real (SENAI e FIEG) → pacote da loja do Edge (gratuita, “oculta”, atualização automática)</div></div></div>
+<div class="foot"><div><b>Em todas as etapas</b>Testes unitários + navegador verdes · CHANGELOG · task.md · memory.md · release com ZIP.</div><div><b>Dados</b>Só no navegador (<code>storage.local</code>), resumos compactos, validade, limite com aviso, backup.</div><div><b>Permissões</b>Só os 2 Moodles. Kahoot: opcional, pedido no clique. Nada novo sem decisão registrada.</div></div>

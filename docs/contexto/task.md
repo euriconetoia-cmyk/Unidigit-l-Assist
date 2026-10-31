@@ -48,3 +48,12 @@ Trabalhar uma por vez, na ordem. Decisões importantes vão para `memory.md`.
 - [ ] Q2. Nome e ícone Unidigit@l Assist na barra do Importar Notas dentro do hub.
 - [ ] Q3. N3: "Ajustar datas Moodle" (aguardando ZIP).
 - [ ] Q4. Homologar em Moodle real.
+
+## Plano 0.11 → 1.0 (detalhes em `plano.md`)
+- [ ] 0.11.0 Excel (.xlsx) + botões nas telas
+- [ ] 0.12.0 Relatório da turma (`/my/`)
+- [ ] 0.13.0 Compatibilidade + Sobre + Meus dados + armazenamento versionado + `key` fixa
+- [ ] 0.14.0 Gaveta Ferramentas + Kahoot (host opcional)
+- [ ] 0.15.0 Modelos de mensagem + retornos agendados + comparativo entre leituras
+- [ ] 0.16.0 Resumo do dia + Ajustes + régua de nota
+- [ ] 1.0.0 Homologação real + pacote da loja do Edge
