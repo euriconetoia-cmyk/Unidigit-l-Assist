@@ -4,7 +4,7 @@
   'use strict';
   const ALN = root.ALN;
   const HOST_ID = 'hub-aln-host';
-  const TABS = [['alunos', 'Alunos'], ['notas', 'Notas'], ['acomp', 'Acompanhamento'], ['relatorio', 'Relatório da UC']];
+  const TABS = [['resumo', 'Resumo'], ['alunos', 'Alunos'], ['notas', 'Notas'], ['acomp', 'Acompanhamento'], ['relatorio', 'Relatório da UC'], ['ajustes', 'Ajustes']];
   const ICON = {
     refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>', close: '<path d="M6 6l12 12M18 6L6 18"/>',
     down: '<path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/>', copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/>',
@@ -124,12 +124,12 @@ label.inl{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-siz
     host.style.cssText = 'all:initial';
     const shadow = host.attachShadow({ mode: 'open' });
     shadow.append(h('style', {}, CSS));
-    const st = { tab: initialTab || 'alunos', data: ALN.reader.cached(), busy: false, progress: '', step: '', secs: 0, abort: null, error: '', copied: false, search: '', f: { access: 'todos', graded: 'todos', pend: 'todos', situation: 'todos' }, sortKey: 'name', sortDir: 'asc', rv: 'todos', ficha: null, tdata: ALN.tarefas.cached(), tbusy: false, tmsg: '', tsecs: 0, tabort: null, terr: '', fSituation: 'todos', fLevel: 'todos', onlyBelow: false, category: '', contacts: {}, modal: null, modelos: [], ret: [], comp: null };
+    const st = { aj: { padrao: {}, ucs: {} }, ajErro: [], ajMsg: '', tab: initialTab || 'resumo', data: ALN.reader.cached(), busy: false, progress: '', step: '', secs: 0, abort: null, error: '', copied: false, search: '', f: { access: 'todos', graded: 'todos', pend: 'todos', situation: 'todos' }, sortKey: 'name', sortDir: 'asc', rv: 'todos', ficha: null, tdata: ALN.tarefas.cached(), tbusy: false, tmsg: '', tsecs: 0, tabort: null, terr: '', fSituation: 'todos', fLevel: 'todos', onlyBelow: false, category: '', contacts: {}, modal: null, modelos: [], ret: [], comp: null };
     const drawer = h('div', { class: 'drawer', role: 'dialog', 'aria-label': 'Alunos e notas' });
     shadow.append(drawer);
     root.document.documentElement.append(host);
 
-    const settings = ALN.DEFAULTS;
+    let settings = ALN.DEFAULTS; let ajRes = null; let ovReset = () => {};
     const visibleCategory = () => st.category;
     const studentsFiltered = () => {
       const q = st.search.trim().toLowerCase();
@@ -152,7 +152,7 @@ label.inl{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-siz
       try { st.data = await ALN.reader.readCourse({ resume: again, signal: st.abort.signal, onProgress: p => { if (p.step) st.step = p.step; st.progress = p.text; renderStatusOnly(); if (p.step) renderSteps(); } }); }
       catch (e) { st.error = e && e.message ? e.message : String(e); }
       root.clearInterval(timer);
-      st.busy = false; st.abort = null; await loadContacts(); await loadRetornos(); await guardarLeitura(); render();
+      st.busy = false; st.abort = null; await loadContacts(); await loadRetornos(); applyAjustes(); await guardarLeitura(); render();
     }
     function renderSteps() { const el = shadow.querySelector('[data-steps]'); if (el) el.replaceChildren(...stepRows()); }
     function cancelRead() { if (st.abort) st.abort.abort(); }
@@ -189,6 +189,7 @@ label.inl{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-siz
     const STATE_LABEL = { avaliada: 'entregue e avaliada', aguardando: 'entregue, aguardando correção', sem_entrega: 'sem entrega', sem_nota: 'sem nota' };
     const STATE_PILL = { avaliada: 'media', aguardando: 'recuperacao', sem_entrega: 'abaixo', sem_nota: 'sem_nota' };
     let ovKey = '';
+    ovReset = () => { ovKey = ''; };
     function ensureOv() {
       if (!st.data) return;
       const key = `${st.data.readAt}|${st.tdata ? st.tdata.readAt : 0}`;
@@ -274,6 +275,64 @@ label.inl{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-siz
       const foot = h('tr', {}, h('td', {}, h('b', {}, 'Média da turma')), ...items.map(it => { const x = rep.perItem.find(p => p.key === it.key); return h('td', { class: 'n' }, x && x.avg != null ? ALN.fmt(x.avg) : '—'); }), h('td', { class: 'n' }, h('b', {}, rep.meanPct == null ? '—' : ALN.fmt(rep.meanPct))));
       return [toolbar, covLine(), warnBox(), h('div', { class: 'body' }, h('div', { class: 'scroll' }, h('table', {}, h('thead', {}, head), h('tbody', {}, rows, foot))),
         h('span', { class: 'why' }, '“—” = sem nota lançada (não é zero). A nota máxima de cada item vem do livro de notas do Moodle.'))];
+    }
+
+    // ---- Ajustes por UC: valores efetivos alimentam relatório, Acompanhamento, Excel e a pausa da fila ----
+    const loadAjustes = async () => { st.aj = await ALN.ajustes.carregar(); applyAjustes(); };
+    function applyAjustes() {
+      ajRes = ALN.ajustes.resolver(st.aj, st.data ? courseKey() : null); settings = ajRes.settings;
+      if (!st.data) return;
+      const cfg = JSON.stringify(settings);
+      if (st.data.cfg === undefined) st.data.cfg = JSON.stringify(ALN.DEFAULTS);
+      if (st.data.cfg === cfg) return;
+      st.data.students = ALN.buildStudents({ gradebook: st.data.gradebook, participants: st.data.participants }, settings); st.data.cfg = cfg; ovReset();
+    }
+    const pausaMs = () => (ajRes ? ajRes.pausaMs : 2000);
+    const pausaTxt = () => `${String(pausaMs() / 1000).replace('.', ',')} s`;
+    async function salvarAjustes(entrada, escopo) {
+      const r = ALN.ajustes.definir(st.aj, escopo === 'uc' ? courseKey() : null, entrada);
+      st.ajErro = r.erros; st.ajMsg = '';
+      if (r.ok) { try { await ALN.ajustes.gravar(r.store); st.aj = r.store; applyAjustes(); st.ajMsg = 'Ajustes salvos.'; } catch (_) { st.ajErro = ['Não consegui gravar os ajustes neste navegador.']; } }
+      render();
+    }
+    async function voltarAjustes(escopo) {
+      try { st.aj = ALN.ajustes.voltarAoPadrao(st.aj, escopo === 'uc' ? courseKey() : null); await ALN.ajustes.gravar(st.aj); applyAjustes(); st.ajMsg = 'Ajustes restaurados.'; st.ajErro = []; } catch (_) { st.ajErro = ['Não consegui gravar os ajustes neste navegador.']; }
+      render();
+    }
+    function viewAjustes() {
+      const inputs = {}; const escopo = { v: 'uc' };
+      const atual = ALN.ajustes.resolver(st.aj, courseKey());
+      const padraoUsuario = ALN.ajustes.resolver(st.aj, null).valores;
+      const own = (st.aj.ucs && st.aj.ucs[courseKey()]) || {};
+      const rows = ALN.ajustes.CAMPOS.map(c => {
+        const inp = h('input', { type: 'text', inputmode: 'decimal', 'aria-label': c.rotulo, value: String(atual.valores[c.id]).replace('.', ',') }); inputs[c.id] = inp;
+        return h('tr', {}, h('td', {}, c.rotulo), h('td', { class: 'n' }, String(padraoUsuario[c.id]).replace('.', ',')), h('td', { class: 'n' }, inp, own[c.id] !== undefined ? h('small', { class: 'sub2' }, ' ajustado') : null));
+      });
+      const coletar = () => Object.fromEntries(Object.entries(inputs).map(([k, el]) => [k, el.value]));
+      const esc = h('select', { 'aria-label': 'Onde aplicar', onchange: e => { escopo.v = e.target.value; } }, h('option', { value: 'uc' }, `Só esta UC (${st.data.course.name})`), h('option', { value: 'padrao' }, 'Padrão para todas as UCs'));
+      return [h('div', { class: 'body' },
+        h('div', { class: 'rbox' }, h('b', {}, 'Ajustes'), h('p', { class: 'hint', style: 'margin:4px 0 0' }, 'Valem no relatório, no Acompanhamento e no Excel desta UC. “Padrão” é o valor das outras UCs; a coluna “Esta UC” é o que está valendo aqui.')),
+        h('div', { class: 'scroll' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Ajuste'), h('th', {}, 'Padrão'), h('th', {}, 'Esta UC'))), h('tbody', {}, rows))),
+        st.ajErro.length ? h('div', { class: 'err', role: 'alert' }, st.ajErro.map(e => h('p', {}, e))) : null,
+        st.ajMsg ? h('p', { class: 'hint', role: 'status' }, st.ajMsg) : null,
+        h('div', { class: 'bar', style: 'margin-top:10px' }, esc, h('button', { type: 'button', class: 'btn pri', onclick: () => salvarAjustes(coletar(), escopo.v) }, 'Salvar'), h('button', { type: 'button', class: 'btn', onclick: () => voltarAjustes(escopo.v) }, 'Voltar ao padrão')),
+        h('span', { class: 'why' }, 'Mudar a nota mínima ou os dias sem acesso muda quem aparece como risco; a pausa entre mensagens vale para a fila de envio (mínimo 2 s). Fica só neste navegador.'))];
+    }
+
+    // ---- Resumo do dia: primeira tela, só números já lidos e guardados ----
+    function viewResumo() {
+      const r = ALN.resumo.resumir({ students: st.data.students, retornos: st.ret, comparativo: st.comp, readAt: st.data.readAt, settings });
+      const k = (n, rot, tom) => h('div', { class: 'card' }, h('b', { class: tom || '' }, n == null ? '—' : String(n)), h('span', {}, rot));
+      const irAcomp = () => { st.tab = 'acomp'; render(); };
+      const linha = (rot, valor, tom, acao) => h('div', { class: 'ret' }, h('b', {}, rot), h('span', { class: `pill ${tom}` }, valor), acao || null);
+      const velha = r.idadeDias != null && r.idadeDias >= 1;
+      return [covLine(), warnBox(), h('div', { class: 'body' },
+        h('div', { class: 'cards' }, k(r.alunos, 'alunos'), k(r.riscoAlto, 'risco alto', 'low'), k(r.semAcesso, `sem acesso +${r.semAcessoDias}d`), k(r.aCorrigir, r.aCorrigir == null ? 'a corrigir (leia as entregas)' : 'a corrigir')),
+        h('div', { class: 'rbox' },
+          linha('Retornos de hoje', String(r.retornosHoje), r.retornosHoje ? 'recuperacao' : 'media', r.retornosHoje ? h('button', { type: 'button', class: 'btn', onclick: irAcomp }, 'Ver') : null),
+          linha('Piorou desde a última leitura', r.piorou == null ? 'sem leitura anterior' : String(r.piorou), r.piorou ? 'abaixo' : 'media', r.piorou ? h('button', { type: 'button', class: 'btn', onclick: irAcomp }, 'Ver') : null),
+          h('div', { class: 'ret' }, h('b', {}, 'Leitura'), h('span', { class: `pill ${velha ? 'recuperacao' : 'media'}` }, `${ALN.resumo.idadeTexto(r.idadeDias)}${velha ? ' — atualizar?' : ''}`), h('button', { type: 'button', class: velha ? 'btn pri' : 'btn', onclick: read }, 'Ler agora'))),
+        h('span', { class: 'why' }, 'Usa a última leitura guardada neste navegador. “A corrigir” só aparece depois de ler as entregas (na aba Alunos); sem essa leitura o número fica em “—”, nunca em zero.'))];
     }
     const LEVELS = ['imediato', 'alto', 'atencao', 'verificar', 'regular'];
     function viewAcomp() {
@@ -581,7 +640,7 @@ label.inl{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-siz
         body.replaceChildren();
         if (fase === 'revisao') {
           head.textContent = `Enviar a ${ativos().length} aluno(s)`;
-          sub.textContent = 'Um por vez, com pausa de 2 s entre mensagens e conferência de cada envio. Vai pela mensagem do Moodle, com a sua conta. Não dá para desfazer.';
+          sub.textContent = `Um por vez, com pausa de ${pausaTxt()} entre mensagens e conferência de cada envio. Vai pela mensagem do Moodle, com a sua conta. Não dá para desfazer.`;
           body.append(h('div', { class: 'row2', style: 'justify-content:flex-start;align-items:center' }, h('label', { class: 'inl' }, 'Modelo:', modeloSelF), h('label', { class: 'inl' }, 'Ver de novo em:', retSel, dataIn)), h('div', { class: 'fl' }, rows.map(r => {
             const area = h('textarea', { 'aria-label': `Mensagem para ${r.s.name}`, maxlength: ALN.messenger.MAX_TEXT }, r.item.text);
             area.addEventListener('input', () => { r.item.text = area.value; r.editado = true; syncFila(); });
@@ -593,7 +652,7 @@ label.inl{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-siz
           const rs = ALN.fila.resumo(ativos().map(r => r.item));
           const tot = ativos().length, feitos = rs.enviada + rs.falhou;
           head.textContent = fase === 'enviando' ? `Enviando… ${Math.min(feitos + 1, tot)} de ${tot}` : (rs.falhou ? `${rs.enviada} enviada(s), ${rs.falhou} falharam` : `${rs.enviada} enviada(s)`);
-          sub.textContent = fase === 'enviando' ? 'Pausa de 2 s entre mensagens para não sobrecarregar o Moodle. Pode parar a qualquer momento.' : 'Só as que falharam são reenviadas; as já enviadas ficam registradas e não se repetem.';
+          sub.textContent = fase === 'enviando' ? `Pausa de ${pausaTxt()} entre mensagens para não sobrecarregar o Moodle. Pode parar a qualquer momento.` : 'Só as que falharam são reenviadas; as já enviadas ficam registradas e não se repetem.';
           bar.firstChild.style.width = `${tot ? Math.round((feitos / tot) * 100) : 0}%`;
           body.append(bar, h('div', { class: 'fl' }, ativos().map(r => h('div', { class: 'it' }, h('div', { class: 'top' }, h('b', {}, r.s.name), h('span', { class: `st ${r.item.state}` }, label[r.item.state])),
             r.item.state === 'falhou' ? h('p', { class: 'err' }, r.item.error) : (r.item.state === 'enviada' && !r.item.out.confirmed ? h('p', { class: 'err' }, r.item.out.note || 'Enviada, mas não conferida. Confira no Moodle.') : null)))));
@@ -616,7 +675,7 @@ label.inl{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-siz
         const out = await ALN.fila.runQueue({
           items: ativos().map(r => r.item),
           send: ({ userId, text }) => ALN.messenger.send({ userId, text }),
-          shouldStop: () => parar,
+          shouldStop: () => parar, gapMs: pausaMs(),
           onUpdate: async item => {
             const r = rows.find(x => x.item === item);
             if (item.state === 'enviada' && r) { try { st.contacts = await ALN.messenger.addLog(st.data.course, r.s.key, { at: item.out.at, msgid: item.out.msgid, confirmed: item.out.confirmed, text: item.text.trim(), nivel: r.s.risk.level, modelo: modeloFila ? modeloFila.id : 'auto' }); await agendarRetorno(r.s, retornoEm(retSel, dataIn)); } catch (_) { /* o registro é só conveniência */ } }
@@ -691,7 +750,7 @@ label.inl{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-siz
       if (st.busy) return readingState();
       if (!st.data) return emptyState();
       ensureOv();
-      const out = st.tab === 'notas' ? viewNotas() : st.tab === 'acomp' ? viewAcomp() : st.tab === 'relatorio' ? viewRelatorio() : viewAlunos();
+      const out = st.tab === 'resumo' ? viewResumo() : st.tab === 'ajustes' ? viewAjustes() : st.tab === 'notas' ? viewNotas() : st.tab === 'acomp' ? viewAcomp() : st.tab === 'relatorio' ? viewRelatorio() : viewAlunos();
       if (st.error) out.unshift(h('div', { class: 'err', role: 'alert' }, st.error));
       if ((st.tab === 'alunos' || (st.tab === 'relatorio' && !st.ficha))) out.splice(1, 0, entregasCard());
       const banner = partialBanner(); if (banner) out.unshift(banner);
@@ -706,7 +765,7 @@ label.inl{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-siz
     }
     const onKey = e => { if (e.key !== 'Escape') return; if (st.modal) { if (!st.modalBusy) closeModal(); return; } api.close(); };
     const api = {
-      show(tab) { if (tab) st.tab = tab; host.style.display = 'block'; render(); Promise.all([loadContacts(), loadModelos(), loadRetornos(), st.data && !st.comp ? ALN.comparativo.ultimo(courseKey()).then(c => { st.comp = c; }, () => {}) : null]).then(() => { if (st.tab === 'acomp') renderBody(); }); root.document.addEventListener('keydown', onKey); },
+      show(tab) { if (tab) st.tab = tab; host.style.display = 'block'; render(); Promise.all([loadContacts(), loadModelos(), loadRetornos(), loadAjustes(), st.data && !st.comp ? ALN.comparativo.ultimo(courseKey()).then(c => { st.comp = c; }, () => {}) : null]).then(() => { renderBody(); }); root.document.addEventListener('keydown', onKey); },
       close() { host.style.display = 'none'; root.document.removeEventListener('keydown', onKey); },
       read, state: st
     };

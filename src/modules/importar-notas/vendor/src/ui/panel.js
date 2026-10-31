@@ -28,7 +28,7 @@
     const entry = M.readiness(doc, win.location);
     if (!entry.isAssign || !entry.isGrading || !entry.hasTable) return null;
 
-    const state = { fileName: '', records: [], warnings: [], plan: null, filled: false, expected: [], overwriteGrade: false, overwriteFeedback: false, confirming: false, error: '', edits: {} };
+    const state = { fileName: '', records: [], warnings: [], plan: null, filled: false, expected: [], overwriteGrade: false, overwriteFeedback: false, confirming: false, error: '', edits: {}, regua: 'nenhuma' };
     const rootEl = h(doc, 'div', { id: 'imn-root', class: 'imn-root' });
     const launcher = h(doc, 'button', { type: 'button', class: 'imn-launcher', onclick: () => open() }, 'Importar notas');
     const banner = h(doc, 'div', { class: 'imn-banner', role: 'status', hidden: true });
@@ -87,7 +87,9 @@
 
     function replan() {
       const pageRows = M.readRows(doc);
-      const records = IMN.records.applyEdits(state.records, state.edits, { max: M.readMaxGrade(doc) });
+      // HUB-PATCH regua: a régua ajusta só o valor sugerido; edição manual na tabela vale mais (applyEdits vem depois).
+      const base = IMN.regua ? IMN.regua.apply(state.records, state.regua, { max: M.readMaxGrade(doc) }) : state.records;
+      const records = IMN.records.applyEdits(base, state.edits, { max: M.readMaxGrade(doc) });
       state.plan = IMN.plan.buildPlan(records, pageRows, {
         decimal: M.decimalSeparator(doc),
         overwriteGrade: state.overwriteGrade,
@@ -252,6 +254,22 @@
       parts.push(h(doc, 'div', { class: 'imn-options' },
         h(doc, 'label', {}, h(doc, 'input', { type: 'checkbox', checked: state.overwriteGrade, disabled: state.filled, onchange: e => { state.overwriteGrade = e.target.checked; replan(); render(); } }), ' Sobrescrever notas já lançadas'),
         h(doc, 'label', {}, h(doc, 'input', { type: 'checkbox', checked: state.overwriteFeedback, disabled: state.filled, onchange: e => { state.overwriteFeedback = e.target.checked; replan(); render(); } }), ' Sobrescrever feedbacks já lançados')));
+
+      // HUB-PATCH regua: seletor + prévia Antes/Depois (só aparece com arquivo carregado)
+      if (IMN.regua && state.records.length) {
+        parts.push(h(doc, 'div', { class: 'imn-options imn-regua' },
+          h(doc, 'label', {}, 'Régua de nota: ',
+            h(doc, 'select', { 'aria-label': 'Régua de nota', disabled: state.filled, onchange: e => { state.regua = e.target.value; replan(); render(); } },
+              ...IMN.regua.REGUAS.map(r => h(doc, 'option', { value: r.id, selected: r.id === state.regua }, r.rotulo)))),
+          h(doc, 'span', { class: 'imn-muted' }, ' Só muda o valor sugerido; sem nota continua sem nota. Nada é gravado sem a sua confirmação.')));
+        const antesDepois = state.plan && state.regua !== 'nenhuma' ? IMN.regua.previa(state.plan) : [];
+        if (state.regua !== 'nenhuma') {
+          parts.push(antesDepois.length
+            ? h(doc, 'table', { class: 'imn-table imn-regua-prev' }, h(doc, 'thead', {}, h(doc, 'tr', {}, ['Aluno', 'Antes', 'Depois'].map(t => h(doc, 'th', { scope: 'col' }, t)))),
+              h(doc, 'tbody', {}, antesDepois.map(x => h(doc, 'tr', {}, h(doc, 'td', {}, x.nome), h(doc, 'td', {}, x.antes), h(doc, 'td', {}, h(doc, 'strong', {}, x.depois))))))
+            : h(doc, 'p', { class: 'imn-muted' }, 'Esta régua não muda nenhuma nota deste arquivo.'));
+        }
+      }
 
       if (state.error) parts.push(h(doc, 'p', { class: 'imn-alert', role: 'alert' }, state.error));
       state.warnings.forEach(w => parts.push(h(doc, 'p', { class: 'imn-warn' }, w)));

@@ -4,7 +4,7 @@
   'use strict';
   if (root.HUB_ALN) return;
   const ALN = root.ALN;
-  const ABAS = ['alunos', 'notas', 'acomp', 'relatorio'];
+  const ABAS = ['resumo', 'alunos', 'notas', 'acomp', 'relatorio', 'ajustes'];
   async function run(command, args) {
     switch (command) {
       case 'sistema.compat': ALN.sistemaUi.open('compat'); return { aberto: true, mensagem: 'Diagnóstico aberto.' };

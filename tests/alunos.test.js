@@ -772,3 +772,54 @@ test('storage 0.15: novas categorias medidas, expiram e entram no backup; juntar
   assert.equal(S.configOf({}).validadeLeiturasDias, 84);
   assert.equal(S.parseBackup(JSON.stringify({ app: 'unidigital-assist', schema: 1, dados: { 'uas.config': { validadeLeiturasDias: 28 } } })).dados['uas.config'].validadeLeiturasDias, 28);
 });
+
+// ---------- 0.16.0: Ajustes por UC e Resumo do dia ----------
+test('ajustes: fábrica < padrão < UC; valores fora do limite são recusados', () => {
+  const A = load().ALN.ajustes;
+  const base = A.resolver({}, 'c1');
+  assert.equal(base.settings.minimumGrade, 60); assert.equal(base.pausaMs, 2000); assert.equal(base.validadeLeiturasDias, 84); assert.equal(base.propria, false);
+  let r = A.definir({}, null, { minimumGrade: '70', recoveryMin: '50' }); assert.equal(r.ok, true);
+  r = A.definir(r.store, 'c1', { noAccessAttentionDays: '5', pausaSeg: 4 }); assert.equal(r.ok, true);
+  const c1 = A.resolver(r.store, 'c1'), c2 = A.resolver(r.store, 'c2');
+  assert.equal(c1.settings.minimumGrade, 70); assert.equal(c1.settings.recoveryMax, 69.99); assert.equal(c1.settings.noAccessAttentionDays, 5); assert.equal(c1.pausaMs, 4000); assert.equal(c1.propria, true);
+  assert.equal(c2.settings.noAccessAttentionDays, 7); assert.equal(c2.settings.minimumGrade, 70, 'padrão vale para as outras UCs');
+  assert.equal(A.definir({}, 'c1', { pausaSeg: 1 }).ok, false, 'pausa mínima 2 s');
+  assert.equal(A.definir({}, 'c1', { minimumGrade: 'abc' }).ok, false);
+  assert.equal(A.definir({}, 'c1', { minimumGrade: 50, recoveryMin: 50 }).ok, false, 'recuperação < mínima');
+  eq(A.definir(r.store, 'c1', { minimumGrade: 70, noAccessAttentionDays: 7, pausaSeg: 2 }).store.ucs, {}, 'valor igual ao herdado não vira ajuste da UC');
+  const v = A.voltarAoPadrao(r.store, 'c1'); assert.equal(A.resolver(v, 'c1').settings.noAccessAttentionDays, 7);
+});
+
+test('ajustes: dados estranhos no armazenamento são ignorados', () => {
+  const A = load().ALN.ajustes;
+  const n = A.normalizar({ padrao: { minimumGrade: 'x', foo: 1 }, ucs: { c1: { pausaSeg: 999 }, c2: { minimumGrade: 65 } } });
+  eq(n, { padrao: {}, ucs: { c2: { minimumGrade: 65 } } });
+  eq(A.normalizar('lixo'), { padrao: {}, ucs: {} });
+});
+
+test('ajustes: nota mínima própria muda o risco; validade da UC vale na limpeza; backup enxerga a chave', () => {
+  const { w, gb } = buildAll();
+  const parts = w.MAT.adapters.createAdapter().extractParticipantRows(page(participantsPage())).rows;
+  const por = min => w.ALN.buildStudents({ gradebook: gb, participants: parts }, w.ALN.ajustes.resolver(w.ALN.ajustes.definir({}, 'c', { minimumGrade: min, recoveryMin: 40 }).store, 'c').settings);
+  const ana = l => l.find(s => s.name.startsWith('Ana'));
+  assert.equal(ana(por(60)).situation, 'media');
+  assert.notEqual(ana(por(95)).situation, 'media', 'com mínima 95 a Ana deixa de ter a média');
+  const S = w.ALN.storage; const velho = new Date(Date.now() - 20 * 86400000).toISOString();
+  const all = { 'uas.leituras': { c1: [{ at: velho }], c2: [{ at: velho }] }, 'uas.ajustes': { padrao: {}, ucs: { c1: { validadeLeiturasDias: 7 } } } };
+  const p = S.prune(all, Date.now());
+  eq(Object.keys(p.all['uas.leituras']), ['c2'], 'c1 (7 dias) expira; c2 usa o geral (84)');
+  assert.ok(JSON.parse(S.exportBackup(all, Date.now(), 'x')).dados['uas.ajustes']);
+  assert.equal(S.usage(all).categorias.find(c => c.categoria === 'Ajustes').itens, 1);
+});
+
+test('resumo do dia: contagens vêm das leituras; "a corrigir" sem leitura de entregas fica null', () => {
+  const { w, students } = buildAll();
+  const R = w.ALN.resumo; const hoje = '2026-10-31';
+  const r = R.resumir({ students, retornos: [{ aluno: 'x', em: hoje }, { aluno: 'y', em: '2026-10-29' }, { aluno: 'z', em: '2026-11-05' }, { aluno: 'w', em: hoje, feito: hoje }], comparativo: { piorou: 2 }, readAt: Date.now() - 6 * 86400000, hojeISO: hoje });
+  assert.equal(r.alunos, students.length); assert.equal(r.aCorrigir, null); assert.equal(r.retornosHoje, 2, 'hoje + atrasado, sem feito e sem futuro');
+  assert.equal(r.piorou, 2); assert.equal(r.idadeDias, 6); assert.equal(R.idadeTexto(6), 'há 6 dias'); assert.equal(R.idadeTexto(0), 'lida hoje');
+  assert.equal(r.semAcesso, students.filter(s => s.lastAccessDays >= 15).length);
+  students[0].ov = { readEntregas: true }; students[0].waitingCount = 3; students[1].waitingCount = 2;
+  assert.equal(R.resumir({ students, hojeISO: hoje }).aCorrigir, 5);
+  assert.equal(R.resumir({ students, hojeISO: hoje }).piorou, null, 'sem leitura anterior não vira zero');
+});

@@ -49,6 +49,9 @@ for (const f of [manifest.background && manifest.background.service_worker, 'lau
 const files = JSON.parse(read('modules/importar-notas/vendor/files.json'));
 for (const f of [...files.scripts, ...files.css]) if (!fs.existsSync(path.join(ext, 'modules/importar-notas/vendor', f))) fail(`arquivo do módulo ausente: ${f}`);
 if (!fs.existsSync(path.join(ext, 'modules/importar-notas/bridge.js'))) fail('bridge.js ausente');
+if (!fs.existsSync(path.join(ext, 'modules/importar-notas/regua.js'))) fail('regua.js ausente (régua de nota, 0.16.0)');
+// O painel vendorizado leva 2 trechos locais da régua; um "npm run sync" que os apague tem de falhar aqui.
+if ((read('modules/importar-notas/vendor/src/ui/panel.js').match(/HUB-PATCH regua/g) || []).length !== 2) fail('panel.js perdeu o patch da régua (HUB-PATCH regua x2). Reaplique depois do sync.');
 
 const alunos = JSON.parse(read('modules/alunos/files.json'));
 for (const f of [...alunos.scripts, 'bridge.js']) if (!fs.existsSync(path.join(ext, 'modules/alunos', f))) fail(`arquivo do módulo alunos ausente: ${f}`);

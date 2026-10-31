@@ -141,7 +141,7 @@ test('handler: Acompanhamento, Alunos e notas e Relatório da UC chamam o módul
   const calls = [];
   const h = makeHandler(calls);
   for (const app of ['acompanhamento', 'alunos-notas', 'relatorio-uc']) assert.equal((await h({ type: 'hub-open', app }, sender())).ok, true);
-  assert.deepEqual(calls.map(c => c.slice(1)), [['alunos', 'alunos.abrir', { aba: 'acomp' }], ['alunos', 'alunos.abrir', { aba: 'alunos' }], ['alunos', 'alunos.abrir', { aba: 'relatorio' }]]);
+  assert.deepEqual(calls.map(c => c.slice(1)), [['alunos', 'alunos.abrir', { aba: 'acomp' }], ['alunos', 'alunos.abrir', { aba: 'resumo' }], ['alunos', 'alunos.abrir', { aba: 'relatorio' }]]);
 });
 
 test('menu em cards: seções, painel inerte quando fechado e rótulo do botão acompanha o estado', () => {

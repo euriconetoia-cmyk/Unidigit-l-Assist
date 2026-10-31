@@ -68,6 +68,6 @@ test('injeção sob demanda: só injeta quando o módulo ainda não está na pá
   assert.deepEqual(await host.call(1, 'importar-notas', 'pagina.info'), { tipo: 'curso' });
   await host.call(1, 'importar-notas', 'pagina.info');
   assert.equal(injected.length, 1);
-  assert.deepEqual(injected[0], ['modules/importar-notas/vendor/src/a.js', 'modules/importar-notas/vendor/src/b.js', 'modules/importar-notas/bridge.js']);
+  assert.deepEqual(injected[0], ['modules/importar-notas/vendor/src/a.js', 'modules/importar-notas/vendor/src/b.js', 'modules/importar-notas/regua.js', 'modules/importar-notas/bridge.js']);
   await assert.rejects(host.ensureInjected(1, 'outro'), /Módulo desconhecido/);
 });

@@ -11,3 +11,6 @@ A tela **Meus dados** mostra o que a extensão guarda neste navegador (hoje, só
 
 ## Kahoot (0.14.0)
 O acesso a `create.kahoot.it` é uma **permissão opcional**, pedida uma vez, só quando você clica em Kahoot e aceita; pode ser revogada em `chrome://extensions`. Com ela, a extensão só age na aba do editor que você preparou e só preenche as perguntas do arquivo CSV que você escolher. O arquivo é lido no navegador e **não é enviado a lugar nenhum**.
+
+## Ajustes por UC (0.16.0)
+Os **Ajustes** (nota mínima, recuperação, dias sem acesso, pausa entre mensagens e validade das leituras) ficam em `chrome.storage.local`, só neste navegador, junto com o identificador da UC. Não contêm nome, e-mail nem nota de aluno. Entram no backup e no “Apagar tudo” de **Meus dados**. A **régua de nota** não guarda nada: só muda o valor sugerido na prévia da Correção, e nada é gravado no Moodle sem a sua confirmação.

@@ -145,6 +145,19 @@ try {
   await pg.click('#hub-ead-launcher .app[data-app="correcao"]');
   await pg.waitForSelector('#imn-root .imn-backdrop:not([hidden])', { timeout: 15000 });
   check('já na tela de avaliação: Correção abre o painel direto, ao lado do botão Nota', await pg.locator('.imn-launcher.imn-inline').count() === 1);
+  // ---- 0.16: régua de nota na prévia da Correção ----
+  const csvRegua = path.join(os.tmpdir(), `regua-${Date.now()}.csv`);
+  fs.writeFileSync(csvRegua, 'id;nome;nota\n10;Ana Souza;8,3\n11;João da Silva;9,8\n12;Beatriz Alves;\n');
+  await pg.setInputFiles('#imn-root .imn-file input[type=file]', csvRegua);
+  await pg.waitForSelector('#imn-root select[aria-label="Régua de nota"]', { timeout: 15000 });
+  const val0 = await pg.locator('#imn-root input[name^="quickgrade_"]').evaluateAll(els => els.map(e => e.value));
+  await pg.selectOption('#imn-root select[aria-label="Régua de nota"]', 'generosa');
+  const prev = await pg.locator('#imn-root .imn-regua-prev tbody tr').allTextContents();
+  check('Régua generosa: a prévia mostra Antes/Depois só de quem mudou (8,3→8,5 e 9,8→10); sem nota fica de fora', prev.length === 2 && /Ana Souza.*8\.3.*8\.5/.test(prev[0]) && /João da Silva.*9\.8.*10/.test(prev[1]), prev.join(' | '));
+  check('Régua: escolher a régua não grava nem preenche nada na página', JSON.stringify(await pg.locator('#imn-root input[name^="quickgrade_"]').evaluateAll(els => els.map(e => e.value))) === JSON.stringify(val0));
+  await pg.screenshot({ path: path.join(SHOTS, '6b-regua.png') });
+  await pg.selectOption('#imn-root select[aria-label="Régua de nota"]', 'nenhuma');
+  check('Régua: voltar para "Sem régua" tira a prévia', await pg.locator('#imn-root .imn-regua-prev').count() === 0);
   // depois de salvar o Moodle recarrega: a conferência volta sozinha
   await pg.goto(`${ORIGIN}/mod/assign/view.php?id=101&action=grading&hubtest=1`);
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
@@ -166,6 +179,26 @@ try {
   check('Alunos e notas: abre o painel só com "Ler agora", sem consultar o livro de notas', await shadow('.box').isVisible() && /Ler alunos e notas/.test(await shadow('.box').textContent()) && await shadow('.btn.pri').count() === 1 && state.graderHits === g0);
   await pg.screenshot({ path: path.join(SHOTS, '7-alunos-vazio.png') });
   await shadow('.btn.pri').first().click();
+  await shadow('.cards .card').first().waitFor({ timeout: 20000 });
+  // ---- 0.16: Resumo do dia é a primeira tela; Ajustes por UC mudam o que aparece ----
+  const resumo = await shadow('[data-content]').textContent();
+  check('Resumo do dia é a primeira tela: alunos, risco alto, sem acesso, a corrigir, retornos e piorou', await shadow('nav button[aria-selected=true]').textContent() === 'Resumo' && /alunos/.test(resumo) && /risco alto/.test(resumo) && /sem acesso \+15d/.test(resumo) && /a corrigir/.test(resumo) && /Retornos de hoje/.test(resumo) && /Piorou desde a última leitura/.test(resumo) && /Ler agora/.test(resumo));
+  check('Resumo: "a corrigir" sem ler as entregas fica em "—", nunca zero', /—\s*a corrigir/.test(resumo));
+  await pg.screenshot({ path: path.join(SHOTS, '7b-resumo.png') });
+  await shadow('nav button:has-text("Ajustes")').click();
+  check('Ajustes: mostra padrão e valor da UC com os 5 campos', await shadow('tbody tr').count() === 5 && /Nota mínima/.test(await shadow('tbody').textContent()));
+  await shadow('input[aria-label="Dias sem acesso (atenção)"]').fill('abc');
+  await shadow('button:has-text("Salvar")').click();
+  check('Ajustes: valor inválido é recusado com motivo e nada muda', /use um número de 1 a 60/.test(await shadow('.err').textContent()));
+  await shadow('input[aria-label="Dias sem acesso (atenção)"]').fill('30');
+  await shadow('button:has-text("Salvar")').click();
+  check('Ajustes: salvar mostra confirmação e marca "ajustado"', /Ajustes salvos/.test(await shadow('[role=status]').textContent()) && /ajustado/.test(await shadow('tbody').textContent()));
+  await pg.screenshot({ path: path.join(SHOTS, '7c-ajustes.png') });
+  await shadow('nav button:has-text("Acompanhamento")').click();
+  await shadow('nav button:has-text("Ajustes")').click();
+  await shadow('button:has-text("Voltar ao padrão")').click();
+  check('Ajustes: "Voltar ao padrão" restaura', /Ajustes restaurados/.test(await shadow('[role=status]').textContent()) && !/ajustado/.test(await shadow('tbody').textContent()));
+  await shadow('nav button:has-text("Alunos")').click();
   await shadow('table tbody tr').first().waitFor({ timeout: 20000 });
   const rows = await shadow('table tbody tr').count();
   check('"Ler" busca livro de notas e participantes uma vez e lista 6 alunos (professor fora)', rows === 6 && state.graderHits === g0 + 1 && state.usersHits >= 1, `${rows} linhas, ${state.graderHits - g0} consultas`);
@@ -360,6 +393,7 @@ try {
   await sleep(700);
   await shadow('.btn.pri').first().click();
   await shadow('.partial:has-text("Leitura incompleta")').waitFor({ timeout: 30000 });
+  await shadow('nav button:has-text("Alunos")').click();
   await pg.screenshot({ path: path.join(SHOTS, '15-leitura-incompleta.png') });
   check('participantes falharam: aparece "Leitura incompleta" com o livro de notas guardado e as notas na tela', /Leitura incompleta/.test(await shadow('.partial:has-text("Leitura incompleta")').textContent()) && /Continuar: ler participantes/.test(await shadow('.partial:has-text("Leitura incompleta")').textContent()) && await shadow('table tbody tr').count() === 6);
   state.failUsers = false;

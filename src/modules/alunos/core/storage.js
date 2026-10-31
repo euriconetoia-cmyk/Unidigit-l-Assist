@@ -10,12 +10,13 @@
   const QUOTA = 10 * 1024 * 1024; // chrome.storage.local sem "unlimitedStorage"
   const AVISO = 0.7;
   // Tudo que a extensão guarda. Chave nova só entra aqui (e o backup/apagar/medir passam a enxergá-la).
-  const K_CONTATOS = 'hub.contatos.v1', K_MODELOS = 'uas.modelos', K_RETORNOS = 'uas.retornos', K_LEITURAS = 'uas.leituras';
+  const K_CONTATOS = 'hub.contatos.v1', K_MODELOS = 'uas.modelos', K_RETORNOS = 'uas.retornos', K_LEITURAS = 'uas.leituras', K_AJUSTES = 'uas.ajustes';
   const KEYS = [
     { key: K_CONTATOS, categoria: 'Contatos', rotulo: 'Registro de mensagens enviadas' },
     { key: K_MODELOS, categoria: 'Modelos', rotulo: 'Modelos de mensagem' },
     { key: K_RETORNOS, categoria: 'Retornos', rotulo: 'Retornos agendados' },
-    { key: K_LEITURAS, categoria: 'Leituras', rotulo: 'Instantâneos para o comparativo' }
+    { key: K_LEITURAS, categoria: 'Leituras', rotulo: 'Instantâneos para o comparativo' },
+    { key: K_AJUSTES, categoria: 'Ajustes', rotulo: 'Ajustes por UC' }
   ];
   const DEFAULT_CONFIG = { validadeContatosDias: 365, validadeLeiturasDias: 84 };
   const VALIDADES = [{ dias: 90, rotulo: '3 meses' }, { dias: 180, rotulo: '6 meses' }, { dias: 365, rotulo: '12 meses' }, { dias: 0, rotulo: 'nunca expirar' }];
@@ -59,10 +60,14 @@
     return { value: out, removidos };
   }
   const hoje = now => { const d = new Date(now); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
-  function pruneLeituras(map, now, dias) {
-    if (!isObj(map) || !dias) return { value: map, removidos: 0 };
-    const limite = now - dias * DAY; let removidos = 0; const out = {};
+  // porUc: { [curso]: dias } sobrepõe o prazo geral nas UCs com ajuste próprio (0 = nunca expirar nessa UC)
+  function pruneLeituras(map, now, dias, porUc = {}) {
+    if (!isObj(map)) return { value: map, removidos: 0 };
+    let removidos = 0; const out = {};
     for (const [curso, lista] of Object.entries(map)) {
+      const d = Number.isFinite(porUc[curso]) ? porUc[curso] : dias;
+      if (!d) { if (Array.isArray(lista) && lista.length) out[curso] = lista; continue; }
+      const limite = now - d * DAY;
       const mant = (Array.isArray(lista) ? lista : []).filter(x => { const t = Date.parse(x && x.at); return !(Number.isFinite(t) && t < limite); });
       removidos += (Array.isArray(lista) ? lista.length : 0) - mant.length;
       if (mant.length) out[curso] = mant;
@@ -85,7 +90,9 @@
     const cfg = configOf(all); let out = all; let removidos = 0;
     const apply = (key, fn) => { if (!(key in out)) return; const r = fn(out[key]); if (r.removidos) { out = { ...out, [key]: r.value }; removidos += r.removidos; } };
     apply(K_CONTATOS, v => pruneContatos(v, now, cfg.validadeContatosDias));
-    apply(K_LEITURAS, v => pruneLeituras(v, now, cfg.validadeLeiturasDias));
+    const aj = isObj(out[K_AJUSTES]) && isObj(out[K_AJUSTES].ucs) ? out[K_AJUSTES].ucs : {};
+    const porUc = Object.fromEntries(Object.entries(aj).filter(([, v]) => isObj(v) && Number.isFinite(v.validadeLeiturasDias)).map(([k, v]) => [k, v.validadeLeiturasDias]));
+    apply(K_LEITURAS, v => pruneLeituras(v, now, cfg.validadeLeiturasDias, porUc));
     apply(K_RETORNOS, v => pruneRetornos(v, now));
     return { all: out, removidos };
   }
@@ -96,6 +103,7 @@
     if (key === K_CONTATOS && isObj(v)) return Object.values(v).reduce((n, a) => n + (isObj(a) ? Object.values(a).reduce((m, l) => m + len(l), 0) : 0), 0);
     if ((key === K_RETORNOS || key === K_LEITURAS) && isObj(v)) return Object.values(v).reduce((n, l) => n + len(l), 0);
     if (key === K_MODELOS && isObj(v)) return len(v.itens);
+    if (key === K_AJUSTES && isObj(v)) return isObj(v.ucs) ? Object.keys(v.ucs).length : 0;
     return 0;
   }
   function usage(all) {
@@ -177,6 +185,7 @@
       else if (k === K_RETORNOS) out[k] = mergeListas(all[k], v, r => `${r.aluno}|${r.em}`);
       else if (k === K_LEITURAS) out[k] = mergeListas(all[k], v, r => String(r.at), 12);
       else if (k === K_MODELOS) out[k] = mergeModelos(all[k], v);
+      else if (k === K_AJUSTES) out[k] = { padrao: { ...((all[k] || {}).padrao || {}), ...((isObj(v) && v.padrao) || {}) }, ucs: { ...((isObj(v) && v.ucs) || {}), ...((all[k] || {}).ucs || {}) } };
       else out[k] = v;
     }
     return out;
@@ -201,5 +210,5 @@
   async function saveConfig(cfg, a = area()) { if (!a) return; const all = await readAll(a); await a.set({ [CONFIG_KEY]: { ...configOf(all), ...pick(cfg) } }); }
   async function writeImport(all, a = area()) { if (!a) return; await a.set(Object.fromEntries(Object.entries(all).filter(([k]) => ownKeys().includes(k)))); }
 
-  ALN.storage = { SCHEMA, QUOTA, AVISO, KEYS, K_CONTATOS, K_MODELOS, K_RETORNOS, K_LEITURAS, VALIDADES, VALIDADES_LEITURAS, hoje, getKey, setKey, pruneLeituras, pruneRetornos, DEFAULT_CONFIG, META_KEY, CONFIG_KEY, migrate, configOf, prune, pruneContatos, usage, fmtBytes, exportBackup, parseBackup, mergeContatos, applyImport, init, readAll, clearAll, saveConfig, writeImport };
+  ALN.storage = { SCHEMA, QUOTA, AVISO, KEYS, K_CONTATOS, K_MODELOS, K_RETORNOS, K_LEITURAS, K_AJUSTES, VALIDADES, VALIDADES_LEITURAS, hoje, getKey, setKey, pruneLeituras, pruneRetornos, DEFAULT_CONFIG, META_KEY, CONFIG_KEY, migrate, configOf, prune, pruneContatos, usage, fmtBytes, exportBackup, parseBackup, mergeContatos, applyImport, init, readAll, clearAll, saveConfig, writeImport };
 })(globalThis);

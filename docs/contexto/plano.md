@@ -11,7 +11,7 @@ Regras de cada etapa (valem para todas): ler `docs/contexto/*` antes; **mockup a
 | **0.13.0** | **Fundação**: relatório de compatibilidade (diagnóstico sem dado de aluno) · tela **Sobre** (versão, novidades, ver versão nova) · **Meus dados** (uso por categoria, backup exportar/importar, apagar, expiração) · `key` fixa no manifest · camada de armazenamento com versão de formato e migração | — | a fazer |
 | **0.14.0** | Gaveta **Ferramentas** no menu + **Kahoot** (permissão opcional do site no clique, validação do CSV, progresso, cancelar) + modelo CSV | 0.13 | `ferramentas-kahoot` ✔ |
 | **0.15.0** | **Modelos de mensagem** (campos nome/UC), **retornos agendados** ("Retornos de hoje"), **comparativo entre leituras** (instantâneos compactos) | 0.13 | a fazer |
-| **0.16.0** | **Resumo do dia** (tela inicial do curso) + **Ajustes** (nota mínima/recuperação/pausa por UC) + **régua de nota** configurável na Correção | 0.15 | a fazer |
+| **0.16.0** | **Resumo do dia** (tela inicial do curso) + **Ajustes** (nota mínima/recuperação/pausa por UC) + **régua de nota** configurável na Correção | 0.15 | feito (local) |
 | **1.0.0** | Homologado em Moodle real (SENAI e FIEG) + pacote da loja do Edge + política de privacidade pública | tudo | — |
 
 ## Pontos de parada (homologação em Moodle real)
