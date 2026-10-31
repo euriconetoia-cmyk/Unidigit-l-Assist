@@ -30,21 +30,21 @@ test('não monta duas vezes na mesma página', () => {
   assert.equal(dom.window.document.querySelectorAll('#hub-ead-launcher').length, 1);
 });
 
-test('clicar no botão abre o menu com as 7 ferramentas; as indisponíveis aparecem "em breve"', () => {
+test('clicar no botão abre o menu com as 10 ferramentas; as indisponíveis aparecem "em breve"', () => {
   const { ui } = mount();
   ui.tab.click();
   assert.equal(ui.isOpen(), true);
   assert.equal(ui.items.length, APPS.length);
   const names = ui.items.map(b => b.querySelector('b').textContent);
-  assert.deepEqual(names, ['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Automação por blocos']);
-  assert.deepEqual(ui.items.map(b => b.getAttribute('aria-disabled')), ['false', 'false', 'false', 'false', 'false', 'false', 'true']);
-  assert.match(ui.items[6].textContent, /em breve/);
+  assert.deepEqual(names, ['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Compatibilidade', 'Meus dados', 'Sobre', 'Automação por blocos']);
+  assert.deepEqual(ui.items.map(b => b.getAttribute('aria-disabled')), ['false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'true']);
+  assert.match(ui.items[9].textContent, /em breve/);
 });
 
 test('clicar em Pendências envia o pedido e fecha o menu; em breve não envia nada', async () => {
   const { ui, sent } = mount();
   ui.tab.click();
-  ui.items[6].click();
+  ui.items[9].click();
   await flush();
   assert.deepEqual(sent, []);
   assert.match(ui.status.textContent, /ainda não está disponível/);
@@ -118,7 +118,7 @@ test('menu em cards: seções, painel inerte quando fechado e rótulo do botão 
   const { ui } = mount();
   assert.equal(ui.panel.hasAttribute('inert'), true);
   const secoes = [...ui.shadow.querySelectorAll('.sec')].map(n => n.textContent);
-  assert.deepEqual(secoes, ['Correção', 'Alunos', 'Em breve']);
+  assert.deepEqual(secoes, ['Correção', 'Alunos', 'Ajuda e dados', 'Em breve']);
   ui.tab.click();
   assert.equal(ui.panel.hasAttribute('inert'), false);
   assert.equal(ui.tab.getAttribute('aria-expanded'), 'true');

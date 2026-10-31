@@ -52,7 +52,7 @@ Trabalhar uma por vez, na ordem. Decisões importantes vão para `memory.md`.
 ## Plano 0.11 → 1.0 (detalhes em `plano.md`)
 - [x] 0.11.0 Excel (.xlsx) + botões nas telas (Alunos, Notas, Acompanhamento, Relatório da UC)
 - [x] 0.12.0 Relatório da turma (`/my/`) — lista própria no painel (não caixas nos cartões do Moodle); UCs futuras: usar o filtro do Moodle
-- [ ] 0.13.0 Compatibilidade + Sobre + Meus dados + armazenamento versionado + `key` fixa
+- [x] 0.13.0 Compatibilidade + Sobre + Meus dados + armazenamento versionado + `key` fixa
 - [ ] 0.14.0 Gaveta Ferramentas + Kahoot (host opcional)
 - [ ] 0.15.0 Modelos de mensagem + retornos agendados + comparativo entre leituras
 - [ ] 0.16.0 Resumo do dia + Ajustes + régua de nota

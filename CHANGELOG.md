@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.13.0 — 2026-10-31
+
+### Novo
+- **Compatibilidade** (menu → Ajuda e dados): diagnóstico da página aberta (livro de notas, participantes, curso, tarefa ou “Meus cursos”). Mostra só o que foi reconhecido, em contagens — **sem nome, e-mail ou nota de aluno** e sem consultar o Moodle. “Copiar diagnóstico” gera o texto para enviar a quem mantém a extensão.
+- **Meus dados**: uso do armazenamento do navegador por categoria, barra com aviso a partir de 70%, **exportar backup** (JSON), **importar** (juntar ou substituir, com validação) e **apagar tudo** com confirmação. Registros de contato **expiram** no prazo escolhido (padrão 12 meses; 3, 6 ou nunca).
+- **Sobre**: versão instalada, créditos, novidades e como atualizar; “Ver se há versão nova” só abre a página de versões no GitHub (a extensão não consulta a internet sozinha).
+
+### Interno
+- Camada única de armazenamento com **versão de formato** e migrações (`core/storage.js`); só `chrome.storage.local`, sem `unlimitedStorage` e sem `storage.sync`.
+- **ID fixo da extensão** (`key` no manifest): ao trocar a pasta de instalação, os dados guardados continuam. O ID está em `docs/projeto/ID_DA_EXTENSAO.txt`; o validador confere. O pacote da loja do Edge deve sair **sem** `key`.
+- Nenhuma permissão nova.
+
 ## 0.12.0 — 2026-10-31
 
 ### Novo

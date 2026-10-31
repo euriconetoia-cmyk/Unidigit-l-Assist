@@ -6,6 +6,9 @@ export const APPS = [
   { id: 'alunos-notas', grupo: 'Alunos', nome: 'Alunos e notas', descricao: 'Lista de alunos e boletim', origem: 'Assistente EaD', icone: 'alun', modulo: 'alunos', comando: 'alunos.abrir', args: { aba: 'alunos' }, disponivel: true },
   { id: 'relatorio-uc', grupo: 'Alunos', nome: 'Relatório da UC', descricao: 'Desempenho geral da turma', origem: 'Assistente EaD', icone: 'rel', modulo: 'alunos', comando: 'alunos.abrir', args: { aba: 'relatorio' }, disponivel: true },
   { id: 'relatorio-turma', grupo: 'Alunos', nome: 'Relatório da turma', descricao: 'Várias UCs de uma vez, em Excel', origem: 'novo', icone: 'turma', modulo: 'alunos', comando: 'alunos.turma', paginas: ['meus-cursos'], dicaPagina: 'Abra a página “Meus cursos”', disponivel: true },
+  { id: 'compat', grupo: 'Ajuda e dados', nome: 'Compatibilidade', descricao: 'Verificar esta página (sem dados de aluno)', origem: 'novo', icone: 'diag', modulo: 'alunos', comando: 'sistema.compat', disponivel: true },
+  { id: 'meus-dados', grupo: 'Ajuda e dados', nome: 'Meus dados', descricao: 'Uso, backup, validade e apagar', origem: 'novo', icone: 'dados', modulo: 'alunos', comando: 'sistema.dados', disponivel: true },
+  { id: 'sobre', grupo: 'Ajuda e dados', nome: 'Sobre', descricao: 'Versão, novidades e atualização', origem: 'novo', icone: 'info', modulo: 'alunos', comando: 'sistema.sobre', disponivel: true },
   { id: 'blocos', grupo: 'Em breve', nome: 'Automação por blocos', descricao: 'Montar rotinas', origem: 'novo', icone: 'blo', disponivel: false }
 ];
 

@@ -91,7 +91,7 @@ try {
 
   await pg.click('#hub-ead-launcher .tab');
   const names = await pg.locator('#hub-ead-launcher .app b').allTextContents();
-  check('o menu lista as 7 ferramentas na ordem do mockup', JSON.stringify(names) === JSON.stringify(['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Automação por blocos']), JSON.stringify(names));
+  check('o menu lista as 10 ferramentas na ordem do mockup', JSON.stringify(names) === JSON.stringify(['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Compatibilidade', 'Meus dados', 'Sobre', 'Automação por blocos']), JSON.stringify(names));
   await sleep(900);
   await pg.screenshot({ path: path.join(SHOTS, '2-menu-aberto.png') });
 
@@ -381,6 +381,54 @@ try {
   check('a UC que falhou não vira nota zero nem some: aparece em Avisos e as outras seguem', /falhou/.test(await tshadow('.list').textContent()) && state.graderHits - gh0 === 2 && /aviso/i.test(await tshadow('.msg').last().textContent()));
   await tshadow('button:has-text("Fechar")').click();
   state.modoMeus = false;
+
+  // ---- 0.13: Compatibilidade, Sobre e Meus dados ----
+  await pg.goto(`${ORIGIN}/grade/report/grader/index.php?id=7`);
+  await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
+  const gh1 = state.graderHits, uh1 = state.usersHits;
+  await pg.click('#hub-ead-launcher .tab');
+  await pg.click('#hub-ead-launcher .app[data-app="compat"]');
+  await pg.waitForSelector('#hub-aln-sistema', { state: 'attached', timeout: 15000 });
+  const sis = sel => pg.locator(`#hub-aln-sistema >> ${sel}`);
+  await sis('.it').first().waitFor();
+  const diagTxt = await sis('.box').textContent();
+  check('Compatibilidade: reconhece o livro de notas, sem consultar o Moodle e sem nome de aluno', /Tabela do livro de notas/.test(diagTxt) && /Coluna “Total do curso”/.test(diagTxt) && state.graderHits === gh1 && state.usersHits === uh1 && !/Camila|Fábio|Diego/.test(diagTxt), diagTxt.slice(0, 200));
+  await pg.screenshot({ path: path.join(SHOTS, '40-compat.png') });
+  await sis('button:has-text("Fechar")').click();
+
+  await pg.click('#hub-ead-launcher .tab');
+  await pg.click('#hub-ead-launcher .app[data-app="sobre"]');
+  await sis('h2').waitFor();
+  const sobre = await sis('.box').textContent();
+  const link = await sis('a:has-text("Ver se há versão nova")').getAttribute('href');
+  check('Sobre: mostra a versão, os créditos e abre só a página de versões do GitHub', /0\.13\.0/.test(sobre) && /Julio Alves/.test(sobre) && /github\.com\/euriconetoia-cmyk\/Unidigit-l-Assist\/releases$/.test(link));
+  await pg.screenshot({ path: path.join(SHOTS, '41-sobre.png') });
+  await sis('button:has-text("Fechar")').click();
+
+  await pg.click('#hub-ead-launcher .tab');
+  await pg.click('#hub-ead-launcher .app[data-app="meus-dados"]');
+  await sis('button:has-text("Exportar backup")').waitFor();
+  check('Meus dados: mostra o uso em KB (baixo) e sem aviso de limite', /Uso: \d+ (B|KB) de 10,0 MB/.test(await sis('.box').textContent()) && !(await sis('.bar.hot').count()), (await sis('.box').textContent()).slice(0, 300));
+  const [dlB] = await Promise.all([pg.waitForEvent('download', { timeout: 15000 }), sis('button:has-text("Exportar backup")').click()]);
+  const bPath = path.join(SHOTS, 'backup.json'); await dlB.saveAs(bPath);
+  const bj = JSON.parse(fs.readFileSync(bPath, 'utf8'));
+  check('Backup exportado: arquivo JSON do app, formato 1, com a validade', /^unidigital-assist-backup-.*\.json$/.test(dlB.suggestedFilename()) && bj.app === 'unidigital-assist' && bj.schema === 1 && bj.dados['uas.config'].validadeContatosDias === 365);
+  const bad = path.join(SHOTS, 'ruim.json'); fs.writeFileSync(bad, '{"qualquer":"coisa"}');
+  await pg.locator('#hub-aln-sistema >> input[type=file]').setInputFiles(bad);
+  await sis('.msg.err').waitFor();
+  check('Importar rejeita arquivo que não é backup, sem mudar nada', /não é um backup/.test(await sis('.msg.err').textContent()));
+  const bom = path.join(SHOTS, 'bom.json'); fs.writeFileSync(bom, JSON.stringify({ app: 'unidigital-assist', schema: 1, dados: { 'hub.contatos.v1': { 'x:1': { 'id:5': [{ at: new Date().toISOString(), msgid: 9, text: 'oi' }] } }, 'uas.config': { validadeContatosDias: 180 } } }));
+  await pg.locator('#hub-aln-sistema >> input[type=file]').setInputFiles(bom);
+  await sis('button:has-text("Juntar")').click();
+  await sis('.msg.ok').waitFor();
+  check('Importar backup válido: aparece em Contatos e a validade vira 6 meses', /Contatos/.test(await sis('.box').textContent()) && /registro\(s\)/.test(await sis('.box').textContent()) && (await sis('select').inputValue()) === '180');
+  await pg.screenshot({ path: path.join(SHOTS, '42-meus-dados.png') });
+  await sis('button:has-text("Apagar tudo")').click();
+  check('Apagar tudo pede confirmação antes de apagar', /Não dá para desfazer/.test(await sis('#apagar').textContent()));
+  await sis('button:has-text("Sim, apagar tudo")').click();
+  await sis('.msg.ok').waitFor();
+  check('Apagar tudo limpa os contatos', /Nada guardado ainda/.test(await sis('.box').textContent()));
+  await sis('button:has-text("Fechar")').click();
 
   errors.length = 0; // os 503 acima foram provocados de propósito pelo teste
   // ---- Pendências numa página de CURSO, depois de usar Alunos e notas (mesma página, dois módulos) ----

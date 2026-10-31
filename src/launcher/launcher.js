@@ -13,6 +13,9 @@ const ICONS = {
   rel: 'M5 20V10M12 20V4M19 20v-7',
   turma: 'M4 5h16v4H4zM4 11h16v4H4zM4 17h10v3H4zM18 17l2 2 3-3',
   alun: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M17 11a3 3 0 1 0 0-6M21 20c0-2.5-1.6-4.6-4-5.5',
+  diag: 'M9 12l2 2 4-4M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6z',
+  dados: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6',
+  info: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v6M12 7.5v.5',
   close: 'M6 6l12 12M18 6L6 18'
 };
 
@@ -39,8 +42,8 @@ h2 { margin: 0 0 2px; font-size: 18px; }
 .app[aria-disabled="true"] { border-style: dashed; cursor: default; } .wrap.open .app[aria-disabled="true"] { opacity: .7; }
 .sym { flex: 0 0 38px; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 14px; }
 .app[data-fora='true'] { opacity: .55; } .app[data-fora='true']:hover { opacity: .8; }
-.g-correcao .sym { background: #e3f0fc; color: #0b5cad; } .g-alunos .sym { background: #e1f5ec; color: #157a4c; } .g-em-breve .sym { background: #eee9fb; color: #5b3fb5; }
-@media (prefers-color-scheme: dark) { .g-correcao .sym { background: #17324f; color: #7db8f0; } .g-alunos .sym { background: #143a2b; color: #6fd0a0; } .g-em-breve .sym { background: #2a2250; color: #b4a1f2; } }
+.g-correcao .sym { background: #e3f0fc; color: #0b5cad; } .g-alunos .sym { background: #e1f5ec; color: #157a4c; } .g-em-breve .sym { background: #eee9fb; color: #5b3fb5; } .g-ajuda-e-dados .sym { background: #eef1f6; color: #4a5a70; }
+@media (prefers-color-scheme: dark) { .g-correcao .sym { background: #17324f; color: #7db8f0; } .g-alunos .sym { background: #143a2b; color: #6fd0a0; } .g-em-breve .sym { background: #2a2250; color: #b4a1f2; } .g-ajuda-e-dados .sym { background: #263040; color: #a9b7cc; } }
 .txt b { display: block; font-size: 14px; } .txt small { display: block; margin-top: 2px; color: var(--m); font-size: 12px; line-height: 1.3; }
 .tag { margin-left: auto; padding: 1px 8px; border-radius: 8px; font-size: 11px; white-space: nowrap; background: var(--line); color: var(--m); }
 .status { min-height: 0; margin: 8px 0 0; color: var(--m); font-size: 12.5px; }

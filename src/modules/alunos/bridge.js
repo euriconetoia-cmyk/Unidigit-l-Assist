@@ -7,7 +7,11 @@
   const ABAS = ['alunos', 'notas', 'acomp', 'relatorio'];
   async function run(command, args) {
     switch (command) {
+      case 'sistema.compat': ALN.sistemaUi.open('compat'); return { aberto: true, mensagem: 'Diagnóstico aberto.' };
+      case 'sistema.dados': ALN.sistemaUi.open('dados'); return { aberto: true, mensagem: 'Meus dados aberto.' };
+      case 'sistema.sobre': ALN.sistemaUi.open('sobre'); return { aberto: true, mensagem: 'Sobre aberto.' };
       case 'alunos.abrir': {
+        try { await ALN.storage.init(); } catch (_) { /* validade é conveniência; não bloqueia */ }
         const aba = ABAS.includes(args && args.aba) ? args.aba : 'alunos';
         ALN.ui.open(aba);
         return { aberto: true, mensagem: 'Painel aberto. Clique em “Ler” para buscar os dados do curso.' };

@@ -616,3 +616,76 @@ test('turma: detecta cursos nos cartões de "Meus cursos" sem duplicar nem traze
   const list = w.ALN.turma.detectCourses(d, 'https://ead.senai.br');
   assert.equal(JSON.stringify(list), JSON.stringify([{ id: '7', name: 'Redes', category: 'Turma A' }]));
 });
+
+// ---- 0.13.0: armazenamento versionado, backup e diagnóstico ----
+const eq = (a, b) => assert.equal(JSON.stringify(a), JSON.stringify(b));
+const NOW = Date.parse('2026-10-31T12:00:00Z');
+const dias = n => new Date(NOW - n * 86400000).toISOString();
+const contatos = () => ({ 'ead.senai.br:7': { 'id:1': [{ at: dias(400), msgid: 1, text: 'velha' }, { at: dias(10), msgid: 2, text: 'nova' }], 'id:2': [{ at: dias(500), msgid: 3, text: 'velha2' }] } });
+
+test('storage: migração 0→1 grava a versão; formato futuro não é tocado', () => {
+  const w = load(); const S = w.ALN.storage;
+  const m = S.migrate({ 'hub.contatos.v1': contatos() });
+  assert.equal(m.mudou, true); assert.equal(m.all[S.META_KEY].schema, S.SCHEMA); assert.equal(S.migrate(m.all).mudou, false);
+  const f = S.migrate({ [S.META_KEY]: { schema: 99 } }); assert.equal(f.futuro, true); assert.equal(f.mudou, false);
+});
+
+test('storage: validade remove só o antigo e aluno sem registro some', () => {
+  const S = load().ALN.storage;
+  const r = S.prune({ 'hub.contatos.v1': contatos() }, NOW);
+  assert.equal(r.removidos, 2);
+  eq(Object.keys(r.all['hub.contatos.v1']['ead.senai.br:7']), ['id:1']);
+  assert.equal(S.prune({ 'hub.contatos.v1': contatos(), 'uas.config': { validadeContatosDias: 0 } }, NOW).removidos, 0, '0 = nunca expirar');
+});
+
+test('storage: uso por categoria e aviso a 70%', () => {
+  const S = load().ALN.storage;
+  const u = S.usage({ 'hub.contatos.v1': contatos() });
+  assert.equal(u.categorias[0].categoria, 'Contatos'); assert.equal(u.categorias[0].itens, 3); assert.equal(u.aviso, false);
+  const grande = { 'hub.contatos.v1': { c: { a: [{ at: dias(1), text: 'x'.repeat(S.QUOTA * 0.72) }] } } };
+  assert.equal(S.usage(grande).aviso, true);
+});
+
+test('storage: backup exporta só chaves conhecidas e a importação valida', () => {
+  const S = load().ALN.storage;
+  const txt = S.exportBackup({ 'hub.contatos.v1': contatos(), 'cookie.sessao': 'segredo', 'uas.meta': { schema: 1 } }, NOW, '0.13.0');
+  assert.ok(!/segredo|cookie/.test(txt));
+  const p = S.parseBackup(txt); assert.equal(p.ok, true); eq(Object.keys(p.dados).sort(), ['hub.contatos.v1', 'uas.config']);
+  assert.equal(S.parseBackup('{}').ok, false); assert.equal(S.parseBackup('não é json').ok, false); assert.equal(S.parseBackup('').ok, false);
+  assert.equal(S.parseBackup(JSON.stringify({ app: 'unidigital-assist', schema: 99, dados: {} })).ok, false);
+  const estranho = S.parseBackup(JSON.stringify({ app: 'unidigital-assist', schema: 1, dados: { 'hub.contatos.v1': {}, 'qualquer.coisa': 1, 'uas.config': { validadeContatosDias: 'x' } } }));
+  eq(Object.keys(estranho.dados).sort(), ['hub.contatos.v1', 'uas.config']); assert.equal(estranho.dados['uas.config'].validadeContatosDias, 365);
+});
+
+test('storage: juntar não duplica e respeita o limite por aluno; substituir troca tudo', () => {
+  const S = load().ALN.storage;
+  const a = contatos(); const merged = S.mergeContatos(a, a); eq(merged, S.mergeContatos(a, {}));
+  const muitos = { c: { x: Array.from({ length: 8 }, (_, i) => ({ at: dias(20 - i), msgid: i })) } };
+  assert.equal(S.mergeContatos(muitos, {}).c.x.length, 5);
+  const out = S.applyImport({ 'hub.contatos.v1': a }, { 'hub.contatos.v1': {} }, 'substituir'); eq(out['hub.contatos.v1'], {});
+});
+
+test('storage: init/clearAll/importar usam só as chaves da extensão (área simulada)', async () => {
+  const S = load().ALN.storage; const store = { 'hub.contatos.v1': contatos(), 'outra.extensao': 1 };
+  const area = { get: async keys => Object.fromEntries(keys.filter(k => k in store).map(k => [k, store[k]])), set: async o => Object.assign(store, o), remove: async keys => keys.forEach(k => delete store[k]) };
+  const r = await S.init(area, NOW); assert.equal(r.removidos, 2); assert.equal(store['uas.meta'].schema, 1);
+  await S.clearAll(area); assert.ok(!('hub.contatos.v1' in store)); assert.equal(store['outra.extensao'], 1);
+});
+
+test('diagnóstico: livro de notas, participantes e página desconhecida; texto sem dado de aluno', () => {
+  const w = load('https://ead.senai.br/grade/report/grader/index.php?id=7');
+  const doc = page(graderPage());
+  const r = w.ALN.diagnostico.rodar(doc, new URL('https://ead.senai.br/grade/report/grader/index.php?id=7'), '0.13.0');
+  assert.equal(r.tipo, 'livro-de-notas');
+  assert.ok(r.itens.find(i => i.rotulo === 'Tabela do livro de notas' && i.estado === 'ok'));
+  assert.ok(r.itens.find(i => i.rotulo === 'Coluna “Total do curso”' && i.estado === 'ok'));
+  const texto = w.ALN.diagnostico.comoTexto(r);
+  for (const a of ALUNOS) { assert.ok(!texto.includes(a.nome.split(' ')[0]), 'nome de aluno no diagnóstico'); assert.ok(!texto.includes(a.email || '@@@')); }
+  assert.ok(!/\?id=7/.test(texto), 'não leva parâmetros do endereço');
+  const p = w.ALN.diagnostico.rodar(page(participantsPage()), new URL('https://ead.senai.br/user/index.php?id=7'), '0.13.0');
+  assert.ok(p.itens.find(i => i.rotulo === 'Coluna “Último acesso”' && i.estado === 'ok'));
+  const vazio = w.ALN.diagnostico.rodar(page('<html><body><p>x</p></body></html>'), new URL('https://ead.senai.br/grade/report/grader/index.php?id=7'), '0.13.0');
+  assert.ok(vazio.itens.some(i => i.estado === 'falha'), 'tabela ausente é falha, não sucesso');
+  const out = w.ALN.diagnostico.rodar(page('<html><body></body></html>'), new URL('https://ead.senai.br/calendar/view.php'), '0.13.0');
+  assert.equal(out.tipo, 'outra');
+});

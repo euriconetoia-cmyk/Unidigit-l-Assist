@@ -1,6 +1,7 @@
 // Valida a pasta dist/ext: manifesto, permissões permitidas, arquivos existentes e padrões proibidos.
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -17,6 +18,13 @@ const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
 const walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
 for (const f of walk(ext).filter(x => /\.(js|json|css|html)$/.test(x))) {
   try { const t = new TextDecoder('utf-8', { fatal: true }).decode(fs.readFileSync(f)); if (/[\uFFFE\uFFFF]/.test(t)) fail(`caractere inválido (U+FFFE/FFFF) em ${path.relative(ext, f)}`); } catch (_) { fail(`arquivo não é UTF-8 válido: ${path.relative(ext, f)}`); }
+}
+// ID fixo da extensão: a "key" mantém o mesmo ID ao mudar de pasta (os dados guardados continuam). Para a loja, o pacote sai sem "key".
+if (!manifest.key) fail('manifest.key ausente (ID fixo da extensão)');
+else {
+  const id = [...crypto.createHash('sha256').update(Buffer.from(manifest.key, 'base64')).digest('hex').slice(0, 32)].map(c => String.fromCharCode(97 + parseInt(c, 16))).join('');
+  const idFile = path.join(root, 'docs/projeto/ID_DA_EXTENSAO.txt');
+  if (fs.existsSync(idFile) && fs.readFileSync(idFile, 'utf8').trim() !== id) fail(`o ID derivado da key (${id}) difere de docs/projeto/ID_DA_EXTENSAO.txt`);
 }
 if (manifest.manifest_version !== 3) fail('manifest_version deve ser 3');
 if (manifest.version !== pkg.version) fail(`versão do manifest (${manifest.version}) difere do package.json (${pkg.version})`);
@@ -46,6 +54,9 @@ if (fs.existsSync(path.join(ext, 'modules/alunos/vendor/origem.json'))) {
   const o = JSON.parse(read('modules/alunos/vendor/origem.json'));
   if (!o.versao) fail('origem.json do módulo alunos sem versão');
 }
+
+const nov = read('modules/alunos/novidades.js');
+if (!new RegExp(`versao: '${manifest.version.replace(/\./g, '\\.')}'`).test(nov)) fail(`novidades.js: a primeira entrada deve ser a versão ${manifest.version}`);
 
 const BANNED = [[/\beval\s*\(/, 'eval('], [/new\s+Function\s*\(/, 'new Function('], [/document\.write\s*\(/, 'document.write('], [/\bsetTimeout\s*\(\s*['"`]/, 'setTimeout(string)'], [/\balert\s*\(|\bconfirm\s*\(|\bprompt\s*\(/, 'alert/confirm/prompt'], [/https?:\/\/(?!ead\.senai\.br|ead\.fieg\.com\.br|www\.w3\.org|github\.com\/google\/blockly)[^"'\s)]+\.js/, 'script remoto']];
 const NO_NETWORK = /\bfetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon/;
