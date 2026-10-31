@@ -689,3 +689,86 @@ test('diagnóstico: livro de notas, participantes e página desconhecida; texto 
   const out = w.ALN.diagnostico.rodar(page('<html><body></body></html>'), new URL('https://ead.senai.br/calendar/view.php'), '0.13.0');
   assert.equal(out.tipo, 'outra');
 });
+
+// ---- 0.15.0: modelos, retornos e comparativo ----
+const areaFalsa = () => { const store = {}; return { store, get: async keys => Object.fromEntries(keys.filter(k => k in store).map(k => [k, store[k]])), set: async o => Object.assign(store, o), remove: async keys => keys.forEach(k => delete store[k]) }; };
+const comArea = () => { const w = load(); const a = areaFalsa(); w.chrome = { storage: { local: a } }; return { w, a }; };
+
+test('modelos: campos conhecidos, desconhecidos e falta de dado marcam a mensagem sem inventar valor', () => {
+  const M = load().ALN.modelos;
+  eq([...M.campos('Oi {nome}, {uc} {uc} {x}')], ['nome', 'uc', 'x']);
+  const r = M.render('Olá, {nome}! UC {uc}. Nota {nota}. Sumido há {dias_sem_acesso} dias.\n{pendencias}', { nome: 'Camila Ferreira', uc: 'Redes', nota: '58', dias: null, pendencias: [] });
+  assert.match(r.texto, /^Olá, Camila! UC Redes\. Nota 58\./);
+  assert.ok(r.texto.includes('{dias_sem_acesso}') && r.texto.includes('{pendencias}'), 'campo sem dado fica visível');
+  eq([...r.faltando], ['dias_sem_acesso', 'pendencias']);
+  assert.ok(M.render('{dias_sem_acesso}', { dias: 9999 }).faltando.includes('dias_sem_acesso'), 'nunca acessou não vira "9999 dias"');
+  assert.equal(M.render('{pendencias}', { pendencias: ['AV1', 'AV2'] }).texto, '• AV1\n• AV2');
+  eq([...M.render('oi {zzz}', {}).desconhecidos], ['zzz']);
+});
+
+test('modelos: validação, padrão por tipo de risco e persistência (padrões só enquanto nada foi salvo)', async () => {
+  const { w } = comArea(); const M = w.ALN.modelos;
+  assert.ok(M.validar({ nome: '', texto: '' }).length >= 2); assert.match(M.validar({ nome: 'a', texto: 'oi {foo}' })[0], /\{foo\}/); assert.equal(M.validar({ nome: 'a', texto: 'oi {nome}' }).length, 0);
+  assert.equal((await M.carregar()).length, 3);
+  const itens = (await M.carregar()).map(m => (m.id === 'nota-baixa' ? { ...m, uso: 'nota' } : m)); await M.salvar(itens);
+  assert.equal((await M.carregar()).find(m => m.id === 'nota-baixa').uso, 'nota');
+  assert.equal(M.sugerido(itens, [{ code: 'recovery_range' }]).id, 'nota-baixa'); assert.equal(M.sugerido(itens, [{ code: 'no_access_high' }]), null); assert.equal(M.sugerido(itens, []), null);
+  await M.salvar([]); assert.equal((await M.carregar()).length, 0, 'lista vazia salva é respeitada');
+});
+
+test('retornos: um aberto por aluno, classificação, feito, adiar e validade', () => {
+  const R = load().ALN.retornos; const hoje = '2026-10-31';
+  assert.equal(R.somarDias('2026-10-29', 7), '2026-11-05'); assert.equal(R.somarDias('2026-12-30', 3), '2027-01-02');
+  let l = R.agendar([], 'id:1', '2026-11-07', hoje); l = R.agendar(l, 'id:1', '2026-11-03', hoje); l = R.agendar(l, 'id:2', '2026-10-31', hoje); l = R.agendar(l, 'id:3', '2026-10-20', hoje);
+  assert.equal(l.filter(r => r.aluno === 'id:1').length, 1, 'novo retorno substitui o aberto'); assert.equal(l.find(r => r.aluno === 'id:1').em, '2026-11-03');
+  const c = R.classificar(l, hoje); eq(c.atrasados.map(r => r.aluno), ['id:3']); eq(c.hoje.map(r => r.aluno), ['id:2']); eq(c.proximos.map(r => r.aluno), ['id:1']);
+  eq(R.devidos(l, hoje).map(r => r.aluno), ['id:3', 'id:2']);
+  const f = R.feito(l, 'id:2', hoje); assert.equal(R.devidos(f, hoje).length, 1);
+  assert.equal(R.adiar(l, 'id:3', 3, hoje).find(r => r.aluno === 'id:3').em, '2026-11-03');
+  assert.throws(() => R.agendar([], 'id:1', '31/10/2026', hoje), /inválida/); assert.equal(R.br('2026-11-03'), '03/11');
+  const S = load().ALN.storage; const velho = { 'ead:1': [{ aluno: 'a', em: '2025-01-01', feito: null }, { aluno: 'b', em: '2026-08-01', feito: '2026-08-01' }, { aluno: 'c', em: '2026-11-01', feito: null }] };
+  eq(S.pruneRetornos(velho, Date.parse('2026-10-31T12:00:00')).value['ead:1'].map(r => r.aluno), ['c']);
+});
+
+test('retornos: persistência por curso e "gravar vazio" remove a chave do curso', async () => {
+  const { w } = comArea(); const R = w.ALN.retornos;
+  await R.gravar('h:7', R.agendar([], 'id:1', '2026-11-07', '2026-10-31')); assert.equal((await R.doCurso('h:7')).length, 1); assert.equal((await R.doCurso('h:8')).length, 0);
+  await R.gravar('h:7', []); assert.equal(JSON.stringify(await w.ALN.storage.getKey('uas.retornos')), '{}');
+});
+
+const alunoSnap = (key, pct, dias, pend) => ({ key, totalPct: pct, accessKnown: dias != null, lastAccessDays: dias, ov: pend == null ? null : { readEntregas: true }, pendCount: pend });
+test('comparativo: instantâneo compacto sem nome/e-mail; compara notas, acesso e pendências', () => {
+  const C = load().ALN.comparativo; const t0 = Date.parse('2026-10-24T10:00:00Z'); const t1 = Date.parse('2026-10-31T10:00:00Z');
+  const a = C.instantaneo([alunoSnap('id:1', 52, 10, 3), alunoSnap('id:2', 47, 2, 1), alunoSnap('id:3', null, null, null)].map(s => ({ ...s, name: 'Fulano', email: 'f@x.com' })), t0);
+  assert.ok(!JSON.stringify(a).includes('Fulano') && !JSON.stringify(a).includes('@'), 'só números'); assert.equal(a.media, 49.5); assert.equal(a.n, 3);
+  const b = C.instantaneo([alunoSnap('id:1', 58, 1, 2), alunoSnap('id:2', 43, 16, 3), alunoSnap('id:3', null, null, null), alunoSnap('id:4', 70, 1, 0)], t1);
+  const cmp = C.comparar(a, b);
+  assert.equal(cmp.piorou, 1); assert.equal(cmp.melhorou, 1); assert.equal(cmp.novos, 1); assert.equal(cmp.sairam, 0);
+  assert.equal(cmp.linhas[0].key, 'id:2', 'quem piorou vem primeiro'); assert.equal(cmp.linhas[0].nota.delta, -4); assert.equal(cmp.linhas[0].acesso.delta, 14); assert.equal(cmp.linhas[0].pend.delta, 2);
+  const um = cmp.linhas.find(l => l.key === 'id:1'); assert.equal(um.melhorou, true); assert.equal(um.nota.delta, 6);
+  const sem = cmp.linhas.find(l => l.key === 'id:3'); assert.equal(sem.nota.delta, null, 'sem nota continua sem nota (nunca zero)'); assert.equal(sem.piorou, false);
+  assert.equal(cmp.media.delta, 7.5); // (58+43+70)/3 = 57 contra 49,5
+});
+
+test('comparativo: guarda no máximo 12, junta leituras seguidas e registra/lê do armazenamento', async () => {
+  const { w } = comArea(); const C = w.ALN.comparativo; const base = Date.parse('2026-10-01T10:00:00Z');
+  const alunos = n => [alunoSnap('id:1', 50 + n, 5, 1)];
+  assert.equal(await C.registrar('h:7', alunos(0), base), null, 'primeira leitura: nada a comparar');
+  const c2 = await C.registrar('h:7', alunos(5), base + 86400000); assert.equal(c2.linhas[0].nota.delta, 5);
+  await C.registrar('h:7', alunos(6), base + 86400000 + 120000); // 2 min depois: substitui o anterior
+  assert.equal((await C.listaDoCurso('h:7')).length, 2);
+  for (let i = 2; i < 20; i += 1) await C.registrar('h:7', alunos(i), base + i * 86400000);
+  assert.equal((await C.listaDoCurso('h:7')).length, 12);
+  assert.ok((await C.ultimo('h:7')).linhas.length === 1); assert.equal(await C.ultimo('h:9'), null);
+});
+
+test('storage 0.15: novas categorias medidas, expiram e entram no backup; juntar não duplica', async () => {
+  const { w } = comArea(); const S = w.ALN.storage; const now = Date.parse('2026-10-31T12:00:00Z');
+  const all = { 'uas.leituras': { 'h:7': [{ at: '2026-01-01T00:00:00Z', n: 1, a: {} }, { at: '2026-10-25T00:00:00Z', n: 1, a: {} }] }, 'uas.retornos': { 'h:7': [{ aluno: 'id:1', em: '2026-11-07', feito: null }] }, 'uas.modelos': { itens: [{ id: 'a', nome: 'A', texto: 'x' }] } };
+  assert.equal(S.prune(all, now).removidos, 1); assert.equal(S.prune(all, now).all['uas.leituras']['h:7'].length, 1);
+  const u = S.usage(all); eq(u.categorias.map(c => c.categoria).sort(), ['Leituras', 'Modelos', 'Retornos']); assert.equal(u.categorias.find(c => c.categoria === 'Retornos').itens, 1);
+  const p = S.parseBackup(S.exportBackup(all, now, '0.15.0')); assert.equal(p.ok, true); assert.ok(p.dados['uas.modelos'] && p.dados['uas.retornos'] && p.dados['uas.leituras']);
+  const m = S.applyImport(all, p.dados, 'juntar'); assert.equal(m['uas.retornos']['h:7'].length, 1); assert.equal(m['uas.modelos'].itens.length, 1); assert.equal(m['uas.leituras']['h:7'].length, 2);
+  assert.equal(S.configOf({}).validadeLeiturasDias, 84);
+  assert.equal(S.parseBackup(JSON.stringify({ app: 'unidigital-assist', schema: 1, dados: { 'uas.config': { validadeLeiturasDias: 28 } } })).dados['uas.config'].validadeLeiturasDias, 28);
+});

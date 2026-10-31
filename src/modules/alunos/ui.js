@@ -89,6 +89,9 @@ nav button.off{opacity:.55}
 .mini i.w{background:var(--wn)}.mini i.e{background:var(--er)}
 .ftable td,.ftable th{padding:8px 8px}.bar2.mini2{width:70px;display:inline-block;margin:0 0 0 8px;vertical-align:middle}.tag.late{background:var(--erbg);color:var(--er)}
 .pend{border:1px solid var(--bd);border-radius:var(--r1);margin:8px 0;overflow:hidden}.pend .ph{background:var(--bg);padding:7px 10px;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);font-weight:700}.pend label{display:flex;gap:8px;align-items:center;padding:7px 10px;border-top:1px solid var(--bd);font-size:13px}.pend em{margin-left:auto;font-style:normal;font-size:12px;color:var(--mut)}
+label.inl{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-size:13px}label.inl select,label.inl input[type=date]{height:34px;border:1px solid var(--bd);border-radius:8px;background:var(--s);color:var(--ink);padding:0 6px}
+.rbox{background:var(--s);border:1px solid var(--bd);border-radius:var(--r2);padding:10px 14px;margin:8px 0 12px}.ret{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:6px 0;border-top:1px solid var(--bd)}.ret b{flex:1;min-width:140px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}.cmpbox summary{font-weight:600}.cmp-up{color:var(--ok);font-weight:600}.cmp-dn{color:var(--er);font-weight:600}.cmp-eq{color:var(--mut)}
 @media (prefers-reduced-motion:reduce){.prog i{animation:none}}
 @media print{.drawer{position:static;width:auto;box-shadow:none}}`;
 
@@ -121,7 +124,7 @@ nav button.off{opacity:.55}
     host.style.cssText = 'all:initial';
     const shadow = host.attachShadow({ mode: 'open' });
     shadow.append(h('style', {}, CSS));
-    const st = { tab: initialTab || 'alunos', data: ALN.reader.cached(), busy: false, progress: '', step: '', secs: 0, abort: null, error: '', copied: false, search: '', f: { access: 'todos', graded: 'todos', pend: 'todos', situation: 'todos' }, sortKey: 'name', sortDir: 'asc', rv: 'todos', ficha: null, tdata: ALN.tarefas.cached(), tbusy: false, tmsg: '', tsecs: 0, tabort: null, terr: '', fSituation: 'todos', fLevel: 'todos', onlyBelow: false, category: '', contacts: {}, modal: null };
+    const st = { tab: initialTab || 'alunos', data: ALN.reader.cached(), busy: false, progress: '', step: '', secs: 0, abort: null, error: '', copied: false, search: '', f: { access: 'todos', graded: 'todos', pend: 'todos', situation: 'todos' }, sortKey: 'name', sortDir: 'asc', rv: 'todos', ficha: null, tdata: ALN.tarefas.cached(), tbusy: false, tmsg: '', tsecs: 0, tabort: null, terr: '', fSituation: 'todos', fLevel: 'todos', onlyBelow: false, category: '', contacts: {}, modal: null, modelos: [], ret: [], comp: null };
     const drawer = h('div', { class: 'drawer', role: 'dialog', 'aria-label': 'Alunos e notas' });
     shadow.append(drawer);
     root.document.documentElement.append(host);
@@ -149,7 +152,7 @@ nav button.off{opacity:.55}
       try { st.data = await ALN.reader.readCourse({ resume: again, signal: st.abort.signal, onProgress: p => { if (p.step) st.step = p.step; st.progress = p.text; renderStatusOnly(); if (p.step) renderSteps(); } }); }
       catch (e) { st.error = e && e.message ? e.message : String(e); }
       root.clearInterval(timer);
-      st.busy = false; st.abort = null; await loadContacts(); render();
+      st.busy = false; st.abort = null; await loadContacts(); await loadRetornos(); await guardarLeitura(); render();
     }
     function renderSteps() { const el = shadow.querySelector('[data-steps]'); if (el) el.replaceChildren(...stepRows()); }
     function cancelRead() { if (st.abort) st.abort.abort(); }
@@ -204,7 +207,7 @@ nav button.off{opacity:.55}
       try { st.tdata = await ALN.tarefas.read({ resume: again, signal: st.tabort.signal, onProgress: p => { st.tmsg = p.text; const el = shadow.querySelector('[data-tprogress]'); if (el) el.textContent = p.text; } }); }
       catch (e) { st.terr = e && e.message ? e.message : String(e); }
       root.clearInterval(timer);
-      st.tbusy = false; st.tabort = null; ovKey = ''; render();
+      st.tbusy = false; st.tabort = null; ovKey = ''; await guardarLeitura(); render();
     }
     function entregasCard() {
       if (st.tbusy) return h('div', { class: 'partial', role: 'status' }, h('p', { class: 'big' }, 'Lendo entregas… ', h('span', { 'data-tsecs': '' }, `${st.tsecs} s`)), h('div', { class: 'prog', role: 'progressbar', 'aria-label': 'Leitura das entregas em andamento' }, h('i')),
@@ -280,7 +283,8 @@ nav button.off{opacity:.55}
       const sel = h('select', { 'aria-label': 'Filtrar por nível', onchange: e => { st.fLevel = e.target.value; renderBody(); } },
         ['todos', ...LEVELS].map(k => h('option', { value: k, selected: k === st.fLevel }, k === 'todos' ? 'Precisam de atenção' : ALN.LEVEL_LABEL[k])));
       const filaBtn = list.some(canSend) ? iconBtn('btn', 'send', `Enviar mensagem a todos os ${list.filter(canSend).length} alunos desta lista, em fila`, () => openFila(list), `Enviar em fila (${list.filter(canSend).length})`) : null;
-      const toolbar = h('div', { class: 'bar' }, search(), sel, readBtn(), filaBtn, csvBtn('Exportar lista de contato em CSV', () => download(`acompanhamento-${slug(st.data.course.name)}.csv`, ALN.riskCsv(list.length ? list : all))), xlsxBtn('Exportar lista de contato em Excel (.xlsx)', () => downloadXlsx(`acompanhamento-${slug(st.data.course.name)}.xlsx`, [ALN.riskSheet(list.length ? list : all)])));
+      const modelosBtn = h('button', { type: 'button', class: 'btn', title: 'Textos prontos com campos', onclick: openModelos }, 'Modelos');
+      const toolbar = h('div', { class: 'bar' }, search(), sel, readBtn(), filaBtn, modelosBtn, csvBtn('Exportar lista de contato em CSV', () => download(`acompanhamento-${slug(st.data.course.name)}.csv`, ALN.riskCsv(list.length ? list : all))), xlsxBtn('Exportar lista de contato em Excel (.xlsx)', () => downloadXlsx(`acompanhamento-${slug(st.data.course.name)}.xlsx`, [ALN.riskSheet(list.length ? list : all)])));
       const cards = h('div', { class: 'cards' }, LEVELS.map(k => h('div', { class: 'card' }, h('b', {}, counts[k]), h('span', {}, ALN.LEVEL_LABEL[k]))));
       const table = h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Aluno'), h('th', {}, 'Nível'), h('th', {}, 'Motivos e próxima ação'), h('th', {}, ''))),
         h('tbody', {}, list.map(s => h('tr', {}, h('td', {}, h('b', {}, s.name), contactMark(s)), h('td', {}, pill(s.risk.level, ALN.LEVEL_LABEL[s.risk.level])),
@@ -288,7 +292,7 @@ nav button.off{opacity:.55}
           h('td', {}, h('div', { class: 'actions' },
             iconBtn('btn', 'send', canSend(s) ? `Enviar mensagem a ${s.name} pelo Moodle` : `Não dá para enviar a ${s.name}: identificador do aluno não reconhecido`, () => openModal(s)),
             iconBtn('btn', 'copy', `Copiar mensagem para ${s.name}`, async e => { const b = e.currentTarget; try { await root.navigator.clipboard.writeText(ALN.contactText(s, st.data.course.name)); b.title = 'Copiado'; b.style.color = '#13795b'; } catch (_) { b.title = 'Não foi possível copiar'; } })))))));
-      return [toolbar, covLine(), warnBox(), h('div', { class: 'body' }, cards, list.length ? table : h('p', { class: 'empty' }, 'Ninguém neste nível.'),
+      return [toolbar, covLine(), warnBox(), h('div', { class: 'body' }, retornosBox(), cards, comparativoBox(), list.length ? table : h('p', { class: 'empty' }, 'Ninguém neste nível.'),
         h('span', { class: 'why' }, 'Aluno sem leitura de acesso ou de nota aparece como “Verificar”, nunca como regular. “Enviar” manda pelo Moodle, com a sua conta, só depois de você revisar e confirmar; “Copiar” só copia o texto. Contato registrado não significa problema resolvido.'),
         h('button', { class: 'btn', type: 'button', style: 'margin-top:8px', onclick: async e => { const b = e.currentTarget; if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.lastChild.textContent = 'Clique de novo para apagar o registro deste curso'; return; } await ALN.messenger.clearLog(st.data.course); st.contacts = {}; render(); } }, svg('close'), 'Apagar registro de contatos'))];
     }
@@ -397,6 +401,87 @@ nav button.off{opacity:.55}
         h('div', { class: 'sec' }, 'Contatos'), contacts)];
     }
 
+    // ---- modelos, retornos e comparativo (0.15) ----
+    const courseKey = () => ALN.messenger.courseKey(st.data.course);
+    const PLACEHOLDER = /\{(nome|uc|nota|dias_sem_acesso|pendencias)\}/;
+    const loadModelos = async () => { try { st.modelos = await ALN.modelos.carregar(); } catch (_) { st.modelos = []; } };
+    const loadRetornos = async () => { try { st.ret = st.data ? await ALN.retornos.doCurso(courseKey()) : []; } catch (_) { st.ret = []; } };
+    const pendTexts = s => (s.ov && s.ov.readEntregas ? s.ov.pendencias : []).map(x => ({ name: x.name, dueText: x.due ? dayOf(x.due).slice(0, 5) : '' }));
+    const ctxOf = (s, pend) => ({ nome: s.name, uc: st.data.course.name, nota: s.totalDisplay || (s.totalPct != null ? ALN.fmt(s.totalPct) : null), dias: s.accessKnown ? s.lastAccessDays : null, pendencias: pend.map(x => `${x.name}${x.dueText ? ` (prazo ${x.dueText})` : ''}`) });
+    const stripName = n => String(n || '').split(/\s+/)[0];
+    const faltaTxt = f => `sem dado para ${f.map(x => `{${x}}`).join(', ')}`;
+    const retornoSelect = (onPick, dateIn) => {
+      const sel = h('select', { 'aria-label': 'Ver de novo em' }, ALN.retornos.OPCOES.map(o => h('option', { value: o.id, selected: o.id === '7' }, o.rotulo)));
+      sel.addEventListener('change', () => { dateIn.hidden = sel.value !== 'data'; if (onPick) onPick(); });
+      return sel;
+    };
+    // data do retorno escolhida (AAAA-MM-DD) ou null se "não agendar"/inválida
+    const retornoEm = (sel, dateIn) => {
+      const hoje = ALN.retornos.hojeISO();
+      if (sel.value === 'nao') return null;
+      if (sel.value === 'data') return ALN.retornos.valida(dateIn.value) && dateIn.value >= hoje ? dateIn.value : null;
+      return ALN.retornos.somarDias(hoje, Number(sel.value));
+    };
+    async function agendarRetorno(s, em) {
+      if (!em) return '';
+      try { const k = courseKey(); const lista = ALN.retornos.agendar(await ALN.retornos.doCurso(k), s.key, em, ALN.retornos.hojeISO()); await ALN.retornos.gravar(k, lista); st.ret = lista; return ` Retorno em ${ALN.retornos.br(em)}.`; } catch (_) { return ''; }
+    }
+    async function guardarLeitura() {
+      if (!st.data) return;
+      try { ensureOv(); st.comp = await ALN.comparativo.registrar(courseKey(), st.data.students); } catch (_) { /* o comparativo é conveniência */ }
+    }
+    const nameOf = key => { const x = st.data && st.data.students.find(a => a.key === key); return x ? x.name : 'Aluno fora da leitura atual'; };
+    const signed = v => (v == null ? '—' : v > 0 ? `+${String(v).replace('.', ',')}` : String(v).replace('.', ','));
+    function retornosBox() {
+      const hoje = ALN.retornos.hojeISO(); const c = ALN.retornos.classificar(st.ret, hoje); const dev = [...c.atrasados, ...c.hoje];
+      if (!dev.length && !c.proximos.length) return null;
+      const salvar = async lista => { await ALN.retornos.gravar(courseKey(), lista); st.ret = lista; renderBody(); };
+      const linha = r => h('div', { class: 'ret' }, h('b', {}, nameOf(r.aluno)), h('span', { class: `pill ${r.em < hoje ? 'abaixo' : r.em === hoje ? 'recuperacao' : 'sem_nota'}` }, r.em < hoje ? `atrasado desde ${ALN.retornos.br(r.em)}` : r.em === hoje ? 'hoje' : ALN.retornos.br(r.em)),
+        h('span', { class: 'actions' }, h('button', { type: 'button', class: 'btn', onclick: () => salvar(ALN.retornos.feito(st.ret, r.aluno, hoje)) }, 'Feito'), h('button', { type: 'button', class: 'btn', onclick: () => salvar(ALN.retornos.adiar(st.ret, r.aluno, 3, hoje)) }, 'Adiar 3 dias')));
+      return h('section', { class: 'rbox', 'aria-label': 'Retornos de hoje' }, h('div', { class: 'sec', style: 'margin-top:0' }, `Retornos de hoje (${dev.length})`, h('span', { class: 'why' }, 'Só neste navegador. Sem notificação: aparece aqui quando você abre o painel.')),
+        dev.length ? dev.map(linha) : h('p', { class: 'why' }, 'Nenhum retorno vence hoje.'), c.proximos.length ? h('p', { class: 'why' }, `Próximos: ${c.proximos.slice(0, 4).map(r => `${nameOf(r.aluno)} (${ALN.retornos.br(r.em)})`).join(' · ')}${c.proximos.length > 4 ? ` e mais ${c.proximos.length - 4}` : ''}`) : null);
+    }
+    function comparativoBox() {
+      const c = st.comp; if (!c) return null;
+      const rows = c.linhas.filter(l => (l.nota.delta || 0) !== 0 || (l.acesso.delta || 0) !== 0 || (l.pend.delta || 0) !== 0).slice(0, 40);
+      const seta = (v, inverso) => (v == null || v === 0 ? 'eq' : (v > 0) !== Boolean(inverso) ? 'up' : 'dn');
+      const cel = (d, inverso, txt) => h('td', { class: `n cmp-${seta(d, inverso)}` }, txt);
+      return h('details', { class: 'more cmpbox' }, h('summary', {}, `Comparativo desde a leitura de ${new Date(c.desde).toLocaleDateString('pt-BR')} · ${c.piorou} piorou · ${c.melhorou} melhorou · média ${signed(c.media.delta)}`),
+        rows.length ? h('div', { class: 'scroll' }, h('table', {}, h('thead', {}, h('tr', {}, ['Aluno', 'Nota', 'Dias sem acesso', 'Sem entrega'].map(t => h('th', {}, t)))),
+          h('tbody', {}, rows.map(l => h('tr', {}, h('td', {}, nameOf(l.key)), cel(l.nota.delta, false, l.nota.delta == null ? '—' : `${l.nota.depois} (${signed(l.nota.delta)})`), cel(l.acesso.delta, true, l.acesso.delta == null ? '—' : `${l.acesso.depois} (${signed(l.acesso.delta)})`), cel(l.pend.delta, true, l.pend.delta == null ? '—' : `${l.pend.depois} (${signed(l.pend.delta)})`)))))) : h('p', { class: 'why' }, 'Nada mudou nos alunos presentes nas duas leituras.'),
+        h('p', { class: 'why' }, `${c.novos ? `${c.novos} aluno(s) novo(s) na leitura. ` : ''}${c.sairam ? `${c.sairam} aluno(s) não aparecem mais. ` : ''}Só números são guardados (sem nome ou e-mail), por até 12 leituras.`));
+    }
+
+    function openModelos() {
+      opener = shadow.activeElement; closeModal();
+      let lista = st.modelos.map(m => ({ ...m })); let atual = lista[0] ? lista[0].id : null;
+      const msg = h('div', { role: 'status', 'aria-live': 'polite' });
+      const nome = h('input', { type: 'text', 'aria-label': 'Nome do modelo', maxlength: 60, style: 'width:100%;height:36px;border:1px solid var(--bd);border-radius:8px;padding:0 10px;margin-top:8px' });
+      const texto = h('textarea', { 'aria-label': 'Texto do modelo', maxlength: ALN.modelos.MAX }); const uso = h('select', { 'aria-label': 'Usar automaticamente' }, ALN.modelos.USOS.map(u => h('option', { value: u.id || '' }, u.rotulo)));
+      const sel = h('select', { 'aria-label': 'Modelos', style: 'width:100%;height:36px;margin-top:6px' });
+      const chips = h('div', { class: 'chips' }, ALN.modelos.CAMPOS.map(c => h('button', { type: 'button', class: 'fchip', onclick: () => { const a = texto.selectionStart == null ? texto.value.length : texto.selectionStart; texto.setRangeText(`{${c}}`, a, texto.selectionEnd == null ? a : texto.selectionEnd, 'end'); texto.focus(); } }, `{${c}}`)));
+      const cur = () => lista.find(m => m.id === atual);
+      const fillSel = () => { sel.replaceChildren(...lista.map(m => h('option', { value: m.id, selected: m.id === atual }, m.nome)), ...(lista.length ? [] : [h('option', { value: '' }, '(nenhum modelo)')])); };
+      const load = () => { const m = cur(); nome.value = m ? m.nome : ''; texto.value = m ? m.texto : ''; uso.value = m && m.uso ? m.uso : ''; nome.disabled = texto.disabled = uso.disabled = !m; };
+      sel.addEventListener('change', () => { atual = sel.value || null; load(); msg.textContent = ''; });
+      const ler = () => ({ id: atual, nome: nome.value.trim(), texto: texto.value, uso: uso.value || null });
+      const salvar = async () => {
+        const m = ler(); const erros = ALN.modelos.validar(m);
+        if (erros.length) { msg.className = 'res bad'; msg.textContent = erros.join(' '); return; }
+        lista = lista.map(x => (x.id === m.id ? m : (m.uso && x.uso === m.uso ? { ...x, uso: null } : x)));
+        try { await ALN.modelos.salvar(lista); st.modelos = lista.map(x => ({ ...x })); msg.className = 'res ok'; msg.textContent = 'Modelo salvo.'; fillSel(); } catch (e) { msg.className = 'res bad'; msg.textContent = `Não foi possível salvar. ${e && e.message ? e.message : e}`; }
+      };
+      const dialog = h('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Modelos de mensagem', onkeydown: e => { if (e.key === 'Escape') { e.stopPropagation(); closeModal(); } } },
+        h('h3', {}, 'Modelos de mensagem'), h('span', { class: 'why' }, 'Textos prontos com campos que são preenchidos com os dados lidos de cada aluno. Se faltar um dado, o campo continua visível e o envio fica travado até você resolver.'),
+        sel, nome, chips, texto, h('label', {}, 'Usar sozinho:', uso), msg,
+        h('div', { class: 'row2' },
+          h('button', { class: 'btn', type: 'button', onclick: () => { const m = { id: ALN.modelos.novoId(), nome: 'Novo modelo', texto: 'Olá, {nome}, tudo bem? ', uso: null }; lista.push(m); atual = m.id; fillSel(); load(); nome.focus(); nome.select(); } }, 'Novo'),
+          h('button', { class: 'btn', type: 'button', onclick: async () => { if (!cur()) return; lista = lista.filter(m => m.id !== atual); atual = lista[0] ? lista[0].id : null; try { await ALN.modelos.salvar(lista); st.modelos = lista.map(x => ({ ...x })); msg.className = 'res ok'; msg.textContent = 'Modelo excluído.'; } catch (_) { /* mantém a tela */ } fillSel(); load(); } }, 'Excluir'),
+          h('button', { class: 'btn pri', type: 'button', onclick: salvar }, 'Salvar modelo'), h('button', { class: 'btn', type: 'button', onclick: closeModal }, 'Fechar')));
+      const back = h('div', { class: 'mback', onclick: e => { if (e.target === back) closeModal(); } }, dialog);
+      st.modal = 'modelos'; drawer.append(back); fillSel(); load(); sel.focus();
+    }
+
     const canSend = s => Boolean(ALN.messenger.studentId(s));
     const contactMark = s => { const l = lastContact(s); return l ? h('span', { class: 'pill contacted', style: 'margin-left:6px', title: l.confirmed ? 'Mensagem enviada e conferida no Moodle' : 'Mensagem enviada; conferência pendente' }, `${l.confirmed ? 'Contatado' : 'Enviada (conferir)'} ${hhmm(l.at)}`) : null; };
 
@@ -412,9 +497,18 @@ nav button.off{opacity:.55}
       const waiting = s.ov ? s.ov.byItem.filter(x => x.state === 'aguardando') : [];
       const sel = new Set(pendList.map((_, i) => i));
       let edited = false;
-      const compose = () => ALN.messenger.buildMessage(s, st.data.course.name, settings, pendList.filter((_, i) => sel.has(i)).map(x => ({ name: x.name, dueText: x.due ? dayOf(x.due).slice(0, 5) : '' })));
+      const sugerido = ALN.modelos.sugerido(st.modelos, s.risk.reasons);
+      let modelo = sugerido;
+      const pendSel = () => pendList.filter((_, i) => sel.has(i)).map(x => ({ name: x.name, dueText: x.due ? dayOf(x.due).slice(0, 5) : '' }));
+      const compose = () => (modelo ? ALN.modelos.render(modelo.texto, ctxOf(s, pendSel())).texto : ALN.messenger.buildMessage(s, st.data.course.name, settings, pendSel()));
       const area = h('textarea', { 'aria-label': `Mensagem para ${s.name}`, maxlength: ALN.messenger.MAX_TEXT }, compose());
       area.addEventListener('input', () => { edited = true; });
+      const aviso = h('p', { class: 'hint', style: 'margin:4px 0 0;color:var(--wn)', role: 'status' });
+      const showAviso = () => { const f = modelo ? ALN.modelos.render(modelo.texto, ctxOf(s, pendSel())).faltando : []; aviso.textContent = f.length && PLACEHOLDER.test(area.value) ? `Este modelo precisa de dado que não foi lido para este aluno (${faltaTxt(f)}). Complete o texto à mão ou use outro modelo.` : ''; };
+      const modeloSel = h('select', { 'aria-label': 'Modelo de mensagem', onchange: e => { modelo = st.modelos.find(m => m.id === e.target.value) || null; edited = false; area.value = compose(); showAviso(); syncAll(); } },
+        h('option', { value: '' }, 'Texto automático'), st.modelos.map(m => h('option', { value: m.id, selected: Boolean(modelo) && m.id === modelo.id }, m.nome)));
+      const dataIn = h('input', { type: 'date', 'aria-label': 'Data do retorno', hidden: true, min: ALN.retornos.hojeISO() });
+      const retSel = retornoSelect(null, dataIn);
       const checklist = pendList.length ? h('div', { class: 'pend' }, h('div', { class: 'ph' }, 'Atividades sem entrega deste aluno (marque as que quer cobrar)'),
         pendList.map((x, i) => h('label', {}, h('input', { type: 'checkbox', checked: true, onchange: e => { if (e.target.checked) sel.add(i); else sel.delete(i); if (!edited) { area.value = compose(); area.dispatchEvent(new root.Event('compose')); } syncAll(); } }), x.name, h('em', {}, `${x.due ? `prazo ${dayOf(x.due).slice(0, 5)}` : 'sem prazo lido'}${x.overdue ? ' · atrasada' : ''}`))),
         waiting.length ? h('p', { class: 'hint', style: 'padding:6px 10px;margin:0' }, `Entregues e aguardando a sua correção (não entram na mensagem): ${waiting.map(x => x.name).join(', ')}.`) : null,
@@ -424,7 +518,7 @@ nav button.off{opacity:.55}
       const res = h('div', { role: 'status', 'aria-live': 'polite' });
       const sendBtn = h('button', { class: 'btn pri', type: 'button', disabled: true }, svg('send'), 'Enviar ao aluno');
       const cancel = h('button', { class: 'btn', type: 'button', onclick: closeModal }, 'Cancelar');
-      const sync = () => { sendBtn.disabled = !(ok.checked && area.value.trim()); };
+      const sync = () => { sendBtn.disabled = !(ok.checked && area.value.trim() && !PLACEHOLDER.test(area.value)); showAviso(); };
       const syncAll = () => sync();
       ok.addEventListener('change', sync); area.addEventListener('input', sync);
       sendBtn.addEventListener('click', async () => {
@@ -433,9 +527,10 @@ nav button.off{opacity:.55}
         res.className = 'res'; res.textContent = 'Enviando pelo Moodle…';
         try {
           const out = await ALN.messenger.send({ userId: ALN.messenger.studentId(s), text: area.value });
-          st.contacts = await ALN.messenger.addLog(st.data.course, s.key, { at: out.at, msgid: out.msgid, confirmed: out.confirmed, text: area.value.trim(), nivel: s.risk.level });
+          st.contacts = await ALN.messenger.addLog(st.data.course, s.key, { at: out.at, msgid: out.msgid, confirmed: out.confirmed, text: area.value.trim(), nivel: s.risk.level, modelo: modelo ? modelo.id : 'auto' });
+          const retTxt = await agendarRetorno(s, retornoEm(retSel, dataIn));
           res.className = `res ${out.confirmed ? 'ok' : 'warn'}`;
-          res.textContent = out.confirmed ? `Mensagem enviada e conferida no Moodle às ${hhmm(out.at)}.` : `Mensagem enviada às ${hhmm(out.at)}, mas não foi possível conferir. ${out.note}`;
+          res.textContent = (out.confirmed ? `Mensagem enviada e conferida no Moodle às ${hhmm(out.at)}.` : `Mensagem enviada às ${hhmm(out.at)}, mas não foi possível conferir. ${out.note}`) + retTxt;
           st.modalBusy = false; cancel.disabled = false; cancel.textContent = 'Fechar'; sendBtn.hidden = true;
           renderBody();
         } catch (e) {
@@ -449,13 +544,15 @@ nav button.off{opacity:.55}
         h('span', { class: 'why' }, `Nível: ${ALN.LEVEL_LABEL[s.risk.level]} · vai pela mensagem do Moodle, com a sua conta; o aluno recebe na caixa dele. Não dá para desfazer.`),
         prev ? h('div', { class: 'note' }, `Você já enviou uma mensagem a este aluno às ${hhmm(prev.at)}${new Date(prev.at).toDateString() === new Date().toDateString() ? ' (hoje)' : ` de ${new Date(prev.at).toLocaleDateString('pt-BR')}`}. Envie de novo só se for preciso.`) : null,
         checklist,
-        area,
+        h('label', { class: 'inl' }, 'Modelo:', modeloSel), area, aviso,
+        h('label', { class: 'inl' }, 'Ver de novo em:', retSel, dataIn),
         h('label', {}, ok, 'Revisei o texto e quero enviar esta mensagem ao aluno.'),
         res,
         h('div', { class: 'row2' }, cancel, sendBtn));
       const back = h('div', { class: 'mback', onclick: e => { if (e.target === back && !cancel.disabled) closeModal(); } }, dialog);
       st.modal = s.key;
       drawer.append(back);
+      showAviso(); sync();
       area.focus();
     }
 
@@ -466,8 +563,14 @@ nav button.off{opacity:.55}
       if (!alvo.length) return;
       opener = shadow.activeElement; closeModal(); ensureOv();
       const hoje = s => { const l = lastContact(s); return l && new Date(l.at).toDateString() === new Date().toDateString(); };
-      const textFor = s => { const pend = s.ov && s.ov.readEntregas ? s.ov.pendencias : []; return ALN.messenger.buildMessage(s, st.data.course.name, settings, pend.map(x => ({ name: x.name, dueText: x.due ? dayOf(x.due).slice(0, 5) : '' }))); };
-      const rows = alvo.map(s => ({ s, on: !hoje(s), item: ALN.fila.novoItem({ key: s.key, name: s.name, userId: ALN.messenger.studentId(s), text: textFor(s) }), area: null }));
+      let modeloFila = null;
+      const textFor = s => (modeloFila ? ALN.modelos.render(modeloFila.texto, ctxOf(s, pendTexts(s))).texto : ALN.messenger.buildMessage(s, st.data.course.name, settings, pendTexts(s)));
+      const faltaOf = s => (modeloFila ? ALN.modelos.render(modeloFila.texto, ctxOf(s, pendTexts(s))).faltando : []);
+      const rows = alvo.map(s => ({ s, on: !hoje(s), editado: false, falta: [], item: ALN.fila.novoItem({ key: s.key, name: s.name, userId: ALN.messenger.studentId(s), text: textFor(s) }), area: null }));
+      const dataIn = h('input', { type: 'date', 'aria-label': 'Data do retorno', hidden: true, min: ALN.retornos.hojeISO() });
+      const retSel = retornoSelect(null, dataIn);
+      const aplicarModelo = () => { rows.forEach(r => { if (!r.editado) { r.item.text = textFor(r.s); r.falta = faltaOf(r.s); if (r.falta.length) r.on = false; else r.on = !hoje(r.s); } }); draw(); };
+      const modeloSelF = h('select', { 'aria-label': 'Modelo de mensagem para todos', onchange: e => { modeloFila = st.modelos.find(m => m.id === e.target.value) || null; aplicarModelo(); } }, h('option', { value: '' }, 'Texto automático'), st.modelos.map(m => h('option', { value: m.id }, m.nome)));
       let fase = 'revisao', parar = false;
       const body = h('div', {}), foot = h('div', { class: 'row2' }), head = h('h3', {}), sub = h('span', { class: 'why' }), res = h('div', { role: 'status', 'aria-live': 'polite' });
       const bar = h('div', { class: 'fbar', role: 'progressbar', 'aria-label': 'Progresso do envio' }, h('i'));
@@ -479,12 +582,12 @@ nav button.off{opacity:.55}
         if (fase === 'revisao') {
           head.textContent = `Enviar a ${ativos().length} aluno(s)`;
           sub.textContent = 'Um por vez, com pausa de 2 s entre mensagens e conferência de cada envio. Vai pela mensagem do Moodle, com a sua conta. Não dá para desfazer.';
-          body.append(h('div', { class: 'fl' }, rows.map(r => {
+          body.append(h('div', { class: 'row2', style: 'justify-content:flex-start;align-items:center' }, h('label', { class: 'inl' }, 'Modelo:', modeloSelF), h('label', { class: 'inl' }, 'Ver de novo em:', retSel, dataIn)), h('div', { class: 'fl' }, rows.map(r => {
             const area = h('textarea', { 'aria-label': `Mensagem para ${r.s.name}`, maxlength: ALN.messenger.MAX_TEXT }, r.item.text);
-            area.addEventListener('input', () => { r.item.text = area.value; syncFila(); });
+            area.addEventListener('input', () => { r.item.text = area.value; r.editado = true; syncFila(); });
             r.area = area;
             const chk = h('input', { type: 'checkbox', checked: r.on, onchange: e => { r.on = e.target.checked; head.textContent = `Enviar a ${ativos().length} aluno(s)`; syncFila(); } });
-            return h('div', { class: 'it' }, h('div', { class: 'top' }, h('label', {}, chk, h('b', {}, r.s.name)), hoje(r.s) ? h('span', { class: 'st' }, 'já contatado hoje') : null), h('details', {}, h('summary', {}, 'Ver / editar mensagem'), area));
+            return h('div', { class: 'it' }, h('div', { class: 'top' }, h('label', {}, chk, h('b', {}, r.s.name)), hoje(r.s) ? h('span', { class: 'st' }, 'já contatado hoje') : null, r.falta.length ? h('span', { class: 'st falhou' }, faltaTxt(r.falta)) : (PLACEHOLDER.test(r.item.text) ? h('span', { class: 'st falhou' }, 'texto com campo sem preencher') : null)), h('details', {}, h('summary', {}, 'Ver / editar mensagem'), area));
           })), h('label', {}, ok, 'Revisei as mensagens e quero enviar a fila.'));
         } else {
           const rs = ALN.fila.resumo(ativos().map(r => r.item));
@@ -497,7 +600,7 @@ nav button.off{opacity:.55}
         }
         foot.replaceChildren(...buttons());
       }
-      const syncFila = () => { if (fase === 'revisao' && go) go.disabled = !(ok.checked && ativos().length && ativos().every(r => r.item.text.trim())); };
+      const syncFila = () => { if (fase === 'revisao' && go) go.disabled = !(ok.checked && ativos().length && ativos().every(r => r.item.text.trim() && !PLACEHOLDER.test(r.item.text))); };
       ok.addEventListener('change', syncFila);
       let go = null;
       const cancel = h('button', { class: 'btn', type: 'button', onclick: () => { if (fase !== 'enviando') closeModal(); } }, 'Cancelar');
@@ -516,7 +619,7 @@ nav button.off{opacity:.55}
           shouldStop: () => parar,
           onUpdate: async item => {
             const r = rows.find(x => x.item === item);
-            if (item.state === 'enviada' && r) { try { st.contacts = await ALN.messenger.addLog(st.data.course, r.s.key, { at: item.out.at, msgid: item.out.msgid, confirmed: item.out.confirmed, text: item.text.trim(), nivel: r.s.risk.level }); } catch (_) { /* o registro é só conveniência */ } }
+            if (item.state === 'enviada' && r) { try { st.contacts = await ALN.messenger.addLog(st.data.course, r.s.key, { at: item.out.at, msgid: item.out.msgid, confirmed: item.out.confirmed, text: item.text.trim(), nivel: r.s.risk.level, modelo: modeloFila ? modeloFila.id : 'auto' }); await agendarRetorno(r.s, retornoEm(retSel, dataIn)); } catch (_) { /* o registro é só conveniência */ } }
             if (fase === 'enviando') draw();
           }
         });
@@ -603,7 +706,7 @@ nav button.off{opacity:.55}
     }
     const onKey = e => { if (e.key !== 'Escape') return; if (st.modal) { if (!st.modalBusy) closeModal(); return; } api.close(); };
     const api = {
-      show(tab) { if (tab) st.tab = tab; host.style.display = 'block'; render(); loadContacts().then(() => { if (st.tab === 'acomp') renderBody(); }); root.document.addEventListener('keydown', onKey); },
+      show(tab) { if (tab) st.tab = tab; host.style.display = 'block'; render(); Promise.all([loadContacts(), loadModelos(), loadRetornos(), st.data && !st.comp ? ALN.comparativo.ultimo(courseKey()).then(c => { st.comp = c; }, () => {}) : null]).then(() => { if (st.tab === 'acomp') renderBody(); }); root.document.addEventListener('keydown', onKey); },
       close() { host.style.display = 'none'; root.document.removeEventListener('keydown', onKey); },
       read, state: st
     };

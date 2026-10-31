@@ -10,9 +10,16 @@
   const QUOTA = 10 * 1024 * 1024; // chrome.storage.local sem "unlimitedStorage"
   const AVISO = 0.7;
   // Tudo que a extensão guarda. Chave nova só entra aqui (e o backup/apagar/medir passam a enxergá-la).
-  const KEYS = [{ key: 'hub.contatos.v1', categoria: 'Contatos', rotulo: 'Registro de mensagens enviadas', validavel: true }];
-  const DEFAULT_CONFIG = { validadeContatosDias: 365 };
+  const K_CONTATOS = 'hub.contatos.v1', K_MODELOS = 'uas.modelos', K_RETORNOS = 'uas.retornos', K_LEITURAS = 'uas.leituras';
+  const KEYS = [
+    { key: K_CONTATOS, categoria: 'Contatos', rotulo: 'Registro de mensagens enviadas' },
+    { key: K_MODELOS, categoria: 'Modelos', rotulo: 'Modelos de mensagem' },
+    { key: K_RETORNOS, categoria: 'Retornos', rotulo: 'Retornos agendados' },
+    { key: K_LEITURAS, categoria: 'Leituras', rotulo: 'Instantâneos para o comparativo' }
+  ];
+  const DEFAULT_CONFIG = { validadeContatosDias: 365, validadeLeiturasDias: 84 };
   const VALIDADES = [{ dias: 90, rotulo: '3 meses' }, { dias: 180, rotulo: '6 meses' }, { dias: 365, rotulo: '12 meses' }, { dias: 0, rotulo: 'nunca expirar' }];
+  const VALIDADES_LEITURAS = [{ dias: 28, rotulo: '4 semanas' }, { dias: 84, rotulo: '12 semanas' }, { dias: 180, rotulo: '6 meses' }, { dias: 0, rotulo: 'nunca expirar' }];
   const DAY = 86400000;
 
   const known = key => KEYS.some(k => k.key === key);
@@ -51,15 +58,46 @@
     }
     return { value: out, removidos };
   }
+  const hoje = now => { const d = new Date(now); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+  function pruneLeituras(map, now, dias) {
+    if (!isObj(map) || !dias) return { value: map, removidos: 0 };
+    const limite = now - dias * DAY; let removidos = 0; const out = {};
+    for (const [curso, lista] of Object.entries(map)) {
+      const mant = (Array.isArray(lista) ? lista : []).filter(x => { const t = Date.parse(x && x.at); return !(Number.isFinite(t) && t < limite); });
+      removidos += (Array.isArray(lista) ? lista.length : 0) - mant.length;
+      if (mant.length) out[curso] = mant;
+    }
+    return { value: out, removidos };
+  }
+  // retornos: feitos há mais de 60 dias e vencidos e não feitos há mais de 365 dias saem
+  function pruneRetornos(map, now) {
+    if (!isObj(map)) return { value: map, removidos: 0 };
+    const h = hoje(now); const feitoLim = hoje(now - 60 * DAY); const velhoLim = hoje(now - 365 * DAY); let removidos = 0; const out = {};
+    for (const [curso, lista] of Object.entries(map)) {
+      const mant = (Array.isArray(lista) ? lista : []).filter(r => isObj(r) && !(r.feito ? String(r.feito) < feitoLim : String(r.em) < velhoLim));
+      removidos += (Array.isArray(lista) ? lista.length : 0) - mant.length;
+      if (mant.length) out[curso] = mant;
+    }
+    void h;
+    return { value: out, removidos };
+  }
   function prune(all, now) {
-    const dias = configOf(all).validadeContatosDias;
-    const key = 'hub.contatos.v1';
-    if (!(key in all)) return { all, removidos: 0 };
-    const r = pruneContatos(all[key], now, dias);
-    return { all: r.removidos ? { ...all, [key]: r.value } : all, removidos: r.removidos };
+    const cfg = configOf(all); let out = all; let removidos = 0;
+    const apply = (key, fn) => { if (!(key in out)) return; const r = fn(out[key]); if (r.removidos) { out = { ...out, [key]: r.value }; removidos += r.removidos; } };
+    apply(K_CONTATOS, v => pruneContatos(v, now, cfg.validadeContatosDias));
+    apply(K_LEITURAS, v => pruneLeituras(v, now, cfg.validadeLeiturasDias));
+    apply(K_RETORNOS, v => pruneRetornos(v, now));
+    return { all: out, removidos };
   }
 
   // ---- medição ----
+  const len = l => (Array.isArray(l) ? l.length : 0);
+  function contar(key, v) {
+    if (key === K_CONTATOS && isObj(v)) return Object.values(v).reduce((n, a) => n + (isObj(a) ? Object.values(a).reduce((m, l) => m + len(l), 0) : 0), 0);
+    if ((key === K_RETORNOS || key === K_LEITURAS) && isObj(v)) return Object.values(v).reduce((n, l) => n + len(l), 0);
+    if (key === K_MODELOS && isObj(v)) return len(v.itens);
+    return 0;
+  }
   function usage(all) {
     const cats = new Map();
     for (const k of KEYS) {
@@ -67,7 +105,7 @@
       const c = cats.get(k.categoria) || { categoria: k.categoria, bytes: 0, itens: 0, rotulo: k.rotulo };
       c.bytes += bytesOf(all[k.key]);
       const v = all[k.key];
-      if (k.key === 'hub.contatos.v1' && isObj(v)) c.itens += Object.values(v).reduce((n, a) => n + (isObj(a) ? Object.values(a).reduce((m, l) => m + (Array.isArray(l) ? l.length : 0), 0) : 0), 0);
+      c.itens += contar(k.key, v);
       cats.set(k.categoria, c);
     }
     const total = [...cats.values()].reduce((n, c) => n + c.bytes, 0);
@@ -99,7 +137,7 @@
     void m;
     return { ok: true, dados, criadoEm: j.criadoEm || '', versao: j.versao || '', resumo: usage(dados) };
   }
-  const pick = c => { const o = {}; if (Number.isFinite(c.validadeContatosDias) && c.validadeContatosDias >= 0 && c.validadeContatosDias <= 3650) o.validadeContatosDias = Math.floor(c.validadeContatosDias); return o; };
+  const pick = c => { const o = {}; for (const k of ['validadeContatosDias', 'validadeLeiturasDias']) if (Number.isFinite(c[k]) && c[k] >= 0 && c[k] <= 3650) o[k] = Math.floor(c[k]); return o; };
   // junta os contatos do backup com os atuais (sem duplicar), respeitando o limite por aluno
   function mergeContatos(atual, novo, keep = 5) {
     const out = {};
@@ -117,11 +155,28 @@
     }
     return out;
   }
+  const mergeListas = (atual, novo, chave, max) => {
+    const out = {};
+    for (const src of [atual, novo]) {
+      if (!isObj(src)) continue;
+      for (const [curso, lista] of Object.entries(src)) {
+        const base = out[curso] || []; const seen = new Set(base.map(chave));
+        out[curso] = [...base, ...(Array.isArray(lista) ? lista : []).filter(x => isObj(x) && !seen.has(chave(x)) && seen.add(chave(x)))];
+      }
+    }
+    for (const c of Object.keys(out)) { out[c].sort((a, b) => String(a.at || a.em).localeCompare(String(b.at || b.em))); if (max) out[c] = out[c].slice(-max); }
+    return out;
+  };
+  const mergeModelos = (atual, novo) => { const itens = [...(isObj(atual) && Array.isArray(atual.itens) ? atual.itens : [])]; const ids = new Set(itens.map(m => m.id)); for (const m of (isObj(novo) && Array.isArray(novo.itens) ? novo.itens : [])) if (isObj(m) && m.id && !ids.has(m.id)) { itens.push(m); ids.add(m.id); } return { itens }; };
   function applyImport(all, dados, modo) {
     const out = { ...all };
     for (const [k, v] of Object.entries(dados)) {
       if (k === CONFIG_KEY) out[k] = { ...configOf(all), ...v };
-      else if (k === 'hub.contatos.v1') out[k] = modo === 'substituir' ? v : mergeContatos(all[k], v);
+      else if (modo === 'substituir') out[k] = v;
+      else if (k === K_CONTATOS) out[k] = mergeContatos(all[k], v);
+      else if (k === K_RETORNOS) out[k] = mergeListas(all[k], v, r => `${r.aluno}|${r.em}`);
+      else if (k === K_LEITURAS) out[k] = mergeListas(all[k], v, r => String(r.at), 12);
+      else if (k === K_MODELOS) out[k] = mergeModelos(all[k], v);
       else out[k] = v;
     }
     return out;
@@ -140,9 +195,11 @@
     if (!m.futuro && (m.mudou || removidos)) await a.set(Object.fromEntries(Object.entries(cur).filter(([k]) => ownKeys().includes(k))));
     return { all: cur, mudou: m.mudou, removidos, futuro: m.futuro };
   }
+  async function getKey(key, a = area()) { if (!a || !known(key)) return undefined; const o = await a.get([key]); return o[key]; }
+  async function setKey(key, value, a = area()) { if (!a || !known(key)) throw new Error('Chave de armazenamento desconhecida.'); await a.set({ [key]: value }); }
   async function clearAll(a = area()) { if (!a) return; await a.remove(KEYS.map(k => k.key)); }
   async function saveConfig(cfg, a = area()) { if (!a) return; const all = await readAll(a); await a.set({ [CONFIG_KEY]: { ...configOf(all), ...pick(cfg) } }); }
   async function writeImport(all, a = area()) { if (!a) return; await a.set(Object.fromEntries(Object.entries(all).filter(([k]) => ownKeys().includes(k)))); }
 
-  ALN.storage = { SCHEMA, QUOTA, AVISO, KEYS, VALIDADES, DEFAULT_CONFIG, META_KEY, CONFIG_KEY, migrate, configOf, prune, pruneContatos, usage, fmtBytes, exportBackup, parseBackup, mergeContatos, applyImport, init, readAll, clearAll, saveConfig, writeImport };
+  ALN.storage = { SCHEMA, QUOTA, AVISO, KEYS, K_CONTATOS, K_MODELOS, K_RETORNOS, K_LEITURAS, VALIDADES, VALIDADES_LEITURAS, hoje, getKey, setKey, pruneLeituras, pruneRetornos, DEFAULT_CONFIG, META_KEY, CONFIG_KEY, migrate, configOf, prune, pruneContatos, usage, fmtBytes, exportBackup, parseBackup, mergeContatos, applyImport, init, readAll, clearAll, saveConfig, writeImport };
 })(globalThis);

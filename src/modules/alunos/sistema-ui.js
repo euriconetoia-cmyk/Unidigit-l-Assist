@@ -92,6 +92,8 @@ label.fld{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:13px
       const say = (texto, tipo) => { msg.textContent = texto; msg.className = `msg ${tipo || ''}`; msg.hidden = false; };
       const sel = h('select', { 'aria-label': 'Validade dos contatos', onchange: async e => { await S.saveConfig({ validadeContatosDias: Number(e.target.value) }); say('Validade salva. Registros mais antigos saem na próxima abertura.', 'ok'); } },
         S.VALIDADES.map(v => h('option', { value: String(v.dias), selected: v.dias === cfg.validadeContatosDias ? true : null }, v.rotulo)));
+      const selL = h('select', { 'aria-label': 'Validade das leituras', onchange: async e => { await S.saveConfig({ validadeLeiturasDias: Number(e.target.value) }); say('Validade salva. Leituras mais antigas saem na próxima abertura.', 'ok'); } },
+        S.VALIDADES_LEITURAS.map(v => h('option', { value: String(v.dias), selected: v.dias === cfg.validadeLeiturasDias ? true : null }, v.rotulo)));
       const pct = Math.max(u.total ? 1 : 0, Math.round(u.fracao * 100));
       const file = h('input', { type: 'file', accept: '.json,application/json', hidden: true });
       file.addEventListener('change', async () => {
@@ -110,7 +112,7 @@ label.fld{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:13px
         ...(u.categorias.length ? u.categorias.map(c => h('div', { class: 'it' }, h('b', {}, c.categoria), h('small', {}, c.itens ? `${c.itens} registro(s)` : c.rotulo), h('span', { class: 'pill' }, S.fmtBytes(c.bytes)))) : [h('div', { class: 'it' }, h('b', {}, 'Nada guardado ainda'), h('small', {}, 'os contatos aparecem aqui depois do primeiro envio'))]),
         h('div', { class: u.aviso ? 'bar hot' : 'bar', role: 'img', 'aria-label': `Uso ${pct}%` }, h('i', { style: `width:${Math.min(100, pct)}%` })),
         h('p', { class: 'sub' }, `Uso: ${S.fmtBytes(u.total)} de ${S.fmtBytes(u.quota)} (${pct}%). Aviso a partir de 70%.${u.aviso ? ' O limite está chegando: exporte um backup e apague o que não precisa.' : ''}`),
-        h('label', { class: 'fld' }, 'Contatos expiram em ', sel),
+        h('label', { class: 'fld' }, 'Contatos expiram em ', sel), h('label', { class: 'fld' }, 'Leituras do comparativo expiram em ', selL),
         msg, file,
         h('div', { class: 'row2' },
           h('button', { type: 'button', class: 'pri', onclick: async () => { const n = Date.now(); saveFile(`unidigital-assist-backup-${stamp(n)}.json`, S.exportBackup(await S.readAll(), n, version()), 'application/json'); say('Backup baixado.', 'ok'); } }, 'Exportar backup'),

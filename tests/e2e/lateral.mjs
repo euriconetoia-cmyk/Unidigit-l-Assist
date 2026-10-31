@@ -277,6 +277,61 @@ try {
   await shadow('.modal .btn:has-text("Fechar")').click();
 
 
+  // ---- 0.15: retornos, modelos de mensagem e comparativo ----
+  await shadow('nav button:has-text("Acompanhamento")').click();
+  check('o 1º envio já agendou o retorno padrão (7 dias): aparece em "Próximos" do painel de retornos', await shadow('.rbox').count() === 1 && new RegExp(nomeAluno.split(' ')[0]).test(await shadow('.rbox').textContent()) && /Próximos/.test(await shadow('.rbox').textContent()), await shadow('.rbox').count() ? await shadow('.rbox').textContent() : 'sem .rbox');
+  await shadow('.bar button:has-text("Modelos")').click();
+  await shadow('.modal select').first().waitFor();
+  check('Modelos: abre com 3 modelos padrão e os campos para inserir', (await shadow('.modal select').first().locator('option').count()) === 3 && (await shadow('.modal .chips button').count()) === 5);
+  await shadow('.modal select').first().selectOption('nota-baixa');
+  await shadow('.modal select[aria-label="Usar automaticamente"]').selectOption('nota');
+  await shadow('.modal .btn.pri:has-text("Salvar modelo")').click();
+  await shadow('.modal .res.ok').waitFor();
+  await pg.screenshot({ path: path.join(SHOTS, '60-modelos.png') });
+  await shadow('.modal .btn:has-text("Fechar")').click();
+  await shadow('tbody tr:has-text("Fábio Rocha") button').first().click();
+  await shadow('.modal textarea').waitFor();
+  check('modelo marcado como padrão para "nota" já vem escolhido e preenchido com os dados do aluno', (await shadow('.modal select[aria-label="Modelo de mensagem"]').inputValue()) === 'nota-baixa' && /^Olá, Fábio, tudo bem\? Na UC .+, a sua nota atual é 31/.test(await shadow('.modal textarea').inputValue()), await shadow('.modal textarea').inputValue());
+  await shadow('.modal select[aria-label="Modelo de mensagem"]').selectOption('pendentes');
+  await shadow('.modal label:has-text("Revisei") input').check();
+  check('modelo com campo sem dado ({pendencias} sem entregas lidas): o campo fica visível, avisa e TRAVA o envio', /\{pendencias\}/.test(await shadow('.modal textarea').inputValue()) && /não foi lido/.test(await shadow('.modal p[role="status"]').textContent()) && await shadow('.modal .btn.pri').isDisabled());
+  await pg.screenshot({ path: path.join(SHOTS, '61-modelo-campo-faltando.png') });
+  await shadow('.modal select[aria-label="Modelo de mensagem"]').selectOption('sem-acesso');
+  const antesM = state.sent.length;
+  await shadow('.modal select[aria-label="Ver de novo em"]').selectOption('3');
+  check('outro modelo, sem campo faltando: libera o envio', /último acesso foi há 23 dias/.test(await shadow('.modal textarea').inputValue()) && !(await shadow('.modal .btn.pri').isDisabled()));
+  await shadow('.modal .btn.pri').click();
+  await shadow('.modal .res.ok').waitFor({ timeout: 8000 });
+  check('envia com o modelo e agenda o retorno em 3 dias (dito no resultado)', state.sent.length === antesM + 1 && /Retorno em \d\d\/\d\d\./.test(await shadow('.modal .res').textContent()));
+  await shadow('.modal .btn:has-text("Fechar")').click();
+  check('o painel de retornos mostra o aluno agendado', /Fábio Rocha/.test(await shadow('.rbox').textContent()));
+
+  // retorno que vence hoje, comparativo com leitura de 7 dias atrás (guardados direto no armazenamento da extensão)
+  await sw.evaluate(async () => {
+    const d = new Date(); const hoje = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const r = (await chrome.storage.local.get('uas.retornos'))['uas.retornos'] || {};
+    r['ead.senai.br:7'] = [...(r['ead.senai.br:7'] || []), { aluno: 'id:13', em: hoje, criado: hoje, feito: null }];
+    const l = (await chrome.storage.local.get('uas.leituras'))['uas.leituras'] || {};
+    const prev = { at: new Date(Date.now() - 7 * 86400000).toISOString(), n: 6, media: 60, a: { 'id:11': [92, 1, null], 'id:12': [81, 2, null], 'id:13': [52, 3, null], 'id:14': [51, 10, null], 'id:15': [31, 20, null], 'id:16': [74, 5, null] } };
+    l['ead.senai.br:7'] = [prev, ...(l['ead.senai.br:7'] || [])];
+    await chrome.storage.local.set({ 'uas.retornos': r, 'uas.leituras': l });
+  });
+  await pg.keyboard.press('Escape');
+  await pg.click('#hub-ead-launcher .tab');
+  await pg.click('#hub-ead-launcher .app[data-app="acompanhamento"]');
+  await shadow('.rbox').waitFor();
+  check('"Retornos de hoje": o retorno que vence hoje aparece com Feito e Adiar', /Retornos de hoje \(1\)/.test(await shadow('.rbox').textContent()) && /Camila Ferreira/.test(await shadow('.rbox').textContent()) && await shadow('.rbox button:has-text("Adiar 3 dias")').count() === 1);
+  await shadow('details.cmpbox').waitFor();
+  await shadow('details.cmpbox summary').click();
+  const cmp = await shadow('details.cmpbox').textContent();
+  check('Comparativo: resume quem piorou/melhorou e mostra a variação por aluno (Camila +6, Diego −4)', /piorou/.test(cmp) && /melhorou/.test(cmp) && /Camila Ferreira[\s\S]*58 \(\+6\)/.test(cmp) && /Diego Martins[\s\S]*47 \(-4\)/.test(cmp), cmp.slice(0, 300));
+  await pg.screenshot({ path: path.join(SHOTS, '62-retornos-comparativo.png') });
+  check('o comparativo não guarda nome nem e-mail (só números)', await sw.evaluate(async () => { const t = JSON.stringify((await chrome.storage.local.get('uas.leituras'))['uas.leituras']); return !/Camila|@exemplo|Fábio/.test(t); }));
+  await shadow('.rbox button:has-text("Feito")').first().click();
+  check('"Feito" tira o retorno da lista de hoje', !/Retornos de hoje \(1\)/.test(await shadow('.rbox').textContent()));
+  await sw.evaluate(() => chrome.storage.local.remove('uas.modelos')); // volta aos modelos padrão para os próximos testes
+
+
   await shadow('nav button:has-text("Relatório da UC")').click();
   const rel = await shadow('.body').textContent();
   check('Relatório da UC: faixa-resumo (média 63,8), filtros "Ver" e resumo por atividade', /63,8/.test(rel) && /média da turma/.test(rel) && /Precisam de atenção/.test(rel) && /Resumo por atividade/.test(rel));
@@ -350,7 +405,7 @@ try {
   await shadow('.modal .pend label:has-text("AV3") input').uncheck();
   const msg2 = await shadow('.modal textarea').inputValue();
   check('desmarcar uma atividade tira só ela do texto', !/AV3 Serviços/.test(msg2) && /AV2 Endereçamento/.test(msg2));
-  check('nada foi enviado nessa conferência', state.sent.length === totalDepoisFila);
+  check('nada foi enviado nessa conferência', state.sent.length === totalDepoisFila + 1); // +1: a mensagem com modelo enviada no bloco da 0.15
   await shadow('.modal .btn:has-text("Cancelar")').click().catch(async () => { await pg.keyboard.press('Escape'); });
   // ---- exportar HTML ----
   await shadow('.bar .btn:has-text("Voltar")').click();
@@ -409,7 +464,7 @@ try {
   await sis('h2').waitFor();
   const sobre = await sis('.box').textContent();
   const link = await sis('a:has-text("Ver se há versão nova")').getAttribute('href');
-  check('Sobre: mostra a versão, os créditos e abre só a página de versões do GitHub', /0\.14\.0/.test(sobre) && /Julio Alves/.test(sobre) && /github\.com\/euriconetoia-cmyk\/Unidigit-l-Assist\/releases$/.test(link));
+  check('Sobre: mostra a versão, os créditos e abre só a página de versões do GitHub', /0\.15\.0/.test(sobre) && /Julio Alves/.test(sobre) && /github\.com\/euriconetoia-cmyk\/Unidigit-l-Assist\/releases$/.test(link));
   await pg.screenshot({ path: path.join(SHOTS, '41-sobre.png') });
   await sis('button:has-text("Fechar")').click();
 
@@ -430,7 +485,7 @@ try {
   await pg.locator('#hub-aln-sistema >> input[type=file]').setInputFiles(bom);
   await sis('button:has-text("Juntar")').click();
   await sis('.msg.ok').waitFor();
-  check('Importar backup válido: aparece em Contatos e a validade vira 6 meses', /Contatos/.test(await sis('.box').textContent()) && /registro\(s\)/.test(await sis('.box').textContent()) && (await sis('select').inputValue()) === '180');
+  check('Importar backup válido: aparece em Contatos e a validade vira 6 meses', /Contatos/.test(await sis('.box').textContent()) && /registro\(s\)/.test(await sis('.box').textContent()) && (await sis('select[aria-label="Validade dos contatos"]').inputValue()) === '180');
   await pg.screenshot({ path: path.join(SHOTS, '42-meus-dados.png') });
   await sis('button:has-text("Apagar tudo")').click();
   check('Apagar tudo pede confirmação antes de apagar', /Não dá para desfazer/.test(await sis('#apagar').textContent()));

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.15.0 — 2026-10-31
+
+### Novo
+- **Modelos de mensagem** (Acompanhamento → Modelos): textos prontos com campos **{nome}**, **{uc}**, **{nota}**, **{dias_sem_acesso}** e **{pendencias}**, usados na mensagem individual e na **fila**. Vêm 3 modelos padrão; você cria, edita e exclui, e pode marcar um para ser escolhido sozinho quando o risco for por falta de acesso ou por nota. **Campo sem dado nunca vira vazio nem zero**: ele continua visível no texto, a tela avisa e o envio fica travado até você completar à mão ou trocar de modelo (na fila, o aluno sai da seleção).
+- **Retornos agendados**: ao enviar, “Ver de novo em” (3, 7 ou 14 dias, data ou não agendar; padrão 7). O painel **Retornos de hoje** (no Acompanhamento) lista o que vence hoje ou está atrasado, com **Feito** e **Adiar 3 dias**, e os próximos. Só a chave do aluno e as datas ficam guardadas, neste navegador, sem notificações.
+- **Comparativo entre leituras**: cada leitura guarda um instantâneo **só com números** (nota, dias sem acesso, pendências, sem nome nem e-mail); o Acompanhamento mostra “desde a leitura de DD/MM”: quantos pioraram/melhoraram, variação da média e a tabela por aluno. Até 12 leituras por UC; leituras seguidas em 10 minutos viram uma só.
+- **Meus dados**: novas categorias (Modelos, Retornos, Leituras) medidas, exportadas no backup e apagáveis; nova validade “Leituras do comparativo” (padrão 12 semanas).
+
+### Interno
+- O registro de contato passa a anotar qual modelo foi usado (`modelo`); o texto enviado continua guardado como antes.
+- Sem permissão nova.
+
 ## 0.14.0 — 2026-10-31
 
 ### Novo

@@ -110,5 +110,5 @@
     delete memory[courseKey(course)];
   }
 
-  ALN.messenger = { studentId, buildMessage, sesskeyFromDoc, send, loadLog, addLog, clearLog, MAX_TEXT };
+  ALN.messenger = { courseKey, studentId, buildMessage, sesskeyFromDoc, send, loadLog, addLog, clearLog, MAX_TEXT };
 })(globalThis);
