@@ -43,7 +43,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
     shadow.append(h('style', {}, CSS));
     const courses = ALN.turma.detectCourses(root.document, root.location.origin);
     const sel = new Set();
-    const st = { q: '', running: false, ctl: null, status: new Map(), result: null };
+    const st = { q: '', reports: new Map(), failed: new Map(), running: false, ctl: null, status: new Map(), result: null };
     const box = h('div', { class: 'box', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Relatório da turma' });
     const back = h('div', { class: 'back', onclick: e => { if (e.target === back && !st.running) close(); } }, box);
     shadow.append(back);
@@ -69,22 +69,39 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
           const chk = h('input', { type: 'checkbox', checked: sel.has(c.id), disabled: st.running, onchange: e => { if (e.target.checked) sel.add(c.id); else sel.delete(c.id); draw(); } });
           return h('div', { class: `it${sel.has(c.id) ? ' on' : ''}` }, h('label', {}, chk, h('b', {}, c.name), c.category ? h('small', {}, c.category) : null), s ? h('span', { class: `st ${s.tone}` }, s.text) : null);
         }) : [h('div', { class: 'empty' }, `Nenhum curso encontrado para “${st.q.trim()}”.`)]));
-        go.disabled = st.running || !countOn();
       }
-      const go = h('button', { class: 'pri', type: 'button', onclick: generate }, 'Gerar relatório');
       searchIn.addEventListener('input', () => { st.q = searchIn.value; refresh(); });
       box.append(searchIn, barEl, listEl);
       refresh();
       if (st.running) box.append(h('div', { class: 'prog', role: 'progressbar', 'aria-label': 'Progresso' }, h('i', { style: `width:${st.pct || 0}%` })), h('div', { class: 'msg', role: 'status', 'aria-live': 'polite' }, st.msg || 'Lendo…'));
       if (st.result) box.append(h('div', { class: `msg ${st.result.tone}`, role: 'status' }, st.result.text));
-      box.append(h('div', { class: 'row2' }, st.running ? h('button', { type: 'button', onclick: cancel }, 'Cancelar') : h('button', { type: 'button', onclick: close }, 'Fechar'), st.running ? null : go));
+      const pend = st.running ? [] : pendentes(); const lidas = courses.filter(c => sel.has(c.id) && st.reports.has(c.id)).length;
+      box.append(h('div', { class: 'row2' }, st.running ? h('button', { type: 'button', onclick: cancel }, 'Cancelar') : h('button', { type: 'button', onclick: close }, 'Fechar'),
+        !st.running && pend.length ? h('button', { type: 'button', class: 'pri', onclick: () => generate(pend.map(c => c.id)) }, `Tentar só as não verificadas (${pend.length})`) : null,
+        !st.running && pend.length && lidas ? h('button', { type: 'button', onclick: baixar }, 'Baixar Excel assim mesmo') : null,
+        st.running || pend.length ? null : h('button', { class: 'pri', type: 'button', disabled: !countOn(), onclick: () => generate() }, st.reports.size ? 'Ler de novo' : 'Gerar relatório')));
     }
 
-    async function generate() {
+    // Leituras já feitas nesta janela: id → { id, name, category, students, complete, reason }. Quem não leu fica em st.failed.
+    const pendentes = () => courses.filter(c => sel.has(c.id) && (st.failed.has(c.id) || (st.reports.has(c.id) && !st.reports.get(c.id).complete)));
+    function baixar() {
       const picked = courses.filter(c => sel.has(c.id));
+      const reports = picked.filter(c => st.reports.has(c.id)).map(c => { const r = st.reports.get(c.id); return { id: r.id, name: r.name, category: r.category, students: r.students }; });
+      if (!reports.length) return;
+      const failures = picked.filter(c => st.failed.has(c.id) || (st.reports.has(c.id) && !st.reports.get(c.id).complete)).map(c => ({ name: c.name, category: c.category, reason: (st.failed.get(c.id) || st.reports.get(c.id)).reason }));
+      const groups = ALN.turma.groupByTurma(reports); const day = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      saveXlsx(`relatorio-turma-${day}${groups.length === 1 ? `-${slug(groups[0].turma)}` : ''}.xlsx`, ALN.turma.buildSheets(reports, failures));
+      st.result = failures.length ? { tone: 'warn', text: `Excel gerado com ${reports.length} unidade(s) em ${groups.length} turma(s). Atenção: ${failures.length} unidade(s) sem leitura completa — veja a aba “Avisos”.` } : { tone: 'ok', text: `Excel gerado com ${reports.length} unidade(s) em ${groups.length} turma(s).` };
+      draw();
+    }
+
+    // only: lista de ids a (re)ler; vazio = todas as marcadas. O Excel só sai sozinho se tudo foi lido por completo.
+    async function generate(only) {
+      const picked = courses.filter(c => sel.has(c.id) && (!only || only.includes(c.id)));
       if (!picked.length || st.running) return;
-      st.running = true; st.ctl = new AbortController(); st.result = null; st.status = new Map(); draw();
-      const reports = [], failures = [];
+      st.running = true; st.ctl = new AbortController(); st.result = null;
+      if (!only) { st.reports = new Map(); st.failed = new Map(); st.status = new Map(); }
+      draw();
       try {
         for (let i = 0; i < picked.length; i++) {
           const c = picked[i];
@@ -93,22 +110,25 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
           try {
             const r = await ALN.reader.readGradebookFor({ id: c.id, name: c.name }, { signal: st.ctl.signal, onProgress: p => { st.msg = `Lendo ${i + 1} de ${picked.length} — ${c.name}: ${p.text || ''}`; const m = box.querySelector('.msg'); if (m) m.textContent = st.msg; } });
             const students = ALN.buildStudents({ gradebook: r.gradebook, participants: [] }, ALN.DEFAULTS);
-            reports.push({ id: c.id, name: c.name, category: c.category, students });
+            st.failed.delete(c.id);
+            st.reports.set(c.id, { id: c.id, name: c.name, category: c.category, students, complete: Boolean(r.complete), reason: r.complete ? '' : `Leitura parcial: ${r.warnings.join(' ') || 'conferir no Moodle'}` });
             st.status.set(c.id, { tone: r.complete ? 'ok' : 'go', text: r.complete ? `${students.length} alunos` : `${students.length} alunos (parcial)` });
-            if (!r.complete) failures.push({ name: c.name, category: c.category, reason: `Leitura parcial: ${r.warnings.join(' ') || 'conferir no Moodle'}` });
           } catch (e) {
             if (st.ctl.signal.aborted) throw e;
-            st.status.set(c.id, { tone: 'er', text: 'falhou' }); failures.push({ name: c.name, category: c.category, reason: e && e.message ? e.message : String(e) });
+            st.reports.delete(c.id);
+            st.failed.set(c.id, { reason: e && e.message ? e.message : String(e) });
+            st.status.set(c.id, { tone: 'er', text: 'não verificada' });
           }
           if (i < picked.length - 1) await ALN.reader.sleep(ALN.reader.SETTINGS.requestDelayMs);
         }
-        if (!reports.length) { st.result = { tone: 'err', text: `Nenhuma unidade pôde ser lida. ${failures.map(f => `${f.name}: ${f.reason}`).join(' | ')}` }; return; }
-        const turmas = ALN.turma.groupByTurma(reports).length;
-        const day = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-        saveXlsx(`relatorio-turma-${day}${turmas === 1 ? `-${slug(ALN.turma.groupByTurma(reports)[0].turma)}` : ''}.xlsx`, ALN.turma.buildSheets(reports, failures));
-        st.result = failures.length ? { tone: 'warn', text: `Excel gerado com ${reports.length} unidade(s) em ${turmas} turma(s). Atenção: ${failures.length} aviso(s) — veja a aba “Avisos”.` } : { tone: 'ok', text: `Excel gerado com ${reports.length} unidade(s) em ${turmas} turma(s).` };
+        const pend = pendentes();
+        if (!pend.length) { st.running = false; baixar(); return; }
+        const lidas = courses.filter(c => sel.has(c.id) && st.reports.has(c.id)).length;
+        st.result = lidas
+          ? { tone: 'warn', text: `Leitura incompleta: ${pend.length} unidade(s) não verificada(s) ou parcial(is). O Excel NÃO foi gerado. Tente só as não verificadas, ou baixe assim mesmo (as pendências vão para a aba “Avisos”).` }
+          : { tone: 'err', text: `Nenhuma unidade pôde ser lida. ${pend.map(c => `${c.name}: ${(st.failed.get(c.id) || {}).reason || 'parcial'}`).join(' | ')}` };
       } catch (e) {
-        st.result = { tone: 'warn', text: /cancel/i.test(String(e && e.message)) ? 'Leitura cancelada. Nenhum arquivo foi gerado.' : `Não foi possível gerar o relatório: ${e && e.message ? e.message : e}` };
+        st.result = { tone: 'warn', text: /cancel/i.test(String(e && e.message)) ? 'Leitura cancelada. Nenhum arquivo foi gerado; o que já foi lido continua aqui.' : `Não foi possível gerar o relatório: ${e && e.message ? e.message : e}` };
       } finally { st.running = false; st.ctl = null; draw(); }
     }
 

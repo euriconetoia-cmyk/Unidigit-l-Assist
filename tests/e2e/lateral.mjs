@@ -481,13 +481,28 @@ try {
   check('apagar a busca volta às 3 UCs e a seleção pode ser limpa', await tshadow('.list .it').count() === 3 && await tshadow('button.pri').isDisabled());
   await tshadow('button:has-text("Selecionar todas")').click();
   await pg.screenshot({ path: path.join(SHOTS, '32-turma-selecao.png') });
-  const [dlT] = await Promise.all([pg.waitForEvent('download', { timeout: 40000 }), tshadow('button.pri').click()]);
+  let baixouSozinho = 0; const contaDl = () => { baixouSozinho += 1; }; pg.on('download', contaDl);
+  await tshadow('button.pri').click();
+  await tshadow('button:has-text("Tentar só as não verificadas")').waitFor({ timeout: 40000 });
+  await sleep(500);
+  await pg.screenshot({ path: path.join(SHOTS, '33-turma-incompleta.png') });
+  check('leitura incompleta NÃO gera o Excel sozinha: avisa e oferece "Tentar só as não verificadas (1)" e "Baixar Excel assim mesmo"', baixouSozinho === 0 && /NÃO foi gerado/.test(await tshadow('.msg').last().textContent()) && /\(1\)/.test(await tshadow('button:has-text("Tentar só as não verificadas")').textContent()) && await tshadow('button:has-text("Baixar Excel assim mesmo")').count() === 1 && /não verificada/.test(await tshadow('.list').textContent()), `downloads=${baixouSozinho}`);
+  const gh2 = state.graderHits;
+  await tshadow('button:has-text("Tentar só as não verificadas")').click();
+  await tshadow('button:has-text("Tentar só as não verificadas")').waitFor({ timeout: 40000 });
+  check('"Tentar só as não verificadas" lê apenas a que faltava (as 2 lidas não são pedidas de novo)', state.graderHits === gh2 && baixouSozinho === 0, `${state.graderHits - gh2} consultas extras`);
+  const [dlT] = await Promise.all([pg.waitForEvent('download', { timeout: 40000 }), tshadow('button:has-text("Baixar Excel assim mesmo")').click()]);
   const tPath = path.join(SHOTS, 'turma.xlsx'); await dlT.saveAs(tPath);
   const tb = fs.readFileSync(tPath);
   await tshadow('.msg').last().waitFor();
   await pg.screenshot({ path: path.join(SHOTS, '33-turma-resultado.png') });
-  check('gera o Excel: uma aba por turma + Situação + Avisos (a UC que falhou)', /^relatorio-turma-.*\.xlsx$/.test(dlT.suggestedFilename()) && ['Téc. Redes · Turma A', 'Situação', 'Avisos', 'Redes de Computadores', 'Segurança em Redes'].every(t => tb.includes(Buffer.from(t))) && tb.includes(Buffer.from('Lógica de Programação')), dlT.suggestedFilename());
-  check('a UC que falhou não vira nota zero nem some: aparece em Avisos e as outras seguem', /falhou/.test(await tshadow('.list').textContent()) && state.graderHits - gh0 === 2 && /aviso/i.test(await tshadow('.msg').last().textContent()));
+  check('"Baixar assim mesmo": uma aba por turma + Situação + Avisos (a UC que falhou)', /^relatorio-turma-.*\.xlsx$/.test(dlT.suggestedFilename()) && ['Téc. Redes · Turma A', 'Situação', 'Avisos', 'Redes de Computadores', 'Segurança em Redes'].every(t => tb.includes(Buffer.from(t))) && tb.includes(Buffer.from('Lógica de Programação')), dlT.suggestedFilename());
+  check('a UC que falhou não vira nota zero nem some: aparece em Avisos e as outras seguem', /não verificada/.test(await tshadow('.list').textContent()) && state.graderHits - gh0 === 2 && /Atenção/i.test(await tshadow('.msg').last().textContent()));
+  state.modoMeus = false; // o Moodle voltou: agora a tentativa só da que faltava completa tudo e baixa sozinha
+  const [dlOk] = await Promise.all([pg.waitForEvent('download', { timeout: 40000 }), tshadow('button:has-text("Tentar só as não verificadas")').click()]);
+  await tshadow('button:has-text("Ler de novo")').waitFor({ timeout: 20000 });
+  check('depois que a pendente é lida, o Excel completo sai sozinho e sem a lista de pendências', /^relatorio-turma-/.test(dlOk.suggestedFilename()) && state.graderHits - gh0 === 3 && /Excel gerado com 3 unidade/.test(await tshadow('.msg').last().textContent()) && await tshadow('button:has-text("Tentar só")').count() === 0, `${state.graderHits - gh0} consultas`);
+  pg.off('download', contaDl);
   await tshadow('button:has-text("Fechar")').click();
   state.modoMeus = false;
 
