@@ -53,7 +53,7 @@ icons/          ícones da extensão
 
 ## Segurança e privacidade
 
-- Permissões mínimas: `scripting`, `storage`, `downloads` e os dois domínios do Moodle. Nenhum serviço externo, nenhum script remoto.
+- Permissões mínimas: `scripting`, `storage`, `downloads` e os dois domínios do Moodle (mais, **opcional e só se você aceitar**, `create.kahoot.it` para importar perguntas no Kahoot). Nenhum serviço externo, nenhum script remoto.
 - Dados de alunos ficam no navegador; relatórios exportados são arquivos locais. Veja [`PRIVACIDADE.md`](docs/projeto/PRIVACIDADE.md) e [`SECURITY.md`](.github/SECURITY.md).
 - **Estado de homologação:** testado em páginas simuladas; a validação no Moodle real do SENAI/FIEG é feita por versão e registrada no `CHANGELOG`.
 

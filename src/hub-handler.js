@@ -3,7 +3,7 @@ import { APPS } from './apps.js';
 
 export const ALLOWED_ORIGINS = ['https://ead.senai.br', 'https://ead.fieg.com.br'];
 
-export function createHandler({ host, runtimeId }) {
+export function createHandler({ host, runtimeId, abrirPagina }) {
   return async function handle(message, sender) {
     if (!message || message.type !== 'hub-open') return null; // não é conosco
     try {
@@ -14,6 +14,7 @@ export function createHandler({ host, runtimeId }) {
       const app = APPS.find(a => a.id === message.app);
       if (!app) throw new Error('Ferramenta desconhecida.');
       if (!app.disponivel) throw new Error(`${app.nome} ainda não está disponível.`);
+      if (app.pagina) { if (!abrirPagina) throw new Error('Esta ferramenta não está disponível aqui.'); await abrirPagina(app.pagina); return { ok: true, message: app.mensagem || 'Aberto em uma nova aba.' }; }
       const retomar = message.motivo === 'retomar' && Boolean(app.comandoRetomar);
       const value = await host.call(sender.tab.id, app.modulo, retomar ? app.comandoRetomar : app.comando, app.args || {});
       return { ok: true, message: (value && value.mensagem) || 'Pronto.' };

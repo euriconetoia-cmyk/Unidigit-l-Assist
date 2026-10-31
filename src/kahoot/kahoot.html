@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kahoot — Unidigit@l Assist</title>
+<style>
+:root{--p:#0b5cad;--m:#5b6b7c;--bd:#dbe3ec;--bg:#eef2f7;--s:#fff;--ok:#157a4c;--okbg:#e1f5ec;--er:#b3261e;--erbg:#fde8e5;--wn:#a86400;--wnbg:#fff3d6;--tx:#14202e;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--m:#9aa8bd;--bd:#2b3646;--bg:#11161d;--s:#1a212c;--okbg:#143a2b;--ok:#6fd0a0;--erbg:#3d1d1a;--er:#f2a29b;--wnbg:#3a2f12;--wn:#f0c36a;--tx:#e6ecf5}}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;place-items:start center;padding:32px 16px}
+main{width:min(560px,100%);background:var(--s);border-radius:14px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+h1{font-size:20px;margin:0 0 4px}p{margin:6px 0}.sub{color:var(--m)}
+.aviso{margin:14px 0;padding:12px 14px;border-radius:10px;background:var(--wnbg);color:var(--wn)}.aviso b{display:block;color:inherit}
+button{font:inherit;min-height:38px;padding:0 16px;border-radius:8px;border:1px solid var(--bd);background:var(--s);color:inherit;cursor:pointer;margin:4px 6px 4px 0}
+button.pri{background:var(--p);border-color:var(--p);color:#fff}button:focus-visible{outline:3px solid #f6b900;outline-offset:2px}
+.msg{margin-top:12px;padding:8px 10px;border-radius:8px}.msg.ok{background:var(--okbg);color:var(--ok)}.msg.err{background:var(--erbg);color:var(--er)}
+table{border-collapse:collapse;width:100%;margin-top:10px;font-size:13px}td{padding:5px 8px;border-bottom:1px solid var(--bd)}td+td{color:#157a4c;font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <h1>Importar perguntas no Kahoot</h1>
+  <p class="sub">Unidigit@l Assist · preenche o editor do Kahoot com as perguntas de um arquivo CSV, quando você pede.</p>
+
+  <section id="sem" hidden>
+    <div class="aviso"><b>Permitir que o Unidigit@l Assist acesse create.kahoot.it?</b>
+      Usado apenas para preencher o editor quando você clicar em Importar. Pode revogar a qualquer momento em chrome://extensions.</div>
+    <button type="button" class="pri" id="permitir">Permitir</button><button type="button" id="agoraNao">Agora não</button>
+    <p class="sub">Sem permitir, nada acontece no Kahoot e o resto da extensão segue igual.</p>
+    <table><tr><td>Sites fixos</td><td>só os dois Moodles</td></tr><tr><td>Kahoot</td><td>opcional, só se você permitir</td></tr><tr><td>Dados saem do navegador</td><td>nunca</td></tr></table>
+  </section>
+
+  <section id="com" hidden>
+    <p>Permissão concedida. Escolha como continuar:</p>
+    <button type="button" class="pri" id="abrir">Abrir o Kahoot e preparar</button>
+    <div id="abas"></div>
+    <p class="sub" id="semAbas">Nenhuma aba do editor do Kahoot aberta agora. Se já estiver com um quiz aberto, <button type="button" id="reler">procurar de novo</button></p>
+  </section>
+  <div id="msg" class="msg" role="status" aria-live="polite" hidden></div>
+</main>
+<script src="kahoot.js"></script>
+</body>
+</html>

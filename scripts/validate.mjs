@@ -39,6 +39,8 @@ const cs = manifest.content_scripts || [];
 if (cs.length !== 1 || JSON.stringify(cs[0].js) !== JSON.stringify(['launcher.js']) || JSON.stringify(cs[0].matches) !== JSON.stringify(ALLOWED_HOSTS)) fail('content_scripts deve ter só o launcher.js, nos dois hosts do Moodle; os módulos entram por injeção sob demanda');
 if (cs[0] && cs[0].all_frames) fail('o launcher não pode rodar em subframes');
 if (manifest.optional_permissions && manifest.optional_permissions.length) fail('optional_permissions precisa de decisão registrada');
+// Única exceção registrada (rules.md, 0.14.0): o Kahoot, como permissão de site OPCIONAL pedida no clique, sem content script lá.
+if (JSON.stringify(manifest.optional_host_permissions || []) !== JSON.stringify(['https://create.kahoot.it/*'])) fail('optional_host_permissions deve ser exatamente ["https://create.kahoot.it/*"] (decisão de 31/10/2026)');
 if (manifest.content_security_policy) fail('não altere a CSP padrão (sem unsafe-eval)');
 
 for (const f of [manifest.background && manifest.background.service_worker, 'launcher.js', ...(withBlocos ? [manifest.side_panel.default_path, 'sidepanel.js', 'sidepanel.css', 'media/sprites.svg'] : [])]) {
@@ -55,13 +57,18 @@ if (fs.existsSync(path.join(ext, 'modules/alunos/vendor/origem.json'))) {
   if (!o.versao) fail('origem.json do módulo alunos sem versão');
 }
 
+const kahoot = JSON.parse(read('modules/kahoot/files.json'));
+for (const f of [...kahoot.scripts, 'bridge.js']) if (!fs.existsSync(path.join(ext, 'modules/kahoot', f))) fail(`arquivo do módulo kahoot ausente: ${f}`);
+for (const f of ['kahoot.html', 'kahoot.js']) if (!fs.existsSync(path.join(ext, f))) fail(`arquivo ausente: ${f}`);
+if (/<script(?![^>]*\bsrc=["'][a-z.]+["'])[^>]*>[\s\S]*?<\/script>/i.test(read('kahoot.html')) || /<script[^>]*src=["']https?:/i.test(read('kahoot.html'))) fail('kahoot.html: só script local por arquivo (sem inline nem remoto)');
+if (/\bfetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon/.test(kahoot.scripts.map(f => read(`modules/kahoot/${f}`)).join('\n'))) fail('o módulo kahoot não pode usar rede');
 const nov = read('modules/alunos/novidades.js');
 if (!new RegExp(`versao: '${manifest.version.replace(/\./g, '\\.')}'`).test(nov)) fail(`novidades.js: a primeira entrada deve ser a versão ${manifest.version}`);
 
 const BANNED = [[/\beval\s*\(/, 'eval('], [/new\s+Function\s*\(/, 'new Function('], [/document\.write\s*\(/, 'document.write('], [/\bsetTimeout\s*\(\s*['"`]/, 'setTimeout(string)'], [/\balert\s*\(|\bconfirm\s*\(|\bprompt\s*\(/, 'alert/confirm/prompt'], [/https?:\/\/(?!ead\.senai\.br|ead\.fieg\.com\.br|www\.w3\.org|github\.com\/google\/blockly)[^"'\s)]+\.js/, 'script remoto']];
 const NO_NETWORK = /\bfetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon/;
 if (NO_NETWORK.test(read('launcher.js'))) fail('launcher.js não pode consultar nada (só desenha o botão)');
-for (const file of ['launcher.js', 'background.js', 'modules/importar-notas/bridge.js', ...files.scripts.map(f => `modules/importar-notas/vendor/${f}`), 'modules/alunos/bridge.js', ...alunos.scripts.map(f => `modules/alunos/${f}`)]) {
+for (const file of ['launcher.js', 'background.js', 'modules/importar-notas/bridge.js', ...files.scripts.map(f => `modules/importar-notas/vendor/${f}`), 'modules/alunos/bridge.js', ...alunos.scripts.map(f => `modules/alunos/${f}`), 'modules/kahoot/bridge.js', ...kahoot.scripts.map(f => `modules/kahoot/${f}`), 'kahoot.js']) {
   const text = read(file);
   for (const [re, label] of BANNED) if (re.test(text)) fail(`${file}: padrão proibido ${label}`);
 }

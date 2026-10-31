@@ -6,10 +6,13 @@ Nada roda sem o usuário pedir (clique numa ferramenta do menu lateral; no futur
 ## Fazer
 - Executor percorre o JSON do workspace; **proibido** gerar código JavaScript e executá-lo (`eval`, `new Function`, `setTimeout(string)`).
 - Limites no executor: máximo de passos por execução, de repetições e de espera; Parar interrompe entre blocos e durante esperas.
-- Módulo só é injetado quando um bloco em execução o usa; injeção só em `ead.senai.br` e `ead.fieg.com.br`.
+- Módulo só é injetado quando um bloco em execução ou um clique o usa; injeção só em `ead.senai.br` e `ead.fieg.com.br` (e, para o módulo Kahoot, em `create.kahoot.it` depois da permissão opcional).
 - Erro de leitura = o bloco falha com mensagem; nunca vira "zero".
 - Todo texto de página/arquivo no DOM via `textContent` (sem `innerHTML` com dado externo).
 - Depois de alterar código: `npm test`, `npm run build`, `npm run validate`.
+
+## Exceção registrada: Kahoot (0.14.0, decisão de 31/10/2026)
+O manifest declara `optional_host_permissions: ["https://create.kahoot.it/*"]` (e **nenhum** content script nesse site). A permissão só é pedida quando o usuário clica em Kahoot → Permitir, numa página da própria extensão (`kahoot.html`), e pode ser revogada em `chrome://extensions`. O módulo `kahoot` só é injetado em `create.kahoot.it`, depois dessa permissão e do clique; o CSV é lido localmente e nunca enviado a lugar nenhum. O validador aceita exatamente esse host opcional e mais nenhum.
 
 ## Nunca
 - Permissão ou host além de: `sidePanel`, `scripting`, `storage`, `downloads` e os dois hosts do Moodle, sem decisão registrada em `memory.md` (o validador falha).

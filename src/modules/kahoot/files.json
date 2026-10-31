@@ -1,0 +1,4 @@
+{
+  "scripts": ["namespace.js", "parse.js", "filler.js", "ui.js"],
+  "css": []
+}

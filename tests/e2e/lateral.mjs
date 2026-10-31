@@ -13,7 +13,11 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const { chromium } = require(path.join(execSync('npm root -g').toString().trim(), 'playwright'));
 
-const EXT = path.resolve(process.argv[2] || path.join(here, '..', '..', 'dist', 'ext'));
+const EXT_REAL = path.resolve(process.argv[2] || path.join(here, '..', '..', 'dist', 'ext'));
+// O aviso de permissão do Chrome não é automatizável: o teste usa uma CÓPIA do pacote com o host do Kahoot já concedido (o resto é idêntico).
+const EXT = fs.mkdtempSync(path.join(os.tmpdir(), 'ext-e2e-'));
+fs.cpSync(EXT_REAL, EXT, { recursive: true });
+{ const mf = path.join(EXT, 'manifest.json'); const m = JSON.parse(fs.readFileSync(mf, 'utf8')); m.host_permissions.push(...m.optional_host_permissions); delete m.optional_host_permissions; fs.writeFileSync(mf, JSON.stringify(m)); }
 const SHOTS = path.resolve(process.argv[3] || fs.mkdtempSync(path.join(os.tmpdir(), 'blocos-e2e-')));
 fs.mkdirSync(SHOTS, { recursive: true });
 const ORIGIN = 'https://ead.senai.br';
@@ -90,13 +94,15 @@ try {
   await pg.screenshot({ path: path.join(SHOTS, '1-botao-fechado.png') });
 
   await pg.click('#hub-ead-launcher .tab');
-  const names = await pg.locator('#hub-ead-launcher .app b').allTextContents();
-  check('o menu lista as 10 ferramentas na ordem do mockup', JSON.stringify(names) === JSON.stringify(['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Compatibilidade', 'Meus dados', 'Sobre', 'Automação por blocos']), JSON.stringify(names));
+  const names = await pg.locator('#hub-ead-launcher [data-view="main"] .app b').allTextContents();
+  check('o menu principal lista 6 ferramentas + Ferramentas (gaveta)', JSON.stringify(names) === JSON.stringify(['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Ferramentas']), JSON.stringify(names));
   await sleep(900);
   await pg.screenshot({ path: path.join(SHOTS, '2-menu-aberto.png') });
 
+  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
   await pg.click('#hub-ead-launcher .app[data-app="blocos"]', { force: true });
   check('ferramenta "em breve" explica e não faz nada', /ainda não está disponível/.test(await pg.locator('#hub-ead-launcher .status').textContent()) && await pg.locator('.imn-bar').count() === 0);
+  await pg.click('#hub-ead-launcher .voltar');
 
   await pg.click('#hub-ead-launcher .app[data-app="pendencias"]');
   await pg.waitForSelector('.imn-bar', { timeout: 15000 });
@@ -387,6 +393,7 @@ try {
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
   const gh1 = state.graderHits, uh1 = state.usersHits;
   await pg.click('#hub-ead-launcher .tab');
+  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
   await pg.click('#hub-ead-launcher .app[data-app="compat"]');
   await pg.waitForSelector('#hub-aln-sistema', { state: 'attached', timeout: 15000 });
   const sis = sel => pg.locator(`#hub-aln-sistema >> ${sel}`);
@@ -397,15 +404,17 @@ try {
   await sis('button:has-text("Fechar")').click();
 
   await pg.click('#hub-ead-launcher .tab');
+  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
   await pg.click('#hub-ead-launcher .app[data-app="sobre"]');
   await sis('h2').waitFor();
   const sobre = await sis('.box').textContent();
   const link = await sis('a:has-text("Ver se há versão nova")').getAttribute('href');
-  check('Sobre: mostra a versão, os créditos e abre só a página de versões do GitHub', /0\.13\.0/.test(sobre) && /Julio Alves/.test(sobre) && /github\.com\/euriconetoia-cmyk\/Unidigit-l-Assist\/releases$/.test(link));
+  check('Sobre: mostra a versão, os créditos e abre só a página de versões do GitHub', /0\.14\.0/.test(sobre) && /Julio Alves/.test(sobre) && /github\.com\/euriconetoia-cmyk\/Unidigit-l-Assist\/releases$/.test(link));
   await pg.screenshot({ path: path.join(SHOTS, '41-sobre.png') });
   await sis('button:has-text("Fechar")').click();
 
   await pg.click('#hub-ead-launcher .tab');
+  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
   await pg.click('#hub-ead-launcher .app[data-app="meus-dados"]');
   await sis('button:has-text("Exportar backup")').waitFor();
   check('Meus dados: mostra o uso em KB (baixo) e sem aviso de limite', /Uso: \d+ (B|KB) de 10,0 MB/.test(await sis('.box').textContent()) && !(await sis('.bar.hot').count()), (await sis('.box').textContent()).slice(0, 300));
@@ -429,6 +438,57 @@ try {
   await sis('.msg.ok').waitFor();
   check('Apagar tudo limpa os contatos', /Nada guardado ainda/.test(await sis('.box').textContent()));
   await sis('button:has-text("Fechar")').click();
+
+  // ---- 0.14: gaveta Ferramentas, modelo CSV e Kahoot (Kahoot simulado) ----
+  const KAHOOT_HTML = `<!doctype html><html><head><title>Quiz de teste</title></head><body style="font:14px sans-serif">
+  <div id="side"><div data-functional-selector="sidebar-block">Pergunta 1</div><button data-functional-selector="add-question-button">Add</button></div>
+  <div id="ed"><div contenteditable="true" data-functional-selector="question-title__input" style="border:1px solid #888;min-height:24px;margin:6px"></div>
+  ${[0, 1, 2, 3].map(() => '<div data-functional-selector="question-answer" style="margin:6px"><div contenteditable="true" data-functional-selector="question-answer__input" style="border:1px solid #aaa;min-height:22px;display:inline-block;min-width:240px"></div> <button data-functional-selector="question-answer__toggle-button" aria-checked="false">correta</button></div>').join('')}</div>
+  <script>
+  document.querySelectorAll('[data-functional-selector="question-answer__toggle-button"]').forEach(b => b.addEventListener('click', () => { const on = b.getAttribute('aria-checked') === 'true'; document.querySelectorAll('[data-functional-selector="question-answer__toggle-button"]').forEach(x => x.setAttribute('aria-checked', 'false')); b.setAttribute('aria-checked', String(!on)); }));
+  document.querySelector('[data-functional-selector="add-question-button"]').addEventListener('click', () => { const d = document.createElement('div'); d.setAttribute('data-functional-selector', 'sidebar-block'); d.textContent = 'Pergunta ' + (document.querySelectorAll('[data-functional-selector="sidebar-block"]').length + 1); document.getElementById('side').insertBefore(d, document.querySelector('[data-functional-selector="add-question-button"]')); document.querySelectorAll('#ed [contenteditable]').forEach(e => { e.textContent = ''; }); document.querySelectorAll('[data-functional-selector="question-answer__toggle-button"]').forEach(x => x.setAttribute('aria-checked', 'false')); });
+  </script></body></html>`;
+  const kahootHits = []; await ctx.route('https://create.kahoot.it/**', r => { kahootHits.push(r.request().url()); return r.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: KAHOOT_HTML }); });
+  await pg.goto(`${ORIGIN}/course/view.php?id=7`);
+  await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
+  await pg.click('#hub-ead-launcher .tab');
+  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
+  await pg.screenshot({ path: path.join(SHOTS, '50-gaveta.png') });
+  check('gaveta Ferramentas: Kahoot e Modelo disponíveis; Ajustar datas e Automação "em breve"', await pg.evaluate(() => { const r = document.querySelector('#hub-ead-launcher').shadowRoot; const d = id => r.querySelector(`[data-app="${id}"]`).getAttribute('aria-disabled'); return d('kahoot') === 'false' && d('modelo-kahoot') === 'false' && d('ajustar-datas') === 'true' && d('blocos') === 'true'; }));
+  const [dlM] = await Promise.all([pg.waitForEvent('download', { timeout: 15000 }), pg.click('#hub-ead-launcher .app[data-app="modelo-kahoot"]')]);
+  const mPath = path.join(SHOTS, 'modelo.csv'); await dlM.saveAs(mPath);
+  check('Modelo de perguntas: baixa o CSV com o cabeçalho esperado, sem consultar nada', dlM.suggestedFilename() === 'modelo-perguntas-kahoot.csv' && /^﻿pergunta;opcao1;opcao2;opcao3;opcao4;correta/.test(fs.readFileSync(mPath, 'utf8')) && kahootHits.length === 0);
+
+  const [kpage] = await Promise.all([ctx.waitForEvent('page', { timeout: 15000 }), pg.click('#hub-ead-launcher .app[data-app="kahoot"]')]).catch(async e => { throw new Error(`${e.message} | status do menu: ${await pg.locator('#hub-ead-launcher .status').textContent()} | páginas: ${ctx.pages().map(p => p.url()).join(' ; ')} | aberto: ${await pg.locator('#hub-ead-launcher .panel').isVisible()} | erros: ${JSON.stringify(errors)} | abas: ${JSON.stringify(await sw.evaluate(() => chrome.tabs.query({}).then(t => t.map(x => x.url || x.pendingUrl))))}`); });
+  await kpage.waitForLoadState('domcontentloaded');
+  check('Kahoot no menu: abre a página da extensão (nada do Kahoot foi tocado ainda)', /^chrome-extension:\/\/.+\/kahoot\.html$/.test(kpage.url()) && kahootHits.length === 0, kpage.url());
+  await kpage.waitForSelector('#com:not([hidden])', { timeout: 10000 });
+  await kpage.screenshot({ path: path.join(SHOTS, '51-pagina-kahoot.png') });
+  // (abrir o editor numa aba nova é coberto no teste unitário; aqui a aba do Kahoot já está aberta, como no uso normal)
+  const editorPg = await ctx.newPage(); await editorPg.goto('https://create.kahoot.it/creator/1'); await editorPg.waitForSelector('[data-functional-selector="add-question-button"]');
+  await kpage.click('#reler');
+  await kpage.locator('#abas button').first().waitFor({ timeout: 10000 });
+  check('página Kahoot: lista a aba aberta do editor para "Preparar esta aba"', /Quiz de teste/.test(await kpage.locator('#abas button').first().textContent()));
+  await kpage.click('#abas button');
+  await editorPg.bringToFront();
+  await editorPg.waitForSelector('#hub-kht-host', { state: 'attached', timeout: 20000 }).catch(async e => { throw new Error(`${e.message} | msg: ${await kpage.locator('#msg').textContent()}`); });
+  const kh = sel => editorPg.locator(`#hub-kht-host >> ${sel}`);
+  await kh('input[type=file]').waitFor({ state: 'attached' });
+  check('Kahoot: janela de importação aparece no editor depois de preparar', kahootHits.length >= 1 && /Importar perguntas/.test(await kh('h2').textContent()));
+  const csv = path.join(SHOTS, 'quiz.csv');
+  fs.writeFileSync(csv, 'pergunta;opcao1;opcao2;opcao3;opcao4;correta\nQual é a capital de Goiás?;Goiânia;Anápolis;Brasília;Rio Verde;1\nO que é um DNS?;Tradutor de nomes;Um cabo;Um antivírus;Um navegador;A\nSem correta?;a;b;c;d;\nPorta do HTTPS?;80;443;21;22;443\n');
+  await editorPg.locator('#hub-kht-host >> input[type=file]').setInputFiles(csv);
+  await kh('table').waitFor();
+  await editorPg.screenshot({ path: path.join(SHOTS, '52-kahoot-conferir.png') });
+  const tabTxt = await kh('table').textContent();
+  check('Kahoot: conferência mostra 3 prontas e 1 com problema (falta a correta); "Importar tudo" fica travado', /falta a correta/.test(tabTxt) && /3 pronta/.test(await kh('.sub').textContent()) && await kh('button.pri').isDisabled());
+  await kh('button:has-text("Importar só as válidas")').click();
+  await editorPg.locator('#hub-kht-host-prog >> .msg.ok').waitFor({ timeout: 40000 });
+  await editorPg.screenshot({ path: path.join(SHOTS, '53-kahoot-concluido.png') });
+  const out = await editorPg.evaluate(() => ({ blocos: document.querySelectorAll('[data-functional-selector="sidebar-block"]').length, titulo: document.querySelector('[data-functional-selector="question-title__input"]').textContent, opcoes: [...document.querySelectorAll('[data-functional-selector="question-answer__input"]')].map(e => e.textContent), marcada: [...document.querySelectorAll('[data-functional-selector="question-answer__toggle-button"]')].findIndex(b => b.getAttribute('aria-checked') === 'true') }));
+  check('Kahoot: 3 perguntas preenchidas (1ª na em branco), última com a alternativa correta marcada', out.blocos === 3 && out.titulo === 'Porta do HTTPS?' && JSON.stringify(out.opcoes) === JSON.stringify(['80', '443', '21', '22']) && out.marcada === 1, JSON.stringify(out));
+  check('Kahoot: o aviso final manda conferir e salvar no Kahoot', /Confira o quiz e salve/.test(await editorPg.locator('#hub-kht-host-prog >> .msg.ok').textContent()));
+  await editorPg.close(); await kpage.close();
 
   errors.length = 0; // os 503 acima foram provocados de propósito pelo teste
   // ---- Pendências numa página de CURSO, depois de usar Alunos e notas (mesma página, dois módulos) ----

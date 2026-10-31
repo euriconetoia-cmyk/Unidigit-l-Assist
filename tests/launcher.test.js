@@ -30,21 +30,51 @@ test('não monta duas vezes na mesma página', () => {
   assert.equal(dom.window.document.querySelectorAll('#hub-ead-launcher').length, 1);
 });
 
-test('clicar no botão abre o menu com as 10 ferramentas; as indisponíveis aparecem "em breve"', () => {
+test('o menu principal tem 6 ferramentas + "Ferramentas"; as indisponíveis ficam na gaveta como "em breve"', () => {
   const { ui } = mount();
   ui.tab.click();
   assert.equal(ui.isOpen(), true);
-  assert.equal(ui.items.length, APPS.length);
-  const names = ui.items.map(b => b.querySelector('b').textContent);
-  assert.deepEqual(names, ['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Compatibilidade', 'Meus dados', 'Sobre', 'Automação por blocos']);
-  assert.deepEqual(ui.items.map(b => b.getAttribute('aria-disabled')), ['false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'true']);
-  assert.match(ui.items[9].textContent, /em breve/);
+  assert.equal(ui.items.length, APPS.length + 1); // + o botão da gaveta
+  const main = [...ui.shadow.querySelectorAll('[data-view="main"] .app b')].map(b => b.textContent);
+  assert.deepEqual(main, ['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Ferramentas']);
+  const gav = [...ui.shadow.querySelectorAll('[data-view="gaveta"] .app b')].map(b => b.textContent);
+  assert.deepEqual(gav, ['Kahoot — importar perguntas', 'Modelo de perguntas (CSV)', 'Ajustar datas do Moodle', 'Automação por blocos', 'Compatibilidade', 'Meus dados', 'Sobre']);
+  const tag = n => ui.shadow.querySelector(`[data-app="${n}"]`).getAttribute('aria-disabled');
+  assert.deepEqual(['kahoot', 'modelo-kahoot', 'ajustar-datas', 'blocos'].map(tag), ['false', 'false', 'true', 'true']);
+  assert.match(ui.shadow.querySelector('[data-app="blocos"]').textContent, /em breve/);
+});
+
+test('a gaveta Ferramentas abre com voltar, e fechar o menu volta ao principal', () => {
+  const { ui } = mount();
+  ui.tab.click();
+  const view = n => ui.shadow.querySelector(`[data-view="${n}"]`);
+  assert.equal(view('gaveta').hidden, true);
+  ui.shadow.querySelector('[data-app="ferramentas"]').click();
+  assert.equal(view('main').hidden, true); assert.equal(view('gaveta').hidden, false);
+  assert.equal(ui.shadow.querySelector('.voltar').getAttribute('aria-label'), 'Voltar ao menu');
+  ui.shadow.querySelector('.voltar').click();
+  assert.equal(view('main').hidden, false); assert.equal(view('gaveta').hidden, true);
+  ui.shadow.querySelector('[data-app="ferramentas"]').click();
+  ui.tab.click(); ui.tab.click(); // fecha e reabre
+  assert.equal(view('main').hidden, false);
+});
+
+test('Kahoot na gaveta pede a página da extensão; o modelo CSV baixa sem enviar nada', async () => {
+  const { ui, sent, dom } = mount();
+  dom.window.URL.createObjectURL = () => 'blob:x'; dom.window.URL.revokeObjectURL = () => {};
+  const baixados = []; dom.window.HTMLAnchorElement.prototype.click = function () { baixados.push(this.download); };
+  ui.tab.click();
+  ui.shadow.querySelector('[data-app="modelo-kahoot"]').click(); await flush();
+  assert.deepEqual(baixados, ['modelo-perguntas-kahoot.csv']); assert.deepEqual(sent, []);
+  ui.shadow.querySelector('[data-app="kahoot"]').click(); await flush();
+  assert.deepEqual(sent, [{ type: 'hub-open', app: 'kahoot' }]);
 });
 
 test('clicar em Pendências envia o pedido e fecha o menu; em breve não envia nada', async () => {
   const { ui, sent } = mount();
   ui.tab.click();
-  ui.items[9].click();
+  ui.shadow.querySelector('[data-app="ferramentas"]').click();
+  ui.shadow.querySelector('[data-app="blocos"]').click();
   await flush();
   assert.deepEqual(sent, []);
   assert.match(ui.status.textContent, /ainda não está disponível/);
@@ -118,7 +148,7 @@ test('menu em cards: seções, painel inerte quando fechado e rótulo do botão 
   const { ui } = mount();
   assert.equal(ui.panel.hasAttribute('inert'), true);
   const secoes = [...ui.shadow.querySelectorAll('.sec')].map(n => n.textContent);
-  assert.deepEqual(secoes, ['Correção', 'Alunos', 'Ajuda e dados', 'Em breve']);
+  assert.deepEqual(secoes, ['Correção', 'Alunos', 'Mais', 'Ferramentas', 'Ajuda e dados']);
   ui.tab.click();
   assert.equal(ui.panel.hasAttribute('inert'), false);
   assert.equal(ui.tab.getAttribute('aria-expanded'), 'true');
@@ -176,4 +206,16 @@ test('navegação pedida pela Correção continua na tela de avaliação; marca 
   const curso = mountAt('https://ead.senai.br/course/view.php?id=7', w => w.sessionStorage.setItem('imn_verify_v1', '{}'));
   await flush();
   assert.equal(curso.sent.length, 0, 'fora de atividade nada é retomado');
+});
+
+test('hub-handler: app com página da extensão chama abrirPagina e só ela', async () => {
+  const abertas = [];
+  const handle = createHandler({ host: { call: async () => { throw new Error('não deveria injetar'); } }, runtimeId: 'abc', abrirPagina: async n => abertas.push(n) });
+  const sender = { id: 'abc', url: 'https://ead.senai.br/my/', tab: { id: 3 } };
+  const r = await handle({ type: 'hub-open', app: 'kahoot' }, sender);
+  assert.equal(r.ok, true); assert.deepEqual(abertas, ['kahoot.html']);
+  const semPagina = await createHandler({ host: {}, runtimeId: 'abc' })({ type: 'hub-open', app: 'kahoot' }, sender);
+  assert.equal(semPagina.ok, false);
+  const fora = await handle({ type: 'hub-open', app: 'kahoot' }, { ...sender, url: 'https://exemplo.com/' });
+  assert.equal(fora.ok, false); assert.deepEqual(abertas, ['kahoot.html']);
 });

@@ -8,7 +8,10 @@ if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
 }
 
-const handle = createHandler({ host: createModuleHost(chrome), runtimeId: chrome.runtime.id });
+// Páginas da própria extensão (ex.: Kahoot, onde o pedido de permissão é feito com um clique do usuário). Só nomes conhecidos.
+const PAGINAS = { 'kahoot.html': 'kahoot.html' };
+const abrirPagina = async nome => { if (!PAGINAS[nome]) throw new Error('Página desconhecida.'); await chrome.tabs.create({ url: chrome.runtime.getURL(PAGINAS[nome]) }); };
+const handle = createHandler({ host: createModuleHost(chrome), runtimeId: chrome.runtime.id, abrirPagina });
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!message || message.type !== 'hub-open') return false;
   handle(message, sender).then(sendResponse);

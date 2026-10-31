@@ -1,6 +1,6 @@
 // Botão lateral das ferramentas EaD. Roda em toda página do Moodle permitido, mas SÓ desenha o botão:
 // não consulta o Moodle, não lê a página e não injeta nada até você clicar numa ferramenta.
-import { APPS, tipoDaPagina, aplicaNaPagina } from '../apps.js';
+import { APPS, tipoDaPagina, aplicaNaPagina, MODELO_KAHOOT } from '../apps.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const ICONS = {
@@ -16,6 +16,11 @@ const ICONS = {
   diag: 'M9 12l2 2 4-4M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6z',
   dados: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6',
   info: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v6M12 7.5v.5',
+  kahoot: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM9.6 9.2a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1.1.9-1.1 1.7M12 16.6v.1',
+  modelo: 'M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M12 11v6M9.5 14.5L12 17l2.5-2.5',
+  ferr2: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3.5 17.5a1.4 1.4 0 0 0 2 2l5.8-5.8a4 4 0 0 0 5.4-5.4l-2.4 2.4-1.7-.4-.4-1.7z',
+  voltar: 'M15 5l-7 7 7 7',
+  seta: 'M9 5l7 7-7 7',
   close: 'M6 6l12 12M18 6L6 18'
 };
 
@@ -42,12 +47,16 @@ h2 { margin: 0 0 2px; font-size: 18px; }
 .app[aria-disabled="true"] { border-style: dashed; cursor: default; } .wrap.open .app[aria-disabled="true"] { opacity: .7; }
 .sym { flex: 0 0 38px; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 14px; }
 .app[data-fora='true'] { opacity: .55; } .app[data-fora='true']:hover { opacity: .8; }
-.g-correcao .sym { background: #e3f0fc; color: #0b5cad; } .g-alunos .sym { background: #e1f5ec; color: #157a4c; } .g-em-breve .sym { background: #eee9fb; color: #5b3fb5; } .g-ajuda-e-dados .sym { background: #eef1f6; color: #4a5a70; }
-@media (prefers-color-scheme: dark) { .g-correcao .sym { background: #17324f; color: #7db8f0; } .g-alunos .sym { background: #143a2b; color: #6fd0a0; } .g-em-breve .sym { background: #2a2250; color: #b4a1f2; } .g-ajuda-e-dados .sym { background: #263040; color: #a9b7cc; } }
+.g-correcao .sym { background: #e3f0fc; color: #0b5cad; } .g-alunos .sym { background: #e1f5ec; color: #157a4c; } .g-em-breve .sym, .g-ferramentas .sym, .g-mais .sym { background: #eee9fb; color: #5b3fb5; } .g-ajuda-e-dados .sym { background: #eef1f6; color: #4a5a70; }
+@media (prefers-color-scheme: dark) { .g-correcao .sym { background: #17324f; color: #7db8f0; } .g-alunos .sym { background: #143a2b; color: #6fd0a0; } .g-em-breve .sym, .g-ferramentas .sym, .g-mais .sym { background: #2a2250; color: #b4a1f2; } .g-ajuda-e-dados .sym { background: #263040; color: #a9b7cc; } }
 .txt b { display: block; font-size: 14px; } .txt small { display: block; margin-top: 2px; color: var(--m); font-size: 12px; line-height: 1.3; }
 .tag { margin-left: auto; padding: 1px 8px; border-radius: 8px; font-size: 11px; white-space: nowrap; background: var(--line); color: var(--m); }
 .status { min-height: 0; margin: 8px 0 0; color: var(--m); font-size: 12.5px; }
 .status.err { padding: 8px 10px; border-radius: 8px; background: #fde8e5; color: #8e1b1b; font-weight: 600; }
+[hidden] { display: none !important; }
+.head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; } .head h2 { margin: 0; font-size: 16px; }
+.voltar { width: 34px; height: 34px; flex: 0 0 34px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: inherit; cursor: pointer; } .voltar svg { width: 18px; height: 18px; }
+.count { margin-left: auto; min-width: 22px; padding: 1px 8px; border-radius: 999px; font-size: 12px; text-align: center; background: #5b3fb5; color: #fff; } .app .seta { width: 16px; height: 16px; color: var(--m); flex: 0 0 16px; }
 a:focus-visible, button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 @media (max-width: 540px) { .wrap { right: 12px; bottom: 80px; } .tab { width: 52px; height: 52px; } .panel { padding: 14px; } }
 @media print { .wrap { display: none; } }
@@ -81,24 +90,34 @@ export function mountLauncher(doc = document, send = message => chrome.runtime.s
   const status = el(doc, 'p', { class: 'status', role: 'status', 'aria-live': 'polite' });
   const items = [];
   const tipo = loc ? tipoDaPagina(loc) : 'outra';
-  const sections = [];
-  const grupos = [...new Set(APPS.map(a => a.grupo))];
-  grupos.forEach(grupo => {
-    const buttons = APPS.filter(a => a.grupo === grupo).map(app => {
-      const button = el(doc, 'button', { type: 'button', class: 'app', 'data-app': app.id, style: `--i:${items.length + 1}`, 'aria-disabled': app.disponivel ? 'false' : 'true', 'data-fora': app.disponivel && !aplicaNaPagina(app, tipo) ? 'true' : null },
-        el(doc, 'span', { class: 'sym' }, icon(doc, app.icone)),
-        el(doc, 'span', { class: 'txt' }, el(doc, 'b', {}, app.nome), el(doc, 'small', {}, app.descricao)),
-        app.disponivel ? null : el(doc, 'span', { class: 'tag' }, 'em breve'));
-      button.addEventListener('click', () => run(app, button));
-      items.push(button);
-      return button;
-    });
-    sections.push(el(doc, 'div', { class: 'sec' }, grupo), el(doc, 'div', { class: `items g-${slug(grupo)}` }, ...buttons));
+  const makeButton = (app, extra = {}) => {
+    const button = el(doc, 'button', { type: 'button', class: 'app', 'data-app': app.id, style: `--i:${items.length + 1}`, 'aria-disabled': app.disponivel ? 'false' : 'true', 'data-fora': app.disponivel && !aplicaNaPagina(app, tipo) ? 'true' : null },
+      el(doc, 'span', { class: 'sym' }, icon(doc, app.icone)),
+      el(doc, 'span', { class: 'txt' }, el(doc, 'b', {}, app.nome), el(doc, 'small', {}, app.descricao)),
+      app.disponivel ? null : el(doc, 'span', { class: 'tag' }, 'em breve'), ...(extra.filhos || []));
+    button.addEventListener('click', extra.onClick || (() => run(app, button)));
+    items.push(button);
+    return button;
+  };
+  const secoes = (lista, ordem) => ordem.flatMap(grupo => {
+    const apps = lista.filter(a => a.grupo === grupo); if (!apps.length) return [];
+    return [el(doc, 'div', { class: 'sec' }, grupo), el(doc, 'div', { class: `items g-${slug(grupo)}` }, ...apps.map(a => makeButton(a)))];
   });
-  const panel = el(doc, 'section', { class: 'panel', id: 'hub-panel', 'aria-label': 'Unidigit@l Assist', inert: true },
+  const principais = APPS.filter(a => !a.gaveta);
+  const daGaveta = APPS.filter(a => a.gaveta);
+  const mainSections = secoes(principais, [...new Set(principais.map(a => a.grupo))]);
+  const ferrApp = { id: 'ferramentas', nome: 'Ferramentas', descricao: 'Kahoot, modelo de perguntas, ajuda e dados', icone: 'ferr2', disponivel: true };
+  const ferrBtn = makeButton(ferrApp, { onClick: () => showView('gaveta'), filhos: [el(doc, 'span', { class: 'count' }, String(daGaveta.filter(a => a.disponivel).length)), icon(doc, 'seta', 'seta')] });
+  mainSections.push(el(doc, 'div', { class: 'sec' }, 'Mais'), el(doc, 'div', { class: 'items g-mais' }, ferrBtn));
+  const mainView = el(doc, 'div', { class: 'view', 'data-view': 'main' },
     el(doc, 'h2', {}, 'Unidigit@l Assist'),
-    el(doc, 'p', { class: 'hint' }, 'Nada roda sozinho: cada ferramenta só age quando você clica.'),
-    ...sections, status);
+    el(doc, 'p', { class: 'hint' }, 'Nada roda sozinho: cada ferramenta só age quando você clica.'), ...mainSections);
+  const voltarBtn = el(doc, 'button', { type: 'button', class: 'voltar', 'aria-label': 'Voltar ao menu', title: 'Voltar' }, icon(doc, 'voltar'));
+  voltarBtn.addEventListener('click', () => showView('main'));
+  const drawerView = el(doc, 'div', { class: 'view', 'data-view': 'gaveta', hidden: true },
+    el(doc, 'div', { class: 'head' }, voltarBtn, el(doc, 'h2', {}, 'Ferramentas')),
+    el(doc, 'p', { class: 'hint' }, 'As que não se aplicam a esta página aparecem esmaecidas.'), ...secoes(daGaveta, ['Ferramentas', 'Ajuda e dados']));
+  const panel = el(doc, 'section', { class: 'panel', id: 'hub-panel', 'aria-label': 'Unidigit@l Assist', inert: true }, mainView, drawerView, status);
   const tab = el(doc, 'button', { type: 'button', class: 'tab', 'aria-label': 'Abrir Unidigit@l Assist', 'aria-expanded': 'false', 'aria-controls': 'hub-panel', title: 'Unidigit@l Assist' }, icon(doc, 'ferr', 'cap'), icon(doc, 'close', 'x'));
   const wrap = el(doc, 'nav', { class: 'wrap', 'aria-label': 'Unidigit@l Assist' }, panel, tab);
   shadow.append(style, wrap);
@@ -112,12 +131,21 @@ export function mountLauncher(doc = document, send = message => chrome.runtime.s
     tab.setAttribute('aria-expanded', String(value));
     tab.setAttribute('aria-label', value ? 'Fechar Unidigit@l Assist' : 'Abrir Unidigit@l Assist');
   };
-  const open = () => { setStatus(''); setOpen(true); (items.find(i => i.getAttribute('aria-disabled') !== 'true') || tab).focus(); };
-  const close = () => { setOpen(false); tab.focus(); };
+  function showView(name) {
+    mainView.hidden = name !== 'main'; drawerView.hidden = name !== 'gaveta'; setStatus('');
+    (name === 'gaveta' ? voltarBtn : (items.find(i => i.getAttribute('aria-disabled') !== 'true') || tab)).focus();
+  }
+  const open = () => { showView('main'); setOpen(true); };
+  const close = () => { setOpen(false); mainView.hidden = false; drawerView.hidden = true; tab.focus(); };
 
+  function baixarModelo() {
+    const a = el(doc, 'a', { href: URL.createObjectURL(new Blob(['\uFEFF' + MODELO_KAHOOT], { type: 'text/csv;charset=utf-8' })), download: 'modelo-perguntas-kahoot.csv' });
+    shadow.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); // dentro do Shadow DOM: o clique não conta como "fora do menu"
+  }
   async function run(app, button, motivo) {
     if (!app.disponivel) { setStatus(`${app.nome} ainda não está disponível.`); return; }
     if (!aplicaNaPagina(app, tipo)) { setStatus(`${app.nome} não se aplica a esta página. ${app.dicaPagina || ''}.`.replace('..', '.')); return; }
+    if (app.local === 'modelo-kahoot') { baixarModelo(); setStatus('Modelo baixado: preencha e use em Kahoot — importar perguntas.'); return; }
     if (busy) return;
     busy = true; button.setAttribute('aria-busy', 'true'); setStatus('Abrindo…');
     try {

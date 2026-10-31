@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.14.0 — 2026-10-31
+
+### Novo
+- **Gaveta “Ferramentas”** no menu: o menu principal fica com a correção e os alunos; dentro de Ferramentas ficam **Kahoot**, **Modelo de perguntas (CSV)**, Ajustar datas e Automação por blocos (“em breve”) e o grupo **Ajuda e dados** (Compatibilidade, Meus dados, Sobre). Tem botão de voltar.
+- **Kahoot — importar perguntas**: abre uma página da extensão que pede, uma vez e só se você aceitar, a permissão para `create.kahoot.it`. Com ela, você abre o editor de um quiz e usa **Preparar esta aba** (ou “Abrir o Kahoot e preparar”); a janela **Importar!** lê o CSV (`;`, `,` ou TAB), **confere linha a linha** (pergunta vazia, opção faltando, sem correta, textos acima de 120/75 caracteres), mostra o progresso com tempo, **Cancelar**, e “Importar só as válidas”. Só usa a pergunta atual se estiver **em branco**; nunca sobrescreve conteúdo. Se algum campo não for achado, para e diz **qual pergunta e qual campo**, e quantas já foram preenchidas.
+- **Modelo de perguntas (CSV)**: baixa a planilha-modelo em qualquer página.
+- Fluxo do Kahoot reescrito a partir da ideia do projeto “SENAI Extensões” (Julio Alves, MIT).
+
+### Segurança e permissões
+- Única permissão nova: `optional_host_permissions` para `https://create.kahoot.it/*`, **opcional**, pedida só no clique e revogável em `chrome://extensions`. Nenhum content script novo; o CSV é lido no navegador e nunca enviado. Decisão registrada em `docs/contexto/rules.md` e `memory.md`.
+- Os seletores do editor do Kahoot **não foram homologados** no Kahoot real (testado em simulação).
+
 ## 0.13.0 — 2026-10-31
 
 ### Novo

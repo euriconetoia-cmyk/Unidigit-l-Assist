@@ -15,6 +15,10 @@ const common = { bundle: true, format: 'iife', target: 'chrome108', minify: fals
 await build({ ...common, entryPoints: [path.join(root, 'src/launcher/launcher.js')], outfile: path.join(out, 'launcher.js') });
 await build({ ...common, entryPoints: [path.join(root, 'src/background.js')], outfile: path.join(out, 'background.js') });
 
+// Página da extensão para o Kahoot (pedido da permissão opcional com clique do usuário)
+await build({ ...common, entryPoints: [path.join(root, 'src/kahoot/main.js')], outfile: path.join(out, 'kahoot.js') });
+fs.copyFileSync(path.join(root, 'src/kahoot/kahoot.html'), path.join(out, 'kahoot.html'));
+
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'));
 if (withBlocos) {
   await build({ ...common, minify: true, target: 'chrome114', entryPoints: [path.join(root, 'src/sidepanel/main.js')], outfile: path.join(out, 'sidepanel.js') });
