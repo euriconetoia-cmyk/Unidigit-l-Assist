@@ -12,6 +12,10 @@
         ALN.ui.open(aba);
         return { aberto: true, mensagem: 'Painel aberto. Clique em “Ler” para buscar os dados do curso.' };
       }
+      case 'alunos.turma': {
+        ALN.turmaUi.open();
+        return { aberto: true, mensagem: 'Escolha as unidades e clique em “Gerar relatório”.' };
+      }
       default: throw new Error(`Comando desconhecido: ${command}`);
     }
   }

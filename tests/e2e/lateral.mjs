@@ -49,9 +49,11 @@ const handler = async route => {
     if (m.methodname === 'core_message_get_conversation_messages') { state.readbacks += 1; return ok({ messages: state.sent.map(x => ({ id: x.id, text: x.text, useridfrom: 90 })) }); }
     return route.fulfill({ status: 404, body: '' });
   }
-  if (u.pathname === '/grade/report/grader/index.php') { state.graderHits += 1; await sleep(60); return html(graderPage({ id: 7 })); }
+  if (u.pathname === '/grade/report/grader/index.php' && u.searchParams.get('id') === '9' && state.modoMeus) return route.fulfill({ status: 503, body: '' });
+  if (u.pathname === '/grade/report/grader/index.php') { state.graderHits += 1; await sleep(60); return html(graderPage({ id: Number(u.searchParams.get('id')) || 7 })); }
   if (u.pathname === '/user/index.php' && state.failUsers) return route.fulfill({ status: 503, body: '' });
   if (u.pathname === '/user/index.php') { state.usersHits += 1; return html(participantsPage({ id: 7 })); }
+  if (u.pathname === '/my/' && state.modoMeus) return html(`<html><body><div role="main"><h1>Meus cursos</h1>${[[7, 'Redes de Computadores', 'Téc. Redes · Turma A'], [8, 'Segurança em Redes', 'Téc. Redes · Turma A'], [9, 'Lógica de Programação', 'Téc. Informática · Turma B']].map(([id, n, c]) => `<div class="course-summaryitem" data-course-id="${id}"><a href="/course/view.php?id=${id}"><img alt=""></a><a class="coursename" href="/course/view.php?id=${id}"><span class="sr-only">Nome do curso</span> ${n}</a><span class="categoryname">${c}</span></div>`).join('')}</div></body></html>`);
   if (u.pathname === '/my/') return html('<html><body><div role="main"><h1>Painel</h1></div></body></html>');
   if (u.pathname === '/mod/assign/view.php') {
     if (req.method() === 'POST') { state.downloads += 1; return route.fulfill({ status: 200, headers: { 'content-type': 'application/zip' }, body: Buffer.from('504b0506' + '00'.repeat(18), 'hex') }); }
@@ -89,7 +91,7 @@ try {
 
   await pg.click('#hub-ead-launcher .tab');
   const names = await pg.locator('#hub-ead-launcher .app b').allTextContents();
-  check('o menu lista as 6 ferramentas na ordem do mockup', JSON.stringify(names) === JSON.stringify(['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Automação por blocos']), JSON.stringify(names));
+  check('o menu lista as 7 ferramentas na ordem do mockup', JSON.stringify(names) === JSON.stringify(['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Automação por blocos']), JSON.stringify(names));
   await sleep(900);
   await pg.screenshot({ path: path.join(SHOTS, '2-menu-aberto.png') });
 
@@ -354,6 +356,31 @@ try {
   check('HTML exportado é autônomo: só filtro local, sem arquivos nem endereços externos, sem rede', !/<script[^>]+src=/i.test(exp) && !/fetch\(|XMLHttp|<link[^>]+href=|<img[^>]+src=/i.test(exp) && !/https?:\/\//i.test(exp));
   await pg.screenshot({ path: path.join(SHOTS, '23-relatorio-exportar.png') });
   state.modoEntregas = false;
+
+  // ---- Relatório da turma (página "Meus cursos") ----
+  state.modoMeus = true;
+  await pg.goto(`${ORIGIN}/my/`);
+  await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
+  await pg.click('#hub-ead-launcher .tab');
+  check('menu mostra "Relatório da turma" disponível em Meus cursos', await pg.evaluate(() => { const b = document.querySelector('#hub-ead-launcher').shadowRoot.querySelector('.app[data-app="relatorio-turma"]'); return Boolean(b) && b.getAttribute('data-fora') !== 'true'; }));
+  const gh0 = state.graderHits;
+  await pg.click('#hub-ead-launcher .app[data-app="relatorio-turma"]');
+  await pg.waitForSelector('#hub-aln-turma', { state: 'attached', timeout: 15000 });
+  const tshadow = sel => pg.locator(`#hub-aln-turma >> ${sel}`);
+  await tshadow('.list .it').first().waitFor();
+  check('lista as 3 UCs da página com a turma, sem consultar nada antes de gerar', (await tshadow('.list .it').count()) === 3 && state.graderHits === gh0 && /Téc\. Redes/.test(await tshadow('.list').textContent()) && !/Nome do curso/.test(await tshadow('.list').textContent()));
+  check('"Gerar relatório" começa travado sem seleção', await tshadow('button.pri').isDisabled());
+  await tshadow('button:has-text("Selecionar todas")').click();
+  await pg.screenshot({ path: path.join(SHOTS, '32-turma-selecao.png') });
+  const [dlT] = await Promise.all([pg.waitForEvent('download', { timeout: 40000 }), tshadow('button.pri').click()]);
+  const tPath = path.join(SHOTS, 'turma.xlsx'); await dlT.saveAs(tPath);
+  const tb = fs.readFileSync(tPath);
+  await tshadow('.msg').last().waitFor();
+  await pg.screenshot({ path: path.join(SHOTS, '33-turma-resultado.png') });
+  check('gera o Excel: uma aba por turma + Situação + Avisos (a UC que falhou)', /^relatorio-turma-.*\.xlsx$/.test(dlT.suggestedFilename()) && ['Téc. Redes · Turma A', 'Situação', 'Avisos', 'Redes de Computadores', 'Segurança em Redes'].every(t => tb.includes(Buffer.from(t))) && tb.includes(Buffer.from('Lógica de Programação')), dlT.suggestedFilename());
+  check('a UC que falhou não vira nota zero nem some: aparece em Avisos e as outras seguem', /falhou/.test(await tshadow('.list').textContent()) && state.graderHits - gh0 === 2 && /aviso/i.test(await tshadow('.msg').last().textContent()));
+  await tshadow('button:has-text("Fechar")').click();
+  state.modoMeus = false;
 
   errors.length = 0; // os 503 acima foram provocados de propósito pelo teste
   // ---- Pendências numa página de CURSO, depois de usar Alunos e notas (mesma página, dois módulos) ----

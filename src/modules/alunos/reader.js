@@ -203,5 +203,17 @@
     return cache.data && cache.courseId === adapter.courseId ? cache.data : null;
   }
 
-  ALN.reader = { readCourse, cached, nextPageUrl, canResume, diagnostics, fetchDoc, sleep, SETTINGS };
+  // Lê SÓ o livro de notas de outra UC (usado pelo Relatório da turma). Devolve o livro, avisos e se terminou por inteiro.
+  async function readGradebookFor(course, { onProgress = () => {}, settings = SETTINGS, signal } = {}) {
+    const adapter = root.MAT.adapters.createAdapter();
+    const g = { value: null, next: '', visited: new Set(), pages: 0, error: '', warn: [], done: false };
+    await readGradebook(adapter, course, settings, g, onProgress, signal);
+    const gb = g.value, warnings = [...g.warn];
+    if (gb.meta.limitedByGroup) warnings.push(`Livro de notas filtrado pelo grupo "${gb.meta.selectedGroup}": só esses alunos foram lidos.`);
+    if (gb.meta.collapsedCategoriesDetected) warnings.push('Há categorias recolhidas no livro de notas: alguns itens podem não ter sido lidos.');
+    if (!gb.courseTotalItem) warnings.push('O "Total do curso" não foi identificado.');
+    return { gradebook: gb, warnings, complete: g.done && !gb.meta.limitedByGroup && !gb.meta.collapsedCategoriesDetected && Boolean(gb.courseTotalItem) };
+  }
+
+  ALN.reader = { readCourse, readGradebookFor, cached, nextPageUrl, canResume, diagnostics, fetchDoc, sleep, SETTINGS };
 })(globalThis);

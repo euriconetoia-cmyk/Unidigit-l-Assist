@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.12.0 — 2026-10-31
+
+### Novo
+- **Relatório da turma** (menu → Alunos → Relatório da turma), na página **“Meus cursos”**: o painel lista as UCs que aparecem na página, você marca as que quer e clica em **Gerar relatório**. A extensão lê só o “Total do curso” de cada UC (em ordem, com pausa e **Cancelar**) e baixa um **Excel com uma aba por turma** (uma coluna por UC), uma aba **Situação** (sem nota / abaixo da faixa / recuperação / média alcançada, pelas suas faixas) e, se alguma UC falhar ou vier parcial, uma aba **Avisos**. Sem nota = célula vazia, nunca zero. Nada é lido antes de “Gerar” e nada é gravado no Moodle.
+- Fora de “Meus cursos” o item aparece esmaecido e explica onde funciona.
+- Limitação conhecida: os cartões do Moodle não trazem a data de início, então UCs **futuras** não são excluídas automaticamente — use o filtro “Em andamento” do próprio Moodle antes de abrir o relatório.
+
 ## 0.11.0 — 2026-10-31
 
 ### Novo

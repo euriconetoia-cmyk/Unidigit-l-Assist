@@ -30,21 +30,21 @@ test('não monta duas vezes na mesma página', () => {
   assert.equal(dom.window.document.querySelectorAll('#hub-ead-launcher').length, 1);
 });
 
-test('clicar no botão abre o menu com as 6 ferramentas; as indisponíveis aparecem "em breve"', () => {
+test('clicar no botão abre o menu com as 7 ferramentas; as indisponíveis aparecem "em breve"', () => {
   const { ui } = mount();
   ui.tab.click();
   assert.equal(ui.isOpen(), true);
   assert.equal(ui.items.length, APPS.length);
   const names = ui.items.map(b => b.querySelector('b').textContent);
-  assert.deepEqual(names, ['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Automação por blocos']);
-  assert.deepEqual(ui.items.map(b => b.getAttribute('aria-disabled')), ['false', 'false', 'false', 'false', 'false', 'true']);
-  assert.match(ui.items[5].textContent, /em breve/);
+  assert.deepEqual(names, ['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Automação por blocos']);
+  assert.deepEqual(ui.items.map(b => b.getAttribute('aria-disabled')), ['false', 'false', 'false', 'false', 'false', 'false', 'true']);
+  assert.match(ui.items[6].textContent, /em breve/);
 });
 
 test('clicar em Pendências envia o pedido e fecha o menu; em breve não envia nada', async () => {
   const { ui, sent } = mount();
   ui.tab.click();
-  ui.items[5].click();
+  ui.items[6].click();
   await flush();
   assert.deepEqual(sent, []);
   assert.match(ui.status.textContent, /ainda não está disponível/);
@@ -157,7 +157,8 @@ test('em página de atividade: Correção vale, Pendências fica esmaecida e só
 });
 test('em página de curso: Pendências e Correção valem', () => {
   const { ui } = mountAt('https://ead.senai.br/course/view.php?id=7');
-  assert.equal(ui.shadow.querySelectorAll('[data-fora="true"]').length, 0);
+  const fora = [...ui.shadow.querySelectorAll('[data-fora="true"]')].map(b => b.getAttribute('data-app'));
+  assert.deepEqual(fora, ['relatorio-turma']); // só o Relatório da turma é exclusivo de "Meus cursos"
 });
 test('depois de salvar no Moodle (conferência pendente) a Correção é retomada sozinha, uma vez', async () => {
   const { sent } = mountAt('https://ead.senai.br/mod/assign/view.php?id=55&action=grading', w => w.sessionStorage.setItem('imn_verify_v1', '{}'));

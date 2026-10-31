@@ -583,3 +583,36 @@ test('planilhas das telas: mesmos alunos e notas dos CSV, números reais e vazio
   assert.equal(w.ALN.studentsSheet(students).rows.length, students.length + 1);
   assert.ok(w.ALN.reportSheets(w.ALN.buildReport(students, gb, w.ALN.DEFAULTS, ''), 'X').length === 2);
 });
+
+// ---- Relatório da turma ----
+test('turma: abas por turma, UCs em colunas, sem nota vazio, Situação com as faixas e Avisos', () => {
+  const w = load();
+  const T = w.ALN.turma;
+  const eq = (a, b) => assert.equal(JSON.stringify(a), JSON.stringify(b)); // objetos vêm de outra janela (jsdom)
+  const st = (key, name, total, situation) => ({ key, name, total, situation });
+  const reports = [
+    { id: '7', name: 'Redes', category: 'Téc. Redes · A', students: [st('id:1', 'Ana', 90, 'media'), st('id:2', 'Bia', null, 'sem_nota'), st('id:3', 'Caio', 40, 'abaixo')] },
+    { id: '8', name: 'Segurança', category: 'téc. redes · a ', students: [st('id:1', 'Ana Souza', 70, 'media'), st('id:3', 'Caio', 55, 'recuperacao')] },
+    { id: '9', name: 'Lógica', category: 'Téc. Info · B', students: [st('id:9', 'Zeca', 0, 'abaixo')] }
+  ];
+  const sheets = T.buildSheets(reports, [{ name: 'Banco', category: 'Téc. Info · B', reason: 'sessão expirada' }]);
+  eq(sheets.map(s => s.name), ['Téc. Redes · A', 'Téc. Info · B', 'Situação', 'Avisos']);
+  eq(sheets[0].rows[0], ['Aluno', 'Redes', 'Segurança']);
+  eq(sheets[0].rows[1], ['Ana Souza', 90, 70]);            // nome mais completo vence, mesmo aluno nas duas UCs
+  eq(sheets[0].rows[2], ['Bia', null, null]);               // sem nota = vazio, nunca 0
+  eq(sheets[0].rows[3], ['Caio', 40, 55]);
+  eq(sheets[1].rows[1], ['Zeca', 0]);                       // zero lançado de verdade continua zero
+  const sit = sheets[2].rows;
+  eq(sit[0], ['Turma', 'UC', 'Alunos', 'Sem nota', 'Abaixo da faixa', 'Recuperação', 'Média alcançada']);
+  eq(sit[1], ['Téc. Redes · A', 'Redes', 3, 1, 1, 0, 1]);
+  eq(sit[2], ['Téc. Redes · A', 'Segurança', 2, 0, 0, 1, 1]);
+  eq(sheets[3].rows[1], ['Banco', 'Téc. Info · B', 'sessão expirada']);
+  assert.ok(w.ALN.xlsx.build(sheets).length > 500);
+});
+
+test('turma: detecta cursos nos cartões de "Meus cursos" sem duplicar nem trazer texto oculto', () => {
+  const w = load();
+  const d = page('<html><body><div role="main"><div class="course-summaryitem" data-course-id="7"><a href="/course/view.php?id=7"><img></a><a class="coursename" href="/course/view.php?id=7"><span class="sr-only">Nome do curso</span> Redes</a><span class="categoryname">Turma A</span></div><div data-course-id="8"><a class="coursename" href="https://outro.com/course/view.php?id=8">Fora</a></div><a href="/course/view.php?id=abc">x</a></div></body></html>');
+  const list = w.ALN.turma.detectCourses(d, 'https://ead.senai.br');
+  assert.equal(JSON.stringify(list), JSON.stringify([{ id: '7', name: 'Redes', category: 'Turma A' }]));
+});

@@ -8,10 +8,12 @@
     "core/filters.js",
     "core/fila.js",
     "core/xlsx.js",
+    "core/turma.js",
     "core/report-html.js",
     "messenger.js",
     "reader.js",
     "tarefas.js",
+    "turma-ui.js",
     "ui.js"
   ],
   "css": []
