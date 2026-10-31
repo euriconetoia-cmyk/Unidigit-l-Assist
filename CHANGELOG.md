@@ -9,6 +9,8 @@
 - **Relatório da turma: campo de busca.** Digite parte do nome do curso ou da categoria (sem diferenciar maiúsculas nem acentos) e a lista mostra só os encontrados. “Selecionar os encontrados” marca só esses; a seleção anterior continua valendo e a tela avisa quantas ficaram fora da busca. Nada é lido antes de “Gerar relatório”.
 - **Relatório da turma: leitura incompleta não gera mais o Excel sozinha.** Se alguma unidade falhar ou vier parcial, a tela avisa, **não baixa nada** e mostra **“Tentar só as não verificadas (N)”**, que relê apenas as que faltam (as já lidas não são pedidas de novo), e **“Baixar Excel assim mesmo”**, que leva as pendências para a aba “Avisos”. Quando tudo está lido por completo, o Excel sai sozinho como antes.
 
+- **Relatório da turma no ead.fieg.com.br**: a página “Meus cursos” do FIEG fica na raiz do site (`/`), não em `/my/`; agora as duas são reconhecidas. Se a região principal da página não tiver cursos, a busca olha a página toda (sem menus, rodapé e gavetas).
+
 ### Interno
 - Nova chave `uas.ajustes` (entra em Meus dados, backup, medição e “apagar”); a validade das leituras por UC é aplicada na limpeza automática.
 - `panel.js` do Importar Notas (vendorizado) recebeu 2 trechos locais marcados `HUB-PATCH regua`; o validador falha se um `npm run sync` os apagar. O arquivo novo `modules/importar-notas/regua.js` é injetado junto.

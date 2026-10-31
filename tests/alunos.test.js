@@ -823,3 +823,9 @@ test('resumo do dia: contagens vêm das leituras; "a corrigir" sem leitura de en
   assert.equal(R.resumir({ students, hojeISO: hoje }).aCorrigir, 5);
   assert.equal(R.resumir({ students, hojeISO: hoje }).piorou, null, 'sem leitura anterior não vira zero');
 });
+
+test('turma: sem cursos na região principal, procura na página toda, mas ignora menus e rodapé', () => {
+  const w = load();
+  const d = page('<html><body><nav><a href="/course/view.php?id=99">Menu: outro curso</a></nav><div role="main"><p>Bem-vindo</p></div><div id="cursos"><div class="coursebox"><a class="coursename" href="/course/view.php?id=12">Lógica</a><span class="categoryname">Turma C</span></div></div><footer><a href="/course/view.php?id=98">Rodapé</a></footer></body></html>');
+  eq(w.ALN.turma.detectCourses(d, 'https://ead.fieg.com.br'), [{ id: '12', name: 'Lógica', category: 'Turma C' }]);
+});

@@ -26,7 +26,8 @@ export function tipoDaPagina(loc) {
     if (/\/course\/view\.php$/.test(u.pathname)) return 'curso';
     if (/\/course\/index\.php$/.test(u.pathname) && u.searchParams.has('categoryid')) return 'categoria';
     if (/\/mod\/assign\/view\.php$/.test(u.pathname)) return 'atividade';
-    if (/^\/my\/(courses\.php|index\.php)?$/.test(u.pathname)) return 'meus-cursos';
+    // “Meus cursos” fica em /my/ no SENAI e na raiz do site (/ ou /index.php) no ead.fieg.com.br.
+    if (/^\/my\/?(courses\.php|index\.php)?$/.test(u.pathname) || /^\/(index\.php)?$/.test(u.pathname)) return 'meus-cursos';
   } catch (_) { /* endereço inválido */ }
   return 'outra';
 }

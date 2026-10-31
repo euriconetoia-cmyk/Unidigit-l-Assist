@@ -54,7 +54,10 @@
   function detectCourses(doc, origin) {
     const found = new Map();
     const main = doc.querySelector('[role="main"],#region-main,main') || doc.body;
-    main.querySelectorAll('a[href*="/course/view.php"]').forEach(a => {
+    // Se a região principal não tem cursos (temas como o do FIEG), procura na página toda, menos menus, rodapé e gavetas.
+    const links = [...main.querySelectorAll('a[href*="/course/view.php"]')];
+    const lista = links.length ? links : [...doc.body.querySelectorAll('a[href*="/course/view.php"]')].filter(a => !a.closest('nav,header,footer,.navbar,.drawer,[data-region="drawer"],.dropdown-menu,[role="navigation"]'));
+    lista.forEach(a => {
       let u; try { u = new URL(a.getAttribute('href'), origin); } catch (_) { return; }
       const id = u.searchParams.get('id');
       if (!id || !/^\d+$/.test(id) || u.origin !== origin || found.has(id)) return;

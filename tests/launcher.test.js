@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { APPS } from '../src/apps.js';
+import { APPS, tipoDaPagina } from '../src/apps.js';
 import { createHandler } from '../src/hub-handler.js';
 
 globalThis.__HUB_TEST__ = true;
@@ -218,4 +218,13 @@ test('hub-handler: app com página da extensão chama abrirPagina e só ela', as
   assert.equal(semPagina.ok, false);
   const fora = await handle({ type: 'hub-open', app: 'kahoot' }, { ...sender, url: 'https://exemplo.com/' });
   assert.equal(fora.ok, false); assert.deepEqual(abertas, ['kahoot.html']);
+});
+
+test('tipoDaPagina: "Meus cursos" é /my/ (SENAI) e a raiz do site (FIEG); outras páginas não', () => {
+  const t = u => tipoDaPagina({ href: u });
+  for (const u of ['https://ead.senai.br/my/', 'https://ead.senai.br/my', 'https://ead.senai.br/my/courses.php', 'https://ead.fieg.com.br/', 'https://ead.fieg.com.br/index.php', 'https://ead.fieg.com.br/?redirect=0', 'https://ead.fieg.com.br/#cursos']) assert.equal(t(u), 'meus-cursos', u);
+  assert.equal(t('https://ead.fieg.com.br/course/view.php?id=3'), 'curso');
+  assert.equal(t('https://ead.fieg.com.br/user/index.php?id=3'), 'outra');
+  assert.equal(t('https://ead.fieg.com.br/login/index.php'), 'outra');
+  assert.equal(t('https://ead.fieg.com.br/mod/assign/view.php?id=9'), 'atividade');
 });
