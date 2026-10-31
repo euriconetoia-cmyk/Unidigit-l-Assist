@@ -176,13 +176,3 @@ test('navegação pedida pela Correção continua na tela de avaliação; marca 
   await flush();
   assert.equal(curso.sent.length, 0, 'fora de atividade nada é retomado');
 });
-
-test('cartão da estrela: escondido sem armazenamento e dispensável', () => {
-  const { ui } = mount();
-  const star = ui.shadow.querySelector('.star');
-  assert.equal(star.hidden, true);
-  ui.open(); ui.close(); ui.open(); ui.close(); ui.open();
-  assert.equal(star.hidden, true); // sem chrome.storage nada é contado nem mostrado
-  assert.equal(star.querySelector('a').getAttribute('href'), 'https://github.com/euriconetoia-cmyk/Unidigit-l-Assist');
-  assert.equal(star.querySelector('a').getAttribute('rel'), 'noopener noreferrer');
-});

@@ -4,10 +4,6 @@ Ferramentas do tutor EaD dentro do Moodle: **corrigir, cobrar pendências, acomp
 
 > **Nada roda sozinho.** Cada ferramenta só age quando você clica, e nada é gravado no Moodle sem a sua confirmação. Os dados dos alunos não saem do seu navegador.
 
-> **Unidigit@l Assist** — ferramentas do tutor EaD para o Moodle.
->
-> ⭐ Se a ferramenta ajuda no seu dia a dia, deixe uma estrela neste repositório: ajuda quem desenvolve a continuar.
-
 ## O que faz
 
 | Ferramenta | Onde funciona | O que entrega |
@@ -20,9 +16,10 @@ Ferramentas do tutor EaD dentro do Moodle: **corrigir, cobrar pendências, acomp
 
 ## Instalar
 
-1. Baixe o ZIP da versão mais recente em **[Releases](../../releases)** e extraia.
-2. No Chrome, abra `chrome://extensions`, ligue o **Modo do desenvolvedor** e clique em **Carregar sem compactação**, escolhendo a pasta extraída.
-3. Abra uma página do Moodle: o botão da ferramenta aparece na lateral direita.
+1. ⭐ **Aperte na estrelinha** no topo desta página (botão *Star*). É de graça, leva 5 segundos e ajuda quem desenvolve a continuar.
+2. Baixe o ZIP da versão mais recente em **[Releases](https://github.com/euriconetoia-cmyk/Unidigit-l-Assist/releases)** e extraia.
+3. No Chrome, abra `chrome://extensions`, ligue o **Modo do desenvolvedor** e clique em **Carregar sem compactação**, escolhendo a pasta extraída.
+4. Abra uma página do Moodle: o botão da ferramenta aparece na lateral direita.
 
 Se a extensão **Importar Notas** original estiver ativa, desative-a: as duas desenhariam a mesma barra.
 

@@ -4,7 +4,7 @@
 
 ### Novo
 - **Nome Unidigit@l Assist** na extensão (manifest, botão lateral e menu).
-- **Pedido gentil de ⭐** no menu: aparece a partir da 3ª abertura, uma única vez, e some para sempre ao responder ("Dar uma ⭐", "Já dei" ou "Agora não"). Não bloqueia nada.
+- **Pedido de ⭐** como 1º passo das instruções de instalação no README (nada dentro da extensão).
 - Rodapé dos relatórios HTML: "Feito com Unidigit@l Assist · By Eurico Cirilo" com o endereço do projeto.
 - **Licença MIT** adicionada ao repositório.
 
