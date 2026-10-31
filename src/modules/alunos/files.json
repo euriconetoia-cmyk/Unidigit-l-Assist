@@ -1,0 +1,16 @@
+{
+  "scripts": [
+    "namespace.js",
+    "vendor/shared-validation.js",
+    "vendor/utils.js",
+    "vendor/adapters.js",
+    "core/report.js",
+    "core/filters.js",
+    "core/report-html.js",
+    "messenger.js",
+    "reader.js",
+    "tarefas.js",
+    "ui.js"
+  ],
+  "css": []
+}

@@ -1,0 +1,9 @@
+{
+  "projeto": "assistente-ead-senai",
+  "versao": "3.7.18",
+  "arquivos": [
+    "content/shared-validation.js",
+    "content/utils.js",
+    "content/adapters.js"
+  ]
+}

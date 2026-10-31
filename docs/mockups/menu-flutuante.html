@@ -1,0 +1,71 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mockup · menu flutuante adaptado</title>
+<style>
+:root{--p:#0b5cad;--p2:#0a4a8c;--t:#132237;--m:#6b788d;--line:#e3e9f3;--surf:#ffffffee;--card:#f8fafd;--hover:#eef5fc;--focus:#f6b900}
+@media (prefers-color-scheme:dark){:root{--t:#e6ecf5;--m:#9aa8bd;--line:#2b3646;--surf:#1a212cee;--card:#212a37;--hover:#263446}}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font:14px/1.4 Inter,system-ui,sans-serif;color:var(--t);background:#eef1f5}
+@media (prefers-color-scheme:dark){body{background:#12161c}}
+.pg{padding:24px;color:#8a94a3}.pg h2{margin:0 0 8px}.l{height:14px;background:#dfe4ea;border-radius:7px;margin:10px 0;width:60%}
+@media (prefers-color-scheme:dark){.l{background:#222a35}}
+/* ===== menu flutuante ===== */
+.floating{position:fixed;right:16px;bottom:96px;z-index:10;display:flex;align-items:flex-end;gap:14px}
+.toggle{width:56px;height:56px;border:0;border-radius:18px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;cursor:pointer;display:grid;place-items:center;flex-shrink:0;box-shadow:0 10px 26px #0b5cad55;transition:transform .25s,box-shadow .25s}
+.toggle:hover{transform:scale(1.07);box-shadow:0 14px 32px #0b5cad70}
+.toggle svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s}
+.floating.open .toggle .cap{display:none}.toggle .x{display:none}.floating.open .toggle .x{display:block}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.panel{width:min(348px,calc(100vw - 100px));max-height:calc(100dvh - 112px);overflow-y:auto;padding:16px;border:1px solid #ffffff99;border-radius:24px;background:var(--surf);backdrop-filter:blur(18px);box-shadow:0 20px 60px #1d2a4a30;opacity:0;visibility:hidden;transform:translateX(24px) scale(.96);transform-origin:right bottom;pointer-events:none;transition:opacity .3s ease,transform .3s ease,visibility .3s}
+@media (prefers-color-scheme:dark){.panel{border-color:#ffffff1a}}
+.floating.open .panel{opacity:1;visibility:visible;transform:none;pointer-events:auto}
+.panel h2{font-size:18px;margin:0 0 2px}.panel>p{font-size:13px;color:var(--m);margin:0 0 6px}
+.sec{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--m);margin:10px 4px 5px;font-weight:600}
+.items{display:grid;gap:6px}
+.item{display:flex;align-items:center;gap:12px;width:100%;padding:8px 10px;text-align:left;border:1px solid var(--line);border-radius:14px;background:var(--card);color:inherit;font:inherit;cursor:pointer;opacity:0;transform:translateY(10px);transition:background .2s,transform .3s,opacity .3s,border-color .2s,box-shadow .2s}
+.floating.open .item{opacity:1;transform:none;transition-delay:calc(var(--i)*55ms)}
+.item:hover{background:var(--hover);border-color:#b9d3ee;box-shadow:0 6px 18px #0b5cad1f;transform:translateY(-2px)!important}
+.sym{display:grid;place-items:center;flex-shrink:0;width:38px;height:38px;border-radius:12px}.sym svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.g1 .sym{background:#e3f0fc;color:#0b5cad}.g2 .sym{background:#e1f5ec;color:#157a4c}.g3 .sym{background:#eee9fb;color:#5b3fb5}
+@media (prefers-color-scheme:dark){.g1 .sym{background:#17324f;color:#7db8f0}.g2 .sym{background:#143a2b;color:#6fd0a0}.g3 .sym{background:#2a2250;color:#b4a1f2}}
+.item strong{display:block;font-size:14px}.item small{display:block;color:var(--m);margin-top:2px;font-size:12px}
+.item[aria-disabled=true]{border-style:dashed;opacity:.7;cursor:default}.floating.open .item[aria-disabled=true]{opacity:.7}
+.item[aria-disabled=true]:hover{transform:none!important;box-shadow:none;background:var(--card);border-color:var(--line)}
+.tag{margin-left:auto;font-size:11px;background:var(--line);color:var(--m);border-radius:9px;padding:1px 8px;white-space:nowrap}
+.status{margin-top:10px;font-size:12.5px;color:var(--m);min-height:0}.status.err{color:#c0392b;background:#fde8e5;border-radius:10px;padding:8px 10px}
+@media (max-width:540px){.floating{right:12px;bottom:80px}.toggle{width:52px;height:52px}.panel{padding:14px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
+</style>
+<body>
+<div class="pg"><h2>Moodle — Curso Técnico em Redes (EaD)</h2><div class="l"></div><div class="l" style="width:40%"></div><div class="l"></div></div>
+<nav class="floating" id="fl" aria-label="Ferramentas EaD">
+ <section class="panel" id="panel" aria-label="Ferramentas" inert>
+  <h2>Ferramentas EaD</h2><p>O que deseja fazer?</p>
+  <div class="sec">Correção</div>
+  <div class="items g1">
+   <button class="item" style="--i:1"><span class="sym"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span><strong>Pendências</strong><small>Buscar o que falta corrigir</small></span></button>
+   <button class="item" style="--i:2"><span class="sym"><svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16zM14 6l3 3"/></svg></span><span><strong>Correção</strong><small>Lançar notas e feedback por CSV</small></span></button>
+  </div>
+  <div class="sec">Alunos</div>
+  <div class="items g2">
+   <button class="item" style="--i:3"><span class="sym"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 15l4-4 3 3 5-6"/></svg></span><span><strong>Acompanhamento</strong><small>Alunos em risco e próxima ação</small></span></button>
+   <button class="item" style="--i:4"><span class="sym"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M17 11a3 3 0 1 0 0-6M21 20c0-2.5-1.6-4.6-4-5.5"/></svg></span><span><strong>Alunos e notas</strong><small>Lista de alunos e boletim</small></span></button>
+   <button class="item" style="--i:5"><span class="sym"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span><span><strong>Relatório da UC</strong><small>Desempenho geral da turma</small></span></button>
+  </div>
+  <div class="sec">Em breve</div>
+  <div class="items g3">
+   <button class="item" style="--i:6" aria-disabled="true"><span class="sym"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="6" rx="1.5"/><rect x="13" y="14" width="8" height="6" rx="1.5"/><path d="M7 10v4h6"/></svg></span><span><strong>Automação por blocos</strong><small>Montar rotinas</small></span><span class="tag">em breve</span></button>
+  </div>
+  <div class="status" role="status" aria-live="polite" id="st"></div>
+ </section>
+ <button class="toggle" type="button" id="tg" aria-label="Abrir ferramentas EaD" aria-expanded="false" aria-controls="panel">
+  <svg class="cap" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5"/></svg>
+  <svg class="x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+ </button>
+</nav>
+<script>
+const fl=document.getElementById('fl'),tg=document.getElementById('tg'),pn=document.getElementById('panel');
+const set=o=>{fl.classList.toggle('open',o);tg.setAttribute('aria-expanded',String(o));tg.setAttribute('aria-label',o?'Fechar ferramentas EaD':'Abrir ferramentas EaD');pn.inert=!o};
+tg.onclick=()=>set(!fl.classList.contains('open'));
+document.addEventListener('click',e=>{if(!fl.contains(e.target))set(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&fl.classList.contains('open')){set(false);tg.focus()}});
+if(location.hash==='#open')set(true);
+if(location.hash==='#erro'){set(true);const s=document.getElementById('st');s.className='status err';s.textContent='Abra uma página de curso ou de categoria do Moodle para usar esta ferramenta.'}
+</script>

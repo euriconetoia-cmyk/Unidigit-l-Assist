@@ -1,0 +1,44 @@
+# Task — Blocos EaD SENAI
+
+Trabalhar uma por vez, na ordem. Decisões importantes vão para `memory.md`.
+
+## Versão 0.1.0
+- [x] E1. Estrutura: manifest, painel lateral, build com esbuild, Blockly em pt-BR, docs.
+- [x] E2. Executor (interpretador sem eval) com blocos de controle e limites. Testes: `interpreter`.
+- [x] E3. Módulo Importar Notas: sync, ponte `HUB`, injeção sob demanda, blocos (Buscar, Baixar, Abrir lançamento, Total de pendências, Página atual).
+- [x] E4. Exemplos, salvar/carregar programas (`storage.local`), registro de execução.
+- [x] E5. Validador, e2e, pacote, prints para validação do usuário.
+
+## Depois
+- [ ] A1. Módulo **Alunos e notas** (somente leitura).
+- [ ] A2. Integrar ao hub as funções restantes do Assistente EaD e demais extensões antigas (**direção de 30/10: o hub é o ponto único**).
+- [ ] A3. Homologar em Moodle real (SENAI e FIEG).
+
+## Versão 0.2.0 (botão lateral) — direção corrigida em 30/10/2026
+- [x] L1. Botão lateral (content script `launcher.js`, Shadow DOM) + menu com Pendências, Correção, Acompanhamento, Alunos e notas.
+- [x] L2. Pendências = abre a barra do radar (sem buscar); Correção = abre o lançamento de notas (CSV). Acompanhamento e Alunos e notas = "em breve".
+- [x] L3. Alunos e notas (A1) como ferramenta do menu, somente leitura (0.3.0): abas Alunos e Notas.
+- [x] L4. Acompanhamento = risco por aluno do Assistente EaD (0.3.0). Fechamento da UC removido por decisão do usuário; entrou o **Relatório da UC**.
+- [ ] L5. "Automação por blocos" como item do menu (reaproveita `--with-blocos`).
+- [ ] L6. Homologar em Moodle real; ícone da extensão.
+
+## Versão 0.3.0 (alunos e notas)
+- [x] M1. Leitura única do curso (livro de notas + participantes) com cache em memória, só ao clicar em Ler.
+- [x] M2. Telas Alunos, Notas, Acompanhamento e Relatório da UC; CSV; copiar mensagem.
+- [ ] M3. Ler as **tarefas** (entregas, sem entrega, aguardando correção) por atividade, sob demanda — habilita "sem entrega" no risco.
+- [ ] M4. Excel (.xlsx) das notas e PDF próprio do relatório (hoje: CSV e impressão do navegador).
+- [ ] M5. UC vigente automática (reaproveitar `vigencia.js`) e data de encerramento no risco.
+- [ ] M6. Ficha do aluno, ranking de atividades, linha do tempo de prazos (sugestões).
+- [ ] L6. Homologar no Moodle real (nenhum seletor do livro de notas foi testado fora do Moodle simulado).
+
+## Versão 0.4.0
+- [x] N1. Enviar mensagem ao aluno pelo Moodle, com conferência por leitura de volta e registro local.
+- [ ] N2. Saída em **página HTML animada** a partir de Notas (alunos, pendências e demais dados lidos) — mockup antes.
+- [ ] N3. Analisar o "Ajustar datas Moodle 1.3.4" (aguardando ZIP com arquivos).
+- [x] N1b. Pendências na página da UC sem links de tarefa + botão de fechar (0.4.1).
+
+## Versão 0.6.0
+- [x] P1. Aba Alunos: filtros em chips, mini-barra de itens, último acesso destacado, ordenação.
+- [x] P2. Relatório da UC por aluno (cartões por urgência) + ficha do aluno.
+- [x] P3. Ler as tarefas (envio/prazo por atividade, com "Continuar") e mensagem de pendências com atividades marcáveis.
+- [x] P4. HTML baixável do relatório e da ficha (N2).

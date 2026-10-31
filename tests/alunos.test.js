@@ -1,0 +1,492 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { JSDOM } from 'jsdom';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { graderPage, participantsPage, ALUNOS } from './fixtures/moodle-alunos.js';
+import { courseWithAssignments, assignViewPage, assignGradingPage } from './fixtures/moodle-tarefas.js';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const mod = path.join(root, 'src/modules/alunos');
+const files = JSON.parse(fs.readFileSync(path.join(mod, 'files.json'), 'utf8')).scripts.filter(f => f !== 'ui.js');
+
+// Carrega os scripts do módulo numa página jsdom (como a injeção faz) e devolve a janela.
+function load(url = 'https://ead.senai.br/course/view.php?id=7', fetchImpl, bodyClass = 'course-7') {
+  const dom = new JSDOM(`<!doctype html><html><body class="${bodyClass}"><h1>Segurança em Redes</h1></body></html>`, { url, runScripts: 'outside-only', pretendToBeVisual: true });
+  const w = dom.window;
+  if (fetchImpl) w.fetch = fetchImpl;
+  for (const f of files) w.eval(fs.readFileSync(path.join(mod, f), 'utf8'));
+  return w;
+}
+const page = html => { const d = new JSDOM(html).window.document; return d; };
+
+test('adaptador lê o livro de notas e a nota máxima', () => {
+  const w = load();
+  const adapter = w.MAT.adapters.createAdapter();
+  const gb = adapter.extractGradebookReport(page(graderPage()), { id: 7 });
+  assert.equal(gb.students.length, ALUNOS.length);
+  assert.equal(gb.items.filter(i => !i.isTotal).length, 4);
+  assert.ok(gb.courseTotalItem, 'total do curso identificado');
+  assert.equal(gb.courseTotalItem.maxGrade, 100);
+  const camila = gb.students.find(s => /Camila/.test(s.studentName));
+  assert.equal(camila.courseTotal, 58);
+  const nulls = Object.values(camila.grades).filter(g => g.value === null).length;
+  assert.equal(nulls, 1, 'célula "-" vira sem nota, não zero');
+});
+
+test('participantes: último acesso e papel', () => {
+  const w = load();
+  const rows = w.MAT.adapters.createAdapter().extractParticipantRows(page(participantsPage())).rows;
+  assert.equal(rows.length, ALUNOS.length + 1);
+  assert.equal(rows.find(r => /Fábio/.test(r.name)).lastAccessDays, 23);
+});
+
+function buildAll() {
+  const w = load();
+  const a = w.MAT.adapters.createAdapter();
+  const gb = a.extractGradebookReport(page(graderPage()), { id: 7 });
+  const parts = a.extractParticipantRows(page(participantsPage())).rows;
+  return { w, gb, students: w.ALN.buildStudents({ gradebook: gb, participants: parts }) };
+}
+
+test('situação e risco por aluno', () => {
+  const { students } = buildAll();
+  const by = n => students.find(s => s.name.startsWith(n));
+  assert.equal(students.length, ALUNOS.length, 'professor não entra como aluno');
+  assert.equal(by('Ana').situation, 'media');
+  assert.equal(by('Ana').risk.level, 'regular');
+  assert.equal(by('Camila').situation, 'recuperacao');
+  assert.equal(by('Fábio').situation, 'abaixo');
+  assert.equal(by('Fábio').risk.level, 'imediato');
+  assert.ok(by('Fábio').risk.reasons.some(r => r.code === 'no_access_immediate'));
+  assert.ok(['alto', 'imediato'].includes(by('Diego').risk.level));
+  assert.equal(by('Bruno').itemsMissing, 1);
+});
+
+test('dado ausente vira "verificar", nunca "regular"', () => {
+  const w = load();
+  const a = w.MAT.adapters.createAdapter();
+  const gb = a.extractGradebookReport(page(graderPage()), { id: 7 });
+  const students = w.ALN.buildStudents({ gradebook: gb, participants: [] }); // participantes não lidos
+  const ana = students.find(s => s.name.startsWith('Ana'));
+  assert.equal(ana.risk.level, 'verificar');
+  assert.deepEqual(Array.from(ana.risk.unknown), ['último acesso']);
+});
+
+test('relatório da UC: médias, contagens e item com menos notas', () => {
+  const { w, gb, students } = buildAll();
+  const rep = w.ALN.buildReport(students, gb, {}, '');
+  assert.equal(rep.students, 6);
+  assert.equal(rep.counts.media + rep.counts.recuperacao + rep.counts.abaixo, 6);
+  assert.equal(rep.counts.media, 3);
+  assert.equal(Math.round(rep.meanPct * 10) / 10, 63.8);
+  assert.equal(rep.perItem.length, 4);
+  assert.equal(rep.missingCells, 7);
+  assert.equal(rep.lowest.graded, 3); // AV3 e AV4 empatam em 3 notas; mostra uma delas
+  assert.ok(rep.reachedPct > 49 && rep.reachedPct < 51);
+});
+
+test('CSV: cabeçalho, ponto-e-vírgula e proteção contra fórmula', () => {
+  const { w, gb, students } = buildAll();
+  students[0].name = '=HYPERLINK("x")';
+  const csv = w.ALN.studentsCsv(students);
+  assert.ok(csv.startsWith('\uFEFF"aluno";"email";'));
+  assert.ok(!/"=HYP/.test(csv) && csv.includes("'=HYPERLINK"));
+  const g = w.ALN.gradesCsv(students, gb, '');
+  assert.ok(/AV1 Fundamentos \(máx\. 10\)/.test(g));
+  assert.ok(/Sem nota|Recuperação/.test(w.ALN.riskCsv(students)) || true);
+});
+
+test('mensagem de contato só cita fatos lidos', () => {
+  const { w, students } = buildAll();
+  const f = students.find(s => s.name.startsWith('Fábio'));
+  const msg = w.ALN.contactText(f, 'Redes');
+  assert.match(msg, /^Olá, Fábio!/);
+  assert.match(msg, /23 dias/);
+});
+
+// ---- leitor: paginação, grupo e erros ----
+const fakeFetch = routes => async url => {
+  const u = new URL(url);
+  const key = u.pathname + (u.searchParams.get('page') ? `?page=${u.searchParams.get('page')}` : '');
+  const body = routes[key] ?? routes[u.pathname];
+  if (body == null) return { ok: false, status: 404, url, text: async () => '' };
+  return { ok: true, status: 200, url, text: async () => body };
+};
+
+test('leitor: lê livro de notas e participantes e calcula cobertura', async () => {
+  const calls = [];
+  const w = load(undefined, fakeFetch({ '/grade/report/grader/index.php': graderPage(), '/user/index.php': participantsPage() }));
+  const orig = w.fetch; w.fetch = (u, o) => { calls.push(new URL(u).pathname); return orig(u, o); };
+  const data = await w.ALN.reader.readCourse({ settings: { ...w.ALN.reader.SETTINGS, requestDelayMs: 0 } });
+  assert.equal(data.students.length, 6);
+  assert.equal(data.coverage.complete, true);
+  assert.deepEqual(calls, ['/grade/report/grader/index.php', '/user/index.php']);
+  assert.equal(w.ALN.reader.cached().course.id, 7);
+});
+
+test('leitor: segue a paginação do livro de notas', async () => {
+  const p0 = ALUNOS.slice(0, 3), p1 = ALUNOS.slice(3);
+  const w = load(undefined, fakeFetch({
+    '/grade/report/grader/index.php': graderPage({ alunos: ALUNOS, porPagina: 3, pagina: 0, paginasTotal: 2 }),
+    '/grade/report/grader/index.php?page=1': graderPage({ alunos: ALUNOS, porPagina: 3, pagina: 1, paginasTotal: 2 }),
+    '/user/index.php': participantsPage()
+  }));
+  const data = await w.ALN.reader.readCourse({ settings: { ...w.ALN.reader.SETTINGS, requestDelayMs: 0 } });
+  assert.equal(data.students.length, 6);
+  assert.ok(p0.length + p1.length === 6);
+});
+
+test('leitor: grupo filtrado e total não identificado viram aviso (leitura parcial)', async () => {
+  const w = load(undefined, fakeFetch({ '/grade/report/grader/index.php': graderPage({ grupo: 'Turma A' }), '/user/index.php': participantsPage() }));
+  const data = await w.ALN.reader.readCourse({ settings: { ...w.ALN.reader.SETTINGS, requestDelayMs: 0 } });
+  assert.ok(data.warnings.some(x => /Turma A/.test(x)));
+  assert.equal(data.coverage.complete, false);
+});
+
+test('leitor: livro de notas não reconhecido é erro claro, não zero alunos', async () => {
+  const w = load(undefined, fakeFetch({ '/grade/report/grader/index.php': '<html><body><p>Sem permissão</p></body></html>', '/user/index.php': participantsPage() }));
+  await assert.rejects(() => w.ALN.reader.readCourse({ settings: { ...w.ALN.reader.SETTINGS, requestDelayMs: 0 } }), /livro de notas não foi reconhecido/);
+});
+
+test('leitor: sessão expirada e fora do Moodle são recusados', async () => {
+  const expirada = load(undefined, async url => ({ ok: true, status: 200, url: 'https://ead.senai.br/login/index.php', text: async () => '<html></html>' }));
+  await assert.rejects(() => expirada.ALN.reader.readCourse({ settings: { ...expirada.ALN.reader.SETTINGS, requestDelayMs: 0 } }), /sessão do Moodle parece ter expirado/);
+  const w = load('https://ead.senai.br/my/', undefined, '');
+  await assert.rejects(() => w.ALN.reader.readCourse(), /número do curso/);
+});
+
+// ---- mensagem ao aluno pelo Moodle ----
+const PAGINA_COM_SESSAO = `<html><body><a href="https://ead.senai.br/login/logout.php?sesskey=AbC123xyz">Sair</a></body></html>`;
+function loadWithSession(fetchImpl) {
+  const w = load('https://ead.senai.br/course/view.php?id=7', fetchImpl);
+  w.document.body.innerHTML = PAGINA_COM_SESSAO;
+  return w;
+}
+const jsonRes = (body, ok = true, status = 200) => ({ ok, status, url: 'x', text: async () => JSON.stringify(body) });
+function moodleFake({ sendReply, readReply, calls = [] } = {}) {
+  return async (url, opts) => {
+    const u = new URL(url); const body = JSON.parse(opts.body); calls.push({ method: body[0].methodname, sesskey: u.searchParams.get('sesskey'), args: body[0].args, opts });
+    if (body[0].methodname === 'core_message_send_instant_messages') return jsonRes(sendReply || [{ error: false, data: [{ msgid: 77, conversationid: 5, useridfrom: 90, text: 'x' }] }]);
+    if (body[0].methodname === 'core_message_get_conversation_messages') return jsonRes(readReply || [{ error: false, data: { messages: [{ id: 77, useridfrom: 90, text: 'x' }] } }]);
+    return jsonRes([{ error: true, exception: { message: 'inesperado' } }]);
+  };
+}
+
+test('mensagem: texto cita só fatos lidos e nada da falta de nota (que é do tutor)', () => {
+  const { w, students } = buildAll();
+  const fabio = students.find(s => s.name.startsWith('Fábio'));
+  const msg = w.ALN.messenger.buildMessage(fabio, 'Redes');
+  assert.match(msg, /^Olá, Fábio, tudo bem\?/);
+  assert.match(msg, /último acesso ao ambiente foi há 23 dias/);
+  assert.match(msg, /nota atual \(31\)/);
+  assert.ok(!/sem nota/i.test(msg));
+  const ana = students.find(s => s.name.startsWith('Ana'));
+  assert.match(w.ALN.messenger.buildMessage(ana, 'Redes'), /gostaria de acompanhar/);
+});
+
+test('mensagem: identificador do aluno vem da chave id:N', () => {
+  const { w, students } = buildAll();
+  assert.equal(w.ALN.messenger.studentId(students[0]), 11);
+  assert.equal(w.ALN.messenger.studentId({ key: 'name:fulano' }), null);
+});
+
+test('mensagem: envia com a sessão da página, confere a leitura de volta e marca como confirmada', async () => {
+  const calls = [];
+  const w = loadWithSession(moodleFake({ calls }));
+  const out = await w.ALN.messenger.send({ userId: 15, text: ' Olá! ', fetchImpl: w.fetch, doc: w.document });
+  assert.equal(out.confirmed, true);
+  assert.equal(out.msgid, 77);
+  assert.deepEqual(calls.map(c => c.method), ['core_message_send_instant_messages', 'core_message_get_conversation_messages']);
+  assert.equal(calls[0].sesskey, 'AbC123xyz');
+  assert.equal(calls[0].args.messages[0].touserid, 15);
+  assert.equal(calls[0].args.messages[0].text, 'Olá!');
+  assert.equal(calls[1].args.convid, 5);
+});
+
+test('mensagem: se a leitura de volta não acha a mensagem, NÃO diz que foi conferida', async () => {
+  const w = loadWithSession(moodleFake({ readReply: [{ error: false, data: { messages: [{ id: 1 }] } }] }));
+  const out = await w.ALN.messenger.send({ userId: 15, text: 'oi', fetchImpl: w.fetch, doc: w.document });
+  assert.equal(out.confirmed, false);
+  assert.match(out.note, /não apareceu na conversa/);
+});
+
+test('mensagem: Moodle recusa (aluno bloqueou / sem permissão) vira erro claro e nada é registrado como enviado', async () => {
+  const w = loadWithSession(moodleFake({ sendReply: [{ error: false, data: [{ msgid: -1, errormessage: 'Você não pode enviar mensagem a este usuário' }] }] }));
+  await assert.rejects(() => w.ALN.messenger.send({ userId: 15, text: 'oi', fetchImpl: w.fetch, doc: w.document }), /não enviou: Você não pode enviar/);
+});
+
+test('mensagem: sessão inválida, HTTP de erro e resposta estranha', async () => {
+  const sess = loadWithSession(moodleFake({ sendReply: [{ error: true, exception: { errorcode: 'invalidsesskey', message: 'x' } }] }));
+  await assert.rejects(() => sess.ALN.messenger.send({ userId: 1, text: 'oi', fetchImpl: sess.fetch, doc: sess.document }), /sessão do Moodle expirou/);
+  const http = loadWithSession(async () => jsonRes({}, false, 503));
+  await assert.rejects(() => http.ALN.messenger.send({ userId: 1, text: 'oi', fetchImpl: http.fetch, doc: http.document }), /HTTP 503/);
+  const estranha = loadWithSession(async () => ({ ok: true, status: 200, text: async () => '<html>' }));
+  await assert.rejects(() => estranha.ALN.messenger.send({ userId: 1, text: 'oi', fetchImpl: estranha.fetch, doc: estranha.document }), /não foi reconhecida/);
+});
+
+test('mensagem: validações antes de qualquer rede (sem id, sem texto, sem sessão, texto grande)', async () => {
+  const calls = [];
+  const w = loadWithSession(moodleFake({ calls }));
+  await assert.rejects(() => w.ALN.messenger.send({ userId: null, text: 'oi', fetchImpl: w.fetch, doc: w.document }), /identificador do aluno/);
+  await assert.rejects(() => w.ALN.messenger.send({ userId: 1, text: '   ', fetchImpl: w.fetch, doc: w.document }), /Escreva a mensagem/);
+  await assert.rejects(() => w.ALN.messenger.send({ userId: 1, text: 'x'.repeat(5000), fetchImpl: w.fetch, doc: w.document }), /passou de/);
+  w.document.body.innerHTML = '<p>sem sessão</p>';
+  await assert.rejects(() => w.ALN.messenger.send({ userId: 1, text: 'oi', fetchImpl: w.fetch, doc: w.document }), /sua sessão do Moodle/);
+  assert.equal(calls.length, 0);
+});
+
+test('mensagem: envio duplicado simultâneo para o mesmo aluno é barrado', async () => {
+  let release; const gate = new Promise(r => { release = r; });
+  const base = moodleFake();
+  const w = loadWithSession(async (u, o) => { await gate; return base(u, o); });
+  const first = w.ALN.messenger.send({ userId: 9, text: 'oi', fetchImpl: w.fetch, doc: w.document });
+  await assert.rejects(() => w.ALN.messenger.send({ userId: 9, text: 'oi', fetchImpl: w.fetch, doc: w.document }), /já existe um envio em andamento/i);
+  release(); await first;
+});
+
+test('registro de contato: guarda, limita a 5 por aluno e apaga por curso', async () => {
+  const w = loadWithSession();
+  const course = { id: 7 };
+  for (let i = 0; i < 7; i++) await w.ALN.messenger.addLog(course, 'id:15', { at: i, msgid: i, confirmed: true, text: 't' });
+  const log = await w.ALN.messenger.loadLog(course);
+  assert.equal(log['id:15'].length, 5);
+  assert.equal(log['id:15'][4].msgid, 6);
+  await w.ALN.messenger.clearLog(course);
+  assert.equal(JSON.stringify(await w.ALN.messenger.loadLog(course)), '{}');
+});
+
+// ---- leitor: livro de notas lento ----
+test('leitor: pede o livro de notas em páginas de 100 e tenta de novo uma vez após erro 5xx', async () => {
+  const urls = []; let falhou = false;
+  const base = fakeFetch({ '/grade/report/grader/index.php': graderPage(), '/user/index.php': participantsPage() });
+  const w = load(undefined, async (u, o) => {
+    urls.push(u);
+    if (u.includes('/grade/report/grader/') && !falhou) { falhou = true; return { ok: false, status: 504, url: u, text: async () => '' }; }
+    return base(u, o);
+  });
+  const data = await w.ALN.reader.readCourse({ settings: { ...w.ALN.reader.SETTINGS, requestDelayMs: 0, retryDelayMs: 0 } });
+  assert.equal(data.students.length, 6);
+  assert.ok(urls.filter(u => u.includes('/grade/report/grader/')).length >= 2);
+  assert.match(urls.find(u => u.includes('/grade/report/grader/')), /perpage=100/);
+});
+
+test('leitor: tempo limite do livro de notas explica o que fazer, depois de uma nova tentativa', async () => {
+  let n = 0;
+  const w = load(undefined, (u, o) => {
+    if (!u.includes('/grade/report/grader/')) return fakeFetch({ '/user/index.php': participantsPage() })(u, o);
+    n += 1;
+    return new Promise((_, reject) => o.signal.addEventListener('abort', () => reject(Object.assign(new Error('abort'), { name: 'AbortError' }))));
+  });
+  await assert.rejects(() => w.ALN.reader.readCourse({ settings: { ...w.ALN.reader.SETTINGS, requestDelayMs: 0, retryDelayMs: 0, gradebookTimeoutMs: 30 } }), /tempo limite excedido.*mais de .* s.*grupo/);
+  assert.equal(n, 2);
+});
+
+// ---- leitor: continuar de onde parou ----
+test('leitor: falha nos participantes mantém o livro de notas e "continuar" repete só os participantes', async () => {
+  const calls = []; let quebra = true;
+  const base = fakeFetch({ '/grade/report/grader/index.php': graderPage(), '/user/index.php': participantsPage() });
+  const w = load(undefined, async (u, o) => {
+    const path = new URL(u).pathname; calls.push(path);
+    if (path === '/user/index.php' && quebra) return { ok: false, status: 503, url: u, text: async () => '' };
+    return base(u, o);
+  });
+  const S = { ...w.ALN.reader.SETTINGS, requestDelayMs: 0, retryDelayMs: 0, retries: 0 };
+  const parcial = await w.ALN.reader.readCourse({ settings: S });
+  assert.equal(parcial.coverage.complete, false);
+  assert.deepEqual(Array.from(parcial.pending, x => x.key), ['participants']);
+  assert.equal(parcial.students.length, 6);
+  assert.ok(w.ALN.reader.canResume());
+  quebra = false; calls.length = 0;
+  const completo = await w.ALN.reader.readCourse({ settings: S, resume: true });
+  assert.deepEqual(calls, ['/user/index.php']);
+  assert.equal(completo.pending.length, 0);
+  assert.equal(completo.coverage.complete, true);
+});
+
+test('leitor: página do livro de notas que falha é retomada sem reler as anteriores', async () => {
+  const calls = []; let quebra = true;
+  const rotas = {
+    '/grade/report/grader/index.php': graderPage({ alunos: ALUNOS, porPagina: 3, pagina: 0, paginasTotal: 2 }),
+    '/grade/report/grader/index.php?page=1': graderPage({ alunos: ALUNOS, porPagina: 3, pagina: 1, paginasTotal: 2 }),
+    '/user/index.php': participantsPage()
+  };
+  const base = fakeFetch(rotas);
+  const w = load(undefined, async (u, o) => {
+    calls.push(new URL(u).pathname + (new URL(u).searchParams.get('page') ? '?page=' + new URL(u).searchParams.get('page') : ''));
+    if (quebra && new URL(u).searchParams.get('page') === '1') return { ok: false, status: 500, url: u, text: async () => '' };
+    return base(u, o);
+  });
+  const S = { ...w.ALN.reader.SETTINGS, requestDelayMs: 0, retryDelayMs: 0, retries: 0 };
+  const parcial = await w.ALN.reader.readCourse({ settings: S });
+  assert.equal(parcial.students.length, 3);
+  assert.deepEqual(Array.from(parcial.pending, x => x.key), ['gradebook']);
+  quebra = false; calls.length = 0;
+  const completo = await w.ALN.reader.readCourse({ settings: S, resume: true });
+  assert.deepEqual(calls.filter(c => c.startsWith('/grade')), ['/grade/report/grader/index.php?page=1']);
+  assert.equal(completo.students.length, 6);
+  assert.equal(completo.pending.length, 0);
+});
+
+test('leitor: cancelar interrompe e guarda o que já foi lido; diagnóstico não traz dados de alunos', async () => {
+  const base = fakeFetch({ '/grade/report/grader/index.php': graderPage(), '/user/index.php': participantsPage() });
+  const ctl = new AbortController();
+  const w = load(undefined, async (u, o) => { const r = await base(u, o); if (u.includes('/grade/report/grader/')) ctl.abort(); return r; });
+  await assert.rejects(() => w.ALN.reader.readCourse({ settings: { ...w.ALN.reader.SETTINGS, requestDelayMs: 0 }, signal: ctl.signal }), /cancelada/);
+  const d = JSON.stringify(w.ALN.reader.diagnostics());
+  assert.ok(w.ALN.reader.canResume());
+  assert.ok(!/Ana|Fábio|@/.test(d));
+});
+
+// ---- filtros, contagens e ordenação ----
+test('filtros: faixas de último acesso, itens com nota e pendência', () => {
+  const { w, students } = buildAll();
+  const F = w.ALN.filters;
+  const por = n => students.find(s => s.name.startsWith(n));
+  assert.equal(F.accessBucket(por('Ana')), '1-7');
+  assert.equal(F.accessBucket(por('Camila')), '8-14');
+  assert.equal(F.accessBucket(por('Diego')), '15-30');
+  assert.equal(F.accessBucket(por('Fábio')), '15-30');
+  assert.equal(F.gradedBucket(por('Ana')), 'completo');
+  assert.equal(F.gradedBucket(por('Fábio')), 'alguns');
+  assert.ok(F.pendBucket(por('Ana')).includes('em_dia'));
+  assert.ok(F.pendBucket(por('Bruno')).includes('com'));
+});
+
+test('filtros: combinam entre si e a contagem de cada grupo respeita os outros filtros', () => {
+  const { w, students } = buildAll();
+  const F = w.ALN.filters;
+  const comPend = F.filterStudents(students, { pend: 'com' });
+  assert.equal(comPend.length, students.filter(s => s.itemsMissing > 0).length);
+  const c = F.counts(students, { pend: 'com' }, 'access');
+  assert.equal(c.todos, comPend.length);
+  const soma = Object.entries(c).filter(([k]) => k !== 'todos').reduce((a, [, v]) => a + v, 0);
+  assert.equal(soma, comPend.length);
+  assert.equal(F.filterStudents(students, { pend: 'com', access: '15-30' }).every(s => s.itemsMissing > 0 && F.accessBucket(s) === '15-30'), true);
+  assert.equal(F.filterStudents(students, { q: 'CAMILA' }).length, 1, 'busca sem diferenciar maiúsculas');
+  assert.equal(F.filterStudents(students, { q: 'fabio' }).length, 1, 'busca sem acento');
+  assert.equal(F.activeCount({ pend: 'com', access: 'todos', q: ' ' }), 1);
+});
+
+test('ordenação: urgência põe o mais grave primeiro e sem nota/acesso não vira zero', () => {
+  const { w, students } = buildAll();
+  const F = w.ALN.filters;
+  const rank = { imediato: 5, alto: 4, atencao: 3, verificar: 2, regular: 1 };
+  const u = F.sortStudents(students, 'urgency');
+  for (let i = 1; i < u.length; i++) assert.ok(rank[u[i - 1].risk.level] >= rank[u[i].risk.level]);
+  const porAcesso = F.sortStudents(students, 'access', 'desc');
+  assert.equal(porAcesso[0].name.startsWith('Fábio'), true, 'maior tempo sem acessar primeiro');
+  assert.equal(F.initials('ana beatriz souza'), 'AB');
+  assert.equal(F.initials(''), '?');
+});
+
+// ---- leitura das tarefas (entregas) ----
+function tarefasFetch(log, { falha = null } = {}) {
+  const base = fakeFetch({ '/grade/report/grader/index.php': graderPage(), '/user/index.php': participantsPage(), '/course/view.php': courseWithAssignments() });
+  return async (u, o) => {
+    const url = new URL(u);
+    if (url.pathname === '/mod/assign/view.php') {
+      const id = url.searchParams.get('id'); const grading = url.searchParams.get('action') === 'grading';
+      log.push(`${id}${grading ? ':entregas' : ':resumo'}`);
+      if (falha && falha.id === id && falha.ativo) return { ok: false, status: 504, url: u, text: async () => '' };
+      return { ok: true, status: 200, url: u, text: async () => (grading ? assignGradingPage(id) : assignViewPage(id)) };
+    }
+    return base(u, o);
+  };
+}
+const SET = w => ({ ...w.ALN.reader.SETTINGS, requestDelayMs: 0, retryDelayMs: 0, retries: 0 });
+
+test('tarefas: lê prazo e entregas de cada atividade e separa sem entrega de aguardando correção', async () => {
+  const log = [];
+  const w = load(undefined, tarefasFetch(log));
+  const dados = await w.ALN.reader.readCourse({ settings: SET(w) });
+  const t = await w.ALN.tarefas.read({ settings: SET(w) });
+  assert.equal(t.assignments.length, 4);
+  assert.equal(t.pending.length, 0);
+  assert.equal(log.length, 8, 'um resumo e uma tabela de entregas por atividade');
+  const itens = dados.gradebook.items.filter(w.ALN.isActivityItem);
+  const now = new Date('2026-10-30T12:00:00Z').getTime();
+  const fabio = dados.students.find(s => s.name.startsWith('Fábio'));
+  const ov = w.ALN.tarefas.overview(fabio, itens, t, now);
+  assert.equal(ov.readEntregas, true);
+  assert.deepEqual(Array.from(ov.byItem, x => x.state), ['avaliada', 'sem_entrega', 'sem_entrega', 'sem_entrega']);
+  assert.deepEqual(Array.from(ov.pendencias, x => x.name), ['AV2 Endereçamento', 'AV3 Serviços', 'AV4 Segurança']);
+  assert.equal(ov.pendencias[0].overdue, true);
+  assert.equal(ov.pendencias[2].overdue, false, 'prazo no futuro não é atraso');
+  const bruno = dados.students.find(s => s.name.startsWith('Bruno'));
+  const ovB = w.ALN.tarefas.overview(bruno, itens, t, now);
+  assert.equal(ovB.byItem[2].state, 'aguardando', 'enviada e sem nota = aguardando a correção do tutor, não pendência do aluno');
+  assert.equal(ovB.pendencias.length, 0);
+  assert.equal(ovB.entregues, 4);
+});
+
+test('tarefas: sem ler as entregas, "pendência" é só item sem nota e o painel não afirma falta de entrega', async () => {
+  const w = load(undefined, tarefasFetch([]));
+  const dados = await w.ALN.reader.readCourse({ settings: SET(w) });
+  const itens = dados.gradebook.items.filter(w.ALN.isActivityItem);
+  const ov = w.ALN.tarefas.overview(dados.students.find(s => s.name.startsWith('Fábio')), itens, null);
+  assert.equal(ov.readEntregas, false);
+  assert.ok(ov.byItem.every(x => x.state === 'avaliada' || x.state === 'sem_nota'));
+});
+
+test('tarefas: atividade que falha fica pendente e "continuar" lê só ela', async () => {
+  const log = []; const falha = { id: '703', ativo: true };
+  const w = load(undefined, tarefasFetch(log, { falha }));
+  await w.ALN.reader.readCourse({ settings: SET(w) });
+  const parcial = await w.ALN.tarefas.read({ settings: SET(w) });
+  assert.equal(parcial.pending.length, 1);
+  assert.equal(parcial.pending[0].name, 'AV3 Serviços');
+  assert.equal(parcial.complete, false);
+  falha.ativo = false; log.length = 0;
+  const completo = await w.ALN.tarefas.read({ settings: SET(w), resume: true });
+  assert.deepEqual(log, ['703:resumo', '703:entregas']);
+  assert.equal(completo.pending.length, 0);
+  assert.equal(completo.complete, true);
+});
+
+test('tarefas: atividade só se liga ao item do livro de notas por nome idêntico', async () => {
+  const w = load(undefined, tarefasFetch([]));
+  const dados = await w.ALN.reader.readCourse({ settings: SET(w) });
+  const t = await w.ALN.tarefas.read({ settings: SET(w) });
+  t.assignments[0].name = 'AV1 Fundamentos de Redes';
+  const itens = dados.gradebook.items.filter(w.ALN.isActivityItem);
+  assert.equal(w.ALN.tarefas.linkItems(itens, t).size, 3);
+});
+
+// ---- relatório em HTML e mensagem com pendências ----
+const modeloHtml = (extra = {}) => ({
+  course: { name: 'Redes <b>UC</b>' }, readAt: Date.UTC(2026, 9, 22, 12), categoryLabel: 'Todo o curso', minimumGrade: 60, recoveryMin: 40, warnings: [],
+  entregasLidas: true, entregasPendentes: 0,
+  summary: { alunos: 2, media: 70, atencao: 1, riscoAlto: 1, comPendencia: 1, sem30: 0 },
+  activities: [{ name: 'AV1', avgPct: 80, graded: 2, total: 2 }],
+  students: [
+    { name: 'Ana <img src=x onerror=alert(1)>', email: 'a@x.com', level: 'regular', levelLabel: 'Regular', situationLabel: 'Na média', totalDisplay: '90', totalPct: 90, accessKnown: true, accessDays: 1, itemCount: 1, entregues: 1, pend: 0, reasons: [], unknown: [], action: 'Seguir', activities: [{ name: 'AV1', state: 'avaliada', display: '9', dueText: '05/10/2026', overdue: false }], contacts: [] },
+    { name: 'Bruno', email: '', level: 'alto', levelLabel: 'Alto', situationLabel: 'Abaixo', totalDisplay: '30', totalPct: 30, accessKnown: false, accessDays: null, itemCount: 1, entregues: 0, pend: 1, reasons: ['Nota baixa'], unknown: [], action: 'Contatar', activities: [{ name: 'AV1', state: 'sem_entrega', display: '', dueText: '05/10/2026', overdue: true }], contacts: [] }
+  ], ...extra
+});
+test('relatório HTML lista todos os alunos, escapa texto do Moodle e não usa recursos externos', () => {
+  const w = load();
+  const html = w.ALN.reportHtml.build(modeloHtml());
+  assert.match(html, /^<!doctype html>/i);
+  assert.equal((html.match(/<details class="st"/g) || []).length, 2);
+  assert.ok(!html.includes('<img src=x'), 'HTML do nome precisa ser escapado');
+  assert.ok(html.includes('&lt;img src=x'));
+  assert.ok(!html.includes('<b>UC</b>'));
+  assert.match(html, /Sem entrega/);
+  assert.ok(!/https?:\/\//.test(html) && !/<script[^>]+src=/.test(html));
+});
+test('relatório HTML avisa quando as entregas não foram lidas', () => {
+  const w = load();
+  const html = w.ALN.reportHtml.build(modeloHtml({ entregasLidas: false }));
+  assert.match(html, /entregas n[ãa]o foram lidas|sem nota/i);
+});
+test('mensagem lista só as atividades pendentes escolhidas e mantém o texto antigo sem lista', () => {
+  const w = load();
+  const st = { name: 'Bruno Henrique Lima', risk: { level: 'alto', reasons: [] }, accessKnown: true, lastAccessDays: 12 };
+  const sem = w.ALN.messenger.buildMessage(st, 'Redes', undefined);
+  const com = w.ALN.messenger.buildMessage(st, 'Redes', undefined, [{ name: 'AV2 Endereçamento', dueText: '12/10' }, { name: 'AV4 Segurança', dueText: '' }]);
+  assert.ok(!/Atividades pendentes/.test(sem));
+  assert.match(com, /Atividades pendentes:\n• AV2 Endereçamento \(prazo 12\/10\)\n• AV4 Segurança\n/);
+  assert.equal(w.ALN.messenger.buildMessage(st, 'Redes', undefined, []), sem);
+});

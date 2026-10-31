@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blocos EaD SENAI</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <header class="bar" role="toolbar" aria-label="Ações do programa">
+    <button id="run" class="ib primary" type="button" aria-label="Executar" title="Executar o programa (nada roda sozinho)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>
+    </button>
+    <button id="stop" class="ib" type="button" aria-label="Parar" title="Parar a execução" disabled>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6z"/></svg>
+    </button>
+    <label class="sel"><span class="sr">Exemplos</span>
+      <select id="examples" aria-label="Exemplos"><option value="">Exemplos…</option></select>
+    </label>
+    <label class="sel"><span class="sr">Meus programas</span>
+      <select id="saved" aria-label="Meus programas"><option value="">Meus programas…</option></select>
+    </label>
+    <input id="name" type="text" maxlength="60" placeholder="Nome do programa" aria-label="Nome do programa">
+    <button id="save" class="btn" type="button">Salvar</button>
+    <button id="delete" class="btn" type="button" disabled>Excluir</button>
+    <button id="clear" class="btn" type="button">Limpar</button>
+  </header>
+  <main id="editor" aria-label="Editor de blocos"></main>
+  <section class="log" aria-label="Registro de execução">
+    <div class="log-head"><strong>Registro</strong><span id="state" role="status">Pronto. Nada roda sozinho.</span></div>
+    <ol id="log"></ol>
+  </section>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

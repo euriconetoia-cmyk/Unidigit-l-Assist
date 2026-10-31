@@ -1,0 +1,22 @@
+{
+  "name": "blocos-ead",
+  "version": "0.8.1",
+  "private": true,
+  "type": "module",
+  "description": "Extensão do Chrome com programação por blocos (Blockly) para as ferramentas EaD SENAI.",
+  "scripts": {
+    "sync": "node scripts/sync-importar-notas.mjs && node scripts/sync-assistente.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.js",
+    "validate": "node scripts/validate.mjs",
+    "package": "node scripts/package.mjs",
+    "test:e2e": "node tests/e2e/lateral.mjs",
+    "build:blocos": "node scripts/build.mjs --with-blocos",
+    "test:e2e:blocos": "node tests/e2e/blocos.mjs"
+  },
+  "devDependencies": {
+    "blockly": "^13.4.0",
+    "esbuild": "^0.25.0",
+    "jsdom": "^29.1.1"
+  }
+}

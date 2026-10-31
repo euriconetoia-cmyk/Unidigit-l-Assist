@@ -1,0 +1,33 @@
+{
+  "fromVersion": "1.5.1",
+  "scripts": [
+    "src/core/namespace.js",
+    "src/core/text.js",
+    "src/core/limits.js",
+    "src/core/grade.js",
+    "src/core/csv.js",
+    "src/core/xlsx.js",
+    "src/core/records.js",
+    "src/core/match.js",
+    "src/core/plan.js",
+    "src/core/batch.js",
+    "src/core/zip-writer.js",
+    "src/core/vigencia.js",
+    "src/page/moodle-grading.js",
+    "src/ui/dom.js",
+    "src/radar/governor.js",
+    "src/radar/cache.js",
+    "src/radar/moodle-pages.js",
+    "src/radar/scanner.js",
+    "src/radar/downloads.js",
+    "src/radar/radar-ui.js",
+    "src/batch/loader.js",
+    "src/batch/runner.js",
+    "src/batch/batch-ui.js",
+    "src/core/templates.js",
+    "src/ui/panel.js"
+  ],
+  "css": [
+    "src/styles.css"
+  ]
+}
