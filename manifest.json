@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Ferramentas EaD SENAI",
-  "version": "0.8.1",
-  "description": "Botão lateral nas páginas do Moodle com as ferramentas EaD do SENAI (pendências, correção e mais). Nada roda sozinho.",
+  "name": "Unidigit@l Assist",
+  "version": "0.9.0",
+  "description": "Ferramentas do tutor EaD para o Moodle (correção, pendências, alunos e relatórios) — botão lateral. Nada roda sozinho.",
   "minimum_chrome_version": "108",
   "permissions": [
     "scripting",

@@ -19,7 +19,7 @@ test('o botão lateral aparece sozinho, mas o menu fica fechado e nada é enviad
   const { ui, sent } = mount();
   assert.ok(ui.tab);
   assert.equal(ui.isOpen(), false);
-  assert.equal(ui.tab.getAttribute('aria-label'), 'Abrir ferramentas EaD');
+  assert.equal(ui.tab.getAttribute('aria-label'), 'Abrir Unidigit@l Assist');
   assert.equal(ui.tab.getAttribute('aria-expanded'), 'false');
   assert.deepEqual(sent, []);
 });
@@ -122,10 +122,10 @@ test('menu em cards: seções, painel inerte quando fechado e rótulo do botão 
   ui.tab.click();
   assert.equal(ui.panel.hasAttribute('inert'), false);
   assert.equal(ui.tab.getAttribute('aria-expanded'), 'true');
-  assert.equal(ui.tab.getAttribute('aria-label'), 'Fechar ferramentas EaD');
+  assert.equal(ui.tab.getAttribute('aria-label'), 'Fechar Unidigit@l Assist');
   ui.tab.click();
   assert.equal(ui.panel.hasAttribute('inert'), true);
-  assert.equal(ui.tab.getAttribute('aria-label'), 'Abrir ferramentas EaD');
+  assert.equal(ui.tab.getAttribute('aria-label'), 'Abrir Unidigit@l Assist');
 });
 
 test('a caixa do menu não bloqueia cliques na página: só o botão e o painel aberto recebem eventos', () => {
@@ -175,4 +175,14 @@ test('navegação pedida pela Correção continua na tela de avaliação; marca 
   const curso = mountAt('https://ead.senai.br/course/view.php?id=7', w => w.sessionStorage.setItem('imn_verify_v1', '{}'));
   await flush();
   assert.equal(curso.sent.length, 0, 'fora de atividade nada é retomado');
+});
+
+test('cartão da estrela: escondido sem armazenamento e dispensável', () => {
+  const { ui } = mount();
+  const star = ui.shadow.querySelector('.star');
+  assert.equal(star.hidden, true);
+  ui.open(); ui.close(); ui.open(); ui.close(); ui.open();
+  assert.equal(star.hidden, true); // sem chrome.storage nada é contado nem mostrado
+  assert.equal(star.querySelector('a').getAttribute('href'), 'https://github.com/euriconetoia-cmyk/Unidigit-l-Assist');
+  assert.equal(star.querySelector('a').getAttribute('rel'), 'noopener noreferrer');
 });

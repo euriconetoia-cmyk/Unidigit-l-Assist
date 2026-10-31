@@ -44,7 +44,15 @@ h2 { margin: 0 0 2px; font-size: 18px; }
 .tag { margin-left: auto; padding: 1px 8px; border-radius: 8px; font-size: 11px; white-space: nowrap; background: var(--line); color: var(--m); }
 .status { min-height: 0; margin: 8px 0 0; color: var(--m); font-size: 12.5px; }
 .status.err { padding: 8px 10px; border-radius: 8px; background: #fde8e5; color: #8e1b1b; font-weight: 600; }
-button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.star { margin: 12px 0 0; padding: 10px 12px; border: 1px solid var(--hb); border-radius: 12px; background: var(--hover); font-size: 12.5px; }
+.star[hidden] { display: none; }
+.star b { display: block; margin-bottom: 2px; font-size: 13px; }
+.star p { margin: 0 0 8px; color: var(--m); }
+.star .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.star a, .star button { min-height: 32px; padding: 4px 12px; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+.star a { background: var(--p); color: #fff; border: 1px solid var(--p); }
+.star button { background: transparent; color: var(--m); border: 1px solid var(--line); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 @media (max-width: 540px) { .wrap { right: 12px; bottom: 80px; } .tab { width: 52px; height: 52px; } .panel { padding: 14px; } }
 @media print { .wrap { display: none; } }
 @media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
@@ -91,12 +99,19 @@ export function mountLauncher(doc = document, send = message => chrome.runtime.s
     });
     sections.push(el(doc, 'div', { class: 'sec' }, grupo), el(doc, 'div', { class: `items g-${slug(grupo)}` }, ...buttons));
   });
-  const panel = el(doc, 'section', { class: 'panel', id: 'hub-panel', 'aria-label': 'Ferramentas EaD', inert: true },
-    el(doc, 'h2', {}, 'Ferramentas EaD'),
+  // Pedido gentil e único de estrela no GitHub: aparece a partir da 3ª abertura do menu e some para sempre ao responder.
+  const dispensar = el(doc, 'button', { type: 'button' }, 'Agora não');
+  const jaFui = el(doc, 'button', { type: 'button' }, 'Já dei ⭐');
+  const star = el(doc, 'div', { class: 'star', hidden: true, role: 'region', 'aria-label': 'Apoie o projeto' },
+    el(doc, 'b', {}, 'Gostou do Unidigit@l Assist?'),
+    el(doc, 'p', {}, 'Uma ⭐ no GitHub ajuda quem desenvolve a continuar. Leva 5 segundos e não pede nada além disso.'),
+    el(doc, 'div', { class: 'row' }, el(doc, 'a', { href: 'https://github.com/euriconetoia-cmyk/Unidigit-l-Assist', target: '_blank', rel: 'noopener noreferrer' }, 'Dar uma ⭐'), jaFui, dispensar));
+  const panel = el(doc, 'section', { class: 'panel', id: 'hub-panel', 'aria-label': 'Unidigit@l Assist', inert: true },
+    el(doc, 'h2', {}, 'Unidigit@l Assist'),
     el(doc, 'p', { class: 'hint' }, 'Nada roda sozinho: cada ferramenta só age quando você clica.'),
-    ...sections, status);
-  const tab = el(doc, 'button', { type: 'button', class: 'tab', 'aria-label': 'Abrir ferramentas EaD', 'aria-expanded': 'false', 'aria-controls': 'hub-panel', title: 'Ferramentas EaD' }, icon(doc, 'ferr', 'cap'), icon(doc, 'close', 'x'));
-  const wrap = el(doc, 'nav', { class: 'wrap', 'aria-label': 'Ferramentas EaD' }, panel, tab);
+    ...sections, status, star);
+  const tab = el(doc, 'button', { type: 'button', class: 'tab', 'aria-label': 'Abrir Unidigit@l Assist', 'aria-expanded': 'false', 'aria-controls': 'hub-panel', title: 'Unidigit@l Assist' }, icon(doc, 'ferr', 'cap'), icon(doc, 'close', 'x'));
+  const wrap = el(doc, 'nav', { class: 'wrap', 'aria-label': 'Unidigit@l Assist' }, panel, tab);
   shadow.append(style, wrap);
 
   let busy = false;
@@ -106,10 +121,23 @@ export function mountLauncher(doc = document, send = message => chrome.runtime.s
     wrap.classList.toggle('open', value);
     panel.toggleAttribute('inert', !value);
     tab.setAttribute('aria-expanded', String(value));
-    tab.setAttribute('aria-label', value ? 'Fechar ferramentas EaD' : 'Abrir ferramentas EaD');
+    tab.setAttribute('aria-label', value ? 'Fechar Unidigit@l Assist' : 'Abrir Unidigit@l Assist');
   };
-  const open = () => { setStatus(''); setOpen(true); (items.find(i => i.getAttribute('aria-disabled') !== 'true') || tab).focus(); };
+  const open = () => { setStatus(''); contarAbertura(); setOpen(true); (items.find(i => i.getAttribute('aria-disabled') !== 'true') || tab).focus(); };
   const close = () => { setOpen(false); tab.focus(); };
+
+  const KEY = 'hub.estrela.v1';
+  const area = (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) ? chrome.storage.local : null;
+  let estrela = { n: 0, fim: false };
+  const salvar = () => { try { if (area) area.set({ [KEY]: estrela }); } catch (_) { /* sem armazenamento */ } };
+  const encerrar = () => { estrela.fim = true; star.hidden = true; salvar(); };
+  dispensar.addEventListener('click', encerrar); jaFui.addEventListener('click', encerrar);
+  star.querySelector('a').addEventListener('click', () => setTimeout(encerrar, 0));
+  function contarAbertura() {
+    if (!area || estrela.fim) return;
+    estrela.n += 1; star.hidden = estrela.n < 3; salvar();
+  }
+  try { if (area) area.get(KEY, r => { const v = r && r[KEY]; if (v && typeof v.n === 'number') estrela = { n: v.n, fim: Boolean(v.fim) }; }); } catch (_) { /* sem armazenamento */ }
 
   async function run(app, button, motivo) {
     if (!app.disponivel) { setStatus(`${app.nome} ainda não está disponível.`); return; }

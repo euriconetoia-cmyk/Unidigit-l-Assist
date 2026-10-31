@@ -96,7 +96,7 @@ ${warn.map(w => `<div class="warn">${esc(w)}</div>`).join('')}
 <div class="tools"><input id="q" type="search" placeholder="Buscar aluno ou e-mail" aria-label="Buscar aluno ou e-mail">${chips}<button type="button" class="pbtn" id="pr">Imprimir / salvar PDF</button></div>
 <p class="count" id="ct"></p>
 ${m.students.map((s, i) => studentHtml(s, i, m)).join('\n')}
-<footer>Gerado pela extensão Ferramentas EaD SENAI (somente leitura; nada foi gravado no Moodle). Os dados são do momento da leitura e ficam só neste arquivo. “—” significa sem nota, nunca zero. Por Eurico Cirilo.</footer></div><script>${SCRIPT}</script></body></html>`;
+<footer>Feito com Unidigit@l Assist · By Eurico Cirilo · github.com/euriconetoia-cmyk/Unidigit-l-Assist (somente leitura; nada foi gravado no Moodle). Os dados são do momento da leitura e ficam só neste arquivo. “—” significa sem nota, nunca zero.</footer></div><script>${SCRIPT}</script></body></html>`;
   }
 
   ALN.reportHtml = { build, esc };

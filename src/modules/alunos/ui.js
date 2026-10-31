@@ -146,7 +146,7 @@ nav button.off{opacity:.55}
     function cancelRead() { if (st.abort) st.abort.abort(); }
     async function copyDiag(e) {
       const b = e.currentTarget;
-      const text = JSON.stringify({ ferramenta: 'Ferramentas EaD SENAI', leitura: ALN.reader.diagnostics(), entregas: ALN.tarefas.diagnostics(), erro: st.error || null, avisos: st.data ? st.data.warnings : [] }, null, 2);
+      const text = JSON.stringify({ ferramenta: 'Unidigit@l Assist', leitura: ALN.reader.diagnostics(), entregas: ALN.tarefas.diagnostics(), erro: st.error || null, avisos: st.data ? st.data.warnings : [] }, null, 2);
       try { await root.navigator.clipboard.writeText(text); b.textContent = 'Diagnóstico copiado'; } catch (_) { b.textContent = 'Não consegui copiar'; }
       root.setTimeout(() => { b.textContent = 'Copiar diagnóstico'; }, 2500);
     }

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.0 — 2026-10-31
+
+### Novo
+- **Nome Unidigit@l Assist** na extensão (manifest, botão lateral e menu).
+- **Pedido gentil de ⭐** no menu: aparece a partir da 3ª abertura, uma única vez, e some para sempre ao responder ("Dar uma ⭐", "Já dei" ou "Agora não"). Não bloqueia nada.
+- Rodapé dos relatórios HTML: "Feito com Unidigit@l Assist · By Eurico Cirilo" com o endereço do projeto.
+- **Licença MIT** adicionada ao repositório.
+
 ## 0.8.1 — 2026-10-31
 
 ### Melhorado

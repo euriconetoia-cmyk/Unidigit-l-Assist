@@ -4,7 +4,9 @@ Ferramentas do tutor EaD dentro do Moodle: **corrigir, cobrar pendências, acomp
 
 > **Nada roda sozinho.** Cada ferramenta só age quando você clica, e nada é gravado no Moodle sem a sua confirmação. Os dados dos alunos não saem do seu navegador.
 
-> Nome do projeto: *Unidigit@l Assist*. Dentro da extensão o nome ainda aparece como "Ferramentas EaD SENAI" até a versão do rebranding.
+> **Unidigit@l Assist** — ferramentas do tutor EaD para o Moodle.
+>
+> ⭐ Se a ferramenta ajuda no seu dia a dia, deixe uma estrela neste repositório: ajuda quem desenvolve a continuar.
 
 ## O que faz
 
@@ -62,4 +64,4 @@ icons/          ícones da extensão
 
 Idealização e desenvolvimento: **Eurico Cirilo**. Importador de Notas 0.8.1: coautoria de **Julio Alves**. Detalhes em [`CREDITOS.md`](docs/projeto/CREDITOS.md).
 
-Uso interno; licença ainda não definida (todos os direitos reservados até a decisão do autor).
+Licença [MIT](LICENSE) — © 2026 Eurico Cirilo. Uso, cópia e modificação livres, mantendo o aviso de copyright.
