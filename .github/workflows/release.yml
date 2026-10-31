@@ -1,0 +1,42 @@
+name: Release
+
+# Publica o ZIP da extensão quando uma tag de versão (vX.Y.Z) é enviada.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  publicar:
+    name: Publicar versão
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Conferir que a tag é a versão do manifesto
+        run: |
+          versao="$(node -p "require('./manifest.json').version")"
+          if [ "v${versao}" != "${GITHUB_REF_NAME}" ]; then
+            echo "A tag ${GITHUB_REF_NAME} não bate com a versão do manifesto (${versao})." >&2
+            exit 1
+          fi
+      - run: npm test
+      - run: npm run build
+      - run: npm run validate
+      - run: npm run package
+      - name: Notas da versão (trecho do CHANGELOG)
+        run: |
+          versao="${GITHUB_REF_NAME#v}"
+          awk -v v="$versao" '$0 ~ "^## "v" " {p=1; next} /^## / && p {exit} p' CHANGELOG.md > notas.md
+          [ -s notas.md ] || echo "Veja o CHANGELOG.md." > notas.md
+      - name: Criar release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" dist/*.zip --title "Unidigit@l Assist ${GITHUB_REF_NAME}" --notes-file notas.md

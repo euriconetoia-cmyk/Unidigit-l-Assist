@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    name: Testes, build e validação
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Testes unitários
+        run: npm test
+      - name: Build da extensão
+        run: npm run build
+      - name: Validar manifesto, permissões e arquivos
+        run: npm run validate
+      - name: Empacotar
+        run: npm run package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unidigital-assist-zip
+          path: dist/*.zip
+          retention-days: 14

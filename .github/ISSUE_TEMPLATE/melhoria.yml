@@ -1,0 +1,16 @@
+name: Ideia ou melhoria
+description: Sugerir algo novo ou melhorar o que existe
+labels: [melhoria]
+body:
+  - type: textarea
+    id: problema
+    attributes: { label: Qual problema do dia a dia isso resolve? }
+    validations: { required: true }
+  - type: textarea
+    id: ideia
+    attributes: { label: Como você imagina que funcionaria? }
+  - type: dropdown
+    id: ferramenta
+    attributes:
+      label: Onde se encaixa
+      options: [Pendências, Correção, Acompanhamento, Alunos e notas, Relatório da UC, Menu lateral, Nova ferramenta]

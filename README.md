@@ -1,20 +1,54 @@
-# Ferramentas EaD SENAI
+# Unidigit@l Assist
 
-Extensão do Chrome (Manifest V3, Chrome 114+) para montar, **com blocos**, o que as ferramentas EaD devem fazer no Moodle (SENAI e FIEG) e executar só quando você clicar.
+Ferramentas do tutor EaD dentro do Moodle: **corrigir, cobrar pendências, acompanhar alunos e gerar relatórios** sem sair da tela. É uma extensão do Chrome (Manifest V3) para os ambientes `ead.senai.br` e `ead.fieg.com.br`.
 
-## Usar
-1. Abra qualquer página do Moodle (SENAI ou FIEG): o botão **FERRAMENTAS** fica na lateral direita.
-2. Clique nele e escolha: **Pendências** (abre a barra do radar; clique na lupa para buscar), **Correção** (lançamento de notas por CSV), **Acompanhamento**, **Alunos e notas** ou **Relatório da UC** (painel só de leitura; clique em **Ler** para buscar os dados do curso). Automação por blocos está "em breve".
-3. Pendências e Correção funcionam em páginas de **curso** ou de **categoria**; o painel de alunos e notas, em qualquer página que tenha o número do curso no endereço. O que exige confirmação (baixar, lançar notas) continua pedindo na página.
-4. Se a extensão **Importar Notas** original estiver ativa, desative-a: as duas desenhariam a mesma barra.
+> **Nada roda sozinho.** Cada ferramenta só age quando você clica, e nada é gravado no Moodle sem a sua confirmação. Os dados dos alunos não saem do seu navegador.
+
+> Nome do projeto: *Unidigit@l Assist*. Dentro da extensão o nome ainda aparece como "Ferramentas EaD SENAI" até a versão do rebranding.
+
+## O que faz
+
+| Ferramenta | Onde funciona | O que entrega |
+|---|---|---|
+| **Pendências** | Curso e categoria | Radar do que falta corrigir, por atividade; baixa os envios e mostra a **vigência da UC** (lida do campo "Período:" do resumo do curso). |
+| **Correção** | Curso, categoria e atividade | Lançamento de notas e feedback por CSV/XLSX, com prévia, confirmação e conferência depois de salvar (o mesmo painel do Importar Notas). |
+| **Alunos e notas** | Curso | Lista de alunos com filtros (último acesso, itens com nota, pendências, situação), boletim e leitura que pode ser **continuada** se falhar. |
+| **Acompanhamento** | Curso | Alunos em risco, motivo e próxima ação; envio de mensagem pelo Moodle, sempre com revisão antes. |
+| **Relatório da UC** | Curso | Todos os alunos, desempenho, entregas, pendências e nota por atividade; **exporta em HTML** (arquivo único, abre offline), além de CSV e PDF. |
 
 ## Instalar
-1. `npm install && npm run sync && npm run build`
-2. Chrome → `chrome://extensions` → Modo do desenvolvedor → **Carregar sem compactação** → pasta `dist/ext` (ou use o ZIP de `npm run package`, extraído). Painel de blocos opcional: `npm run build:blocos`.
+
+1. Baixe o ZIP da versão mais recente em **[Releases](../../releases)** e extraia.
+2. No Chrome, abra `chrome://extensions`, ligue o **Modo do desenvolvedor** e clique em **Carregar sem compactação**, escolhendo a pasta extraída.
+3. Abra uma página do Moodle: o botão da ferramenta aparece na lateral direita.
+
+Se a extensão **Importar Notas** original estiver ativa, desative-a: as duas desenhariam a mesma barra.
 
 ## Desenvolver
-- `npm test` (executor e ações) · `npm run validate` · `npm run test:e2e` (Chromium + Moodle simulado; precisa de Playwright global).
-- `npm run sync` copia o código do `importar-notas` (módulo Importar Notas) e as funções de leitura do `assistente-ead-senai` (módulo Alunos e notas: `adapters.js`, `utils.js`, `shared-validation.js`) para `vendor/`.
-- Contexto do projeto: `docs/contexto/`.
 
-Créditos em `CREDITOS.md`; privacidade em `PRIVACIDADE.md`.
+Requisitos: Node 20 ou mais novo.
+
+```bash
+npm ci
+npm run build       # monta a extensão em dist/ext
+npm test            # testes unitários (node:test + jsdom)
+npm run validate    # manifesto, permissões e arquivos
+npm run package     # gera dist/<nome>-<versão>.zip
+npm run test:e2e    # Chromium real + Moodle simulado (precisa de Playwright global)
+```
+
+- `npm run sync` atualiza a cópia do código dos projetos de origem (Importar Notas e Assistente EaD) em `vendor/`; só é preciso quando esses projetos mudam, e eles devem estar em pastas ao lado deste.
+- Estrutura e decisões: [`docs/contexto/`](docs/contexto) (produto, arquitetura, regras, design, tarefas e histórico de decisões).
+- Fluxo de contribuição: [`CONTRIBUTING.md`](CONTRIBUTING.md). Histórico de versões: [`CHANGELOG.md`](CHANGELOG.md).
+
+## Segurança e privacidade
+
+- Permissões mínimas: `scripting`, `storage`, `downloads` e os dois domínios do Moodle. Nenhum serviço externo, nenhum script remoto.
+- Dados de alunos ficam no navegador; relatórios exportados são arquivos locais. Veja [`PRIVACIDADE.md`](PRIVACIDADE.md) e [`SECURITY.md`](SECURITY.md).
+- **Estado de homologação:** testado em páginas simuladas; a validação no Moodle real do SENAI/FIEG é feita por versão e registrada no `CHANGELOG`.
+
+## Créditos e licença
+
+Idealização e desenvolvimento: **Eurico Cirilo**. Importador de Notas 0.8.1: coautoria de **Julio Alves**. Detalhes em [`CREDITOS.md`](CREDITOS.md).
+
+Uso interno; licença ainda não definida (todos os direitos reservados até a decisão do autor).

@@ -3,7 +3,27 @@
   "version": "0.8.1",
   "private": true,
   "type": "module",
-  "description": "Extensão do Chrome com programação por blocos (Blockly) para as ferramentas EaD SENAI.",
+  "description": "Unidigit@l Assist — ferramentas do tutor EaD para o Moodle (extensão do Chrome): correção, pendências, alunos, acompanhamento e relatórios.",
+  "author": "Eurico Cirilo",
+  "license": "UNLICENSED",
+  "homepage": "https://github.com/euriconetoia-cmyk/Unidigit-l-Assist#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/euriconetoia-cmyk/Unidigit-l-Assist.git"
+  },
+  "bugs": {
+    "url": "https://github.com/euriconetoia-cmyk/Unidigit-l-Assist/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "moodle",
+    "chrome-extension",
+    "ead",
+    "senai",
+    "tutoria"
+  ],
   "scripts": {
     "sync": "node scripts/sync-importar-notas.mjs && node scripts/sync-assistente.mjs",
     "build": "node scripts/build.mjs",

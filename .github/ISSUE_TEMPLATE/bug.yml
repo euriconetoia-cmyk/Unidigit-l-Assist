@@ -1,0 +1,40 @@
+name: Erro
+description: Algo não funciona como esperado
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Não cole nomes, e-mails ou notas de alunos.** Use "Copiar diagnóstico" (menu da ferramenta), que não leva dados de alunos.
+  - type: input
+    id: versao
+    attributes: { label: Versão da extensão, placeholder: "0.8.1" }
+    validations: { required: true }
+  - type: dropdown
+    id: ambiente
+    attributes:
+      label: Ambiente do Moodle
+      options: [ead.senai.br, ead.fieg.com.br, Outro]
+    validations: { required: true }
+  - type: dropdown
+    id: ferramenta
+    attributes:
+      label: Ferramenta
+      options: [Pendências, Correção, Acompanhamento, Alunos e notas, Relatório da UC, Menu lateral, Outra]
+    validations: { required: true }
+  - type: dropdown
+    id: pagina
+    attributes:
+      label: Tipo de página
+      options: [Categoria, Curso (UC), Atividade, Tela de avaliação, Outra]
+  - type: textarea
+    id: passos
+    attributes: { label: O que você fez, placeholder: "1. Abri… 2. Cliquei em…" }
+    validations: { required: true }
+  - type: textarea
+    id: esperado
+    attributes: { label: O que esperava e o que aconteceu }
+    validations: { required: true }
+  - type: textarea
+    id: diagnostico
+    attributes: { label: Diagnóstico copiado (sem dados de alunos), render: text }
