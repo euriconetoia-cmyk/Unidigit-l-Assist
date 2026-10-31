@@ -1,16 +1,13 @@
 # Changelog
 
-## 0.16.1 — 2026-10-31
-
-### Novo
-- **Relatório da turma: campo de busca.** Digite parte do nome do curso ou da categoria (sem diferenciar maiúsculas nem acentos) e a lista mostra só os encontrados. “Selecionar os encontrados” marca só esses; a seleção feita antes continua valendo e a tela avisa quantas ficaram fora da busca. Sem resultado, aparece um aviso. Nada é lido antes de “Gerar relatório”.
-
 ## 0.16.0 — 2026-10-31
 
 ### Novo
 - **Resumo do dia**: nova primeira tela de “Alunos e notas”, com alunos, **risco alto**, **sem acesso há +15 dias**, **a corrigir**, *Retornos de hoje*, *Piorou desde a última leitura* e a idade da leitura com **Ler agora**. Só agrega o que já foi lido e guardado. “A corrigir” fica em “—” até as entregas serem lidas (nunca vira zero).
 - **Ajustes por UC** (aba Ajustes): nota mínima, recuperação a partir de, dias sem acesso (atenção), pausa entre mensagens (mínimo 2 s) e validade das leituras, **só desta UC ou como padrão para todas**. Valem no relatório, no Acompanhamento, no Excel e na fila de envio. Valor fora do limite é recusado com o motivo; só o que difere do padrão é guardado. “Voltar ao padrão” restaura.
 - **Régua de nota na Correção**: no painel de importar notas, escolha “Arredondar ao mais próximo”, “Generosa: arredondar para cima” (passo de 0,5) ou “Muito generosa: próximo inteiro”. A **prévia Antes/Depois** mostra só quem muda. A régua só altera o **valor sugerido**: sem nota continua sem nota, nota com erro não é tocada, nunca passa da nota máxima, a edição manual na tabela vale mais, e **nada é gravado sem a prévia e a confirmação de sempre**.
+
+- **Relatório da turma: campo de busca.** Digite parte do nome do curso ou da categoria (sem diferenciar maiúsculas nem acentos) e a lista mostra só os encontrados. “Selecionar os encontrados” marca só esses; a seleção anterior continua valendo e a tela avisa quantas ficaram fora da busca. Nada é lido antes de “Gerar relatório”.
 
 ### Interno
 - Nova chave `uas.ajustes` (entra em Meus dados, backup, medição e “apagar”); a validade das leituras por UC é aplicada na limpeza automática.
