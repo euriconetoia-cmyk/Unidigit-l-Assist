@@ -59,6 +59,6 @@ icons/          ícones da extensão
 
 ## Créditos e licença
 
-Idealização e desenvolvimento: **Eurico Cirilo**. Importador de Notas 0.8.1: coautoria de **Julio Alves**. Detalhes em [`CREDITOS.md`](docs/projeto/CREDITOS.md).
+Idealização e desenvolvimento: **Eurico Cirilo**. Coautor: **Julio Alves** (Importador de Notas 0.8.1 e ideias do projeto *SENAI Extensões*: Excel, relatório por turma e Kahoot). Detalhes em [`CREDITOS.md`](docs/projeto/CREDITOS.md).
 
-Licença [MIT](LICENSE) — © 2026 Eurico Cirilo. Uso, cópia e modificação livres, mantendo o aviso de copyright.
+Licença [MIT](LICENSE) — © 2026 Eurico Cirilo e Julio Alves. Uso, cópia e modificação livres, mantendo o aviso de copyright.

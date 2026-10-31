@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Unidigit@l Assist — ferramentas do tutor EaD para o Moodle (extensão do Chrome): correção, pendências, alunos, acompanhamento e relatórios.",
   "author": "Eurico Cirilo",
+  "contributors": ["Julio Alves"],
   "license": "MIT",
   "homepage": "https://github.com/euriconetoia-cmyk/Unidigit-l-Assist#readme",
   "repository": {
