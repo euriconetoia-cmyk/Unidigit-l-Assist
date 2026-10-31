@@ -5,7 +5,7 @@ Manifest V3, JavaScript em módulos ES, empacotado com esbuild (devDependency) p
 | Parte | Onde | Papel |
 |---|---|---|
 | Service worker | `src/background.js` | Abre o painel ao clicar no ícone; nomeia downloads dos módulos (`importScripts` do módulo). |
-| Painel lateral | `sidepanel.html` + `src/sidepanel/` | Editor Blockly, barra (Executar, Parar, Exemplos, Salvar/Carregar), registro. |
+| Painel lateral | `src/sidepanel/` (inclui `sidepanel.html` e `sidepanel.css`) | Editor Blockly, barra (Executar, Parar, Exemplos, Salvar/Carregar), registro. |
 | Blocos | `src/blocks/` | Definições (JSON) e caixa de ferramentas. |
 | Executor | `src/engine/interpreter.js` | **Sem DOM e sem Blockly.** Percorre o JSON de `Blockly.serialization.workspaces.save` e chama as ações. Sem `eval`/`Function` (CSP do MV3). |
 | Módulos | `src/modules/<nome>/` | Cada módulo: lista de scripts a injetar, CSS, ponte `HUB` e ações. |

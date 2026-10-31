@@ -80,3 +80,6 @@ Pedido do usuário: a Correção deve funcionar com as mesmas configurações do
 
 ## 2026-10-31 — 0.8.1
 Hub passa a usar o Importar Notas 1.5.1 (vigência pelo "Período:" do resumo do curso; ver decisão no memory do importar-notas).
+
+## 2026-10-31 — Repositório no GitHub e organização
+Repositório `euriconetoia-cmyk/Unidigit-l-Assist` (público). Decisões: (1) nome do projeto **Unidigit@l Assist**, nome técnico `unidigital-assist` (pacote e ZIP; o `@` não vale em nomes técnicos); (2) raiz enxuta: `CONTRIBUTING.md` e `SECURITY.md` em `.github/`, créditos e privacidade em `docs/projeto/` (o build continua copiando-os para a raiz do ZIP), `sidepanel.*` em `src/sidepanel/`, prints antigos em `docs/historico/prints/`; (3) `main` protegida por conjunto de regras (PR + CI "Testes, construção e validação" + só squash + histórico linear + sem force-push/exclusão), com **exceção para o administrador do repositório**, para correções urgentes; (4) merges só por squash, branches apagadas ao mesclar, Wiki desligada; (5) pedir estrela do repositório de forma gentil (README, release, aviso único e dispensável) — nunca como exigência; (6) licença ainda não definida.

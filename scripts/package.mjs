@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-const zip = path.join(root, 'dist', `blocos-ead-${pkg.version}.zip`);
+const zip = path.join(root, 'dist', `unidigital-assist-${pkg.version}.zip`);
 fs.rmSync(zip, { force: true });
 execFileSync('zip', ['-qr', zip, '.'], { cwd: path.join(root, 'dist', 'ext') });
 console.log(`✓ ${zip}`);

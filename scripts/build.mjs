@@ -18,7 +18,7 @@ await build({ ...common, entryPoints: [path.join(root, 'src/background.js')], ou
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'));
 if (withBlocos) {
   await build({ ...common, minify: true, target: 'chrome114', entryPoints: [path.join(root, 'src/sidepanel/main.js')], outfile: path.join(out, 'sidepanel.js') });
-  for (const f of ['sidepanel.html', 'sidepanel.css']) fs.copyFileSync(path.join(root, f), path.join(out, f));
+  for (const f of ['sidepanel.html', 'sidepanel.css']) fs.copyFileSync(path.join(root, 'src/sidepanel', f), path.join(out, f));
   fs.cpSync(path.join(root, 'node_modules/blockly/media'), path.join(out, 'media'), { recursive: true, filter: s => !/\.map$/.test(s) });
   manifest.permissions.push('sidePanel');
   manifest.side_panel = { default_path: 'sidepanel.html' };
@@ -27,5 +27,6 @@ if (withBlocos) {
 fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify(manifest, null, 2));
 if (fs.existsSync(path.join(root, 'icons'))) fs.cpSync(path.join(root, 'icons'), path.join(out, 'icons'), { recursive: true, filter: s => !/\.svg$/.test(s) });
 fs.cpSync(path.join(root, 'src/modules'), path.join(out, 'modules'), { recursive: true });
-for (const f of ['README.md', 'CHANGELOG.md', 'CREDITOS.md', 'PRIVACIDADE.md']) if (fs.existsSync(path.join(root, f))) fs.copyFileSync(path.join(root, f), path.join(out, f));
+// Documentos que vão dentro do ZIP da extensão (ficam na raiz do pacote, como antes).
+for (const [from, to] of [['README.md', 'README.md'], ['CHANGELOG.md', 'CHANGELOG.md'], ['docs/projeto/CREDITOS.md', 'CREDITOS.md'], ['docs/projeto/PRIVACIDADE.md', 'PRIVACIDADE.md']]) if (fs.existsSync(path.join(root, from))) fs.copyFileSync(path.join(root, from), path.join(out, to));
 console.log(`✓ extensão montada em dist/ext${withBlocos ? ' (com painel de blocos)' : ''}`);
