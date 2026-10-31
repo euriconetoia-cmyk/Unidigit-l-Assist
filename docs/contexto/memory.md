@@ -89,3 +89,6 @@ Decisões do usuário: repositório continua **público**; licença **MIT** (© 
 
 ## 2026-10-31 — 0.10.0: fila de envio de mensagens
 Mockup aprovado pelo usuário. Decisões: (1) lógica pura em `core/fila.js` (um por vez, pausa de 2 s, nunca reenvia `enviada`, "tentar de novo" só `falhou`, para após 3 falhas seguidas); (2) reaproveita `messenger.send` (conferência por leitura de volta) e o registro de contatos; (3) mantém a regra de nunca pular revisão/confirmação: botão só libera após "Revisei" e texto de cada aluno editável; (4) quem já foi contatado hoje vem desmarcado; (5) sem permissão nova. e2e 70/70; não homologado em Moodle real.
+
+## 2026-10-31 — Análise do repositório senai-extensoes (Julio Alves, MIT)
+Analisado para aproveitar o que serve ao fluxo. Decisões: (1) **aproveitar** a ideia do gerador de XLSX sem dependências (etapa A, depois botões "Excel" nas telas B) e do relatório de notas por turma a partir de `/my/` (etapa C), reescritos no nosso padrão, com testes, faixas de nota das configurações e crédito ao autor; (2) **descartado: módulo Drive PDF** (decisão do usuário) — contorna proteção de download escolhida pelo dono do arquivo; (3) Kahoot fica como possibilidade futura, só com permissão pedida no clique e decisão registrada; (4) não copiar permissões amplas (`tabs`, `activeTab`), vários scripts de conteúdo nem `innerHTML` com dado externo.
