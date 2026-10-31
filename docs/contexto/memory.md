@@ -125,3 +125,6 @@ Decisões: (1) campo sem dado **não** é trocado por vazio/zero: fica `{campo}`
 - **Resumo do dia** (`core/resumo.js`) é a aba inicial; o app “Alunos e notas” passou a abrir `resumo`.
 - **Régua**: lógica própria em `modules/importar-notas/regua.js` (injetada antes do bridge) + **patch local de 2 trechos em `vendor/src/ui/panel.js`** (`HUB-PATCH regua`). Decisão: patch pequeno marcado + validador que falha se o sync apagar, em vez de forkar o painel inteiro. Se o projeto original receber a régua, remover o patch. Passos: 0,5 (máx ≤ 20) ou 1; sempre limitada à nota máxima.
 - Publicação continua suspensa por pedido do usuário (local: mockup, 0.13, 0.14, 0.15, 0.16). Próximo: 1.0.0 (homologação em Moodle real, pacote Edge sem `key`, política de privacidade pública).
+
+## Decisão (31/10/2026): loja do Edge adiada
+Usuário: "por enquanto não vamos fazer a parte do Edge". A 1.0.0 fica sem o pacote do Edge Add-ons (sem gerar versão sem `key`, sem cadastro na loja). A distribuição continua por ZIP/GitHub Releases e instalação "Carregar sem compactação". A `key` fixa do manifest permanece. Retomar só quando o usuário pedir. Também: 0.13–0.16 foram enviadas ao GitHub (main) a pedido do usuário; a release v0.16.0 ainda não foi criada.

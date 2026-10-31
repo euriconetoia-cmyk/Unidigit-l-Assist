@@ -12,7 +12,7 @@ Regras de cada etapa (valem para todas): ler `docs/contexto/*` antes; **mockup a
 | **0.14.0** | Gaveta **Ferramentas** no menu + **Kahoot** (permissão opcional do site no clique, validação do CSV, progresso, cancelar) + modelo CSV | 0.13 | `ferramentas-kahoot` ✔ |
 | **0.15.0** | **Modelos de mensagem** (campos nome/UC), **retornos agendados** ("Retornos de hoje"), **comparativo entre leituras** (instantâneos compactos) | 0.13 | a fazer |
 | **0.16.0** | **Resumo do dia** (tela inicial do curso) + **Ajustes** (nota mínima/recuperação/pausa por UC) + **régua de nota** configurável na Correção | 0.15 | feito (local) |
-| **1.0.0** | Homologado em Moodle real (SENAI e FIEG) + pacote da loja do Edge + política de privacidade pública | tudo | — |
+| **1.0.0** | Homologado em Moodle real (SENAI e FIEG) + política de privacidade pública | tudo | — (loja do Edge adiada) |
 
 ## Pontos de parada (homologação em Moodle real)
 - **Após 0.13.0**: você instala, roda o relatório de compatibilidade nas páginas reais (curso, atividade, "Meus cursos", livro de notas) e me manda o resultado. Corrijo seletores antes de seguir. Se aparecer algo grave, as etapas seguintes esperam.

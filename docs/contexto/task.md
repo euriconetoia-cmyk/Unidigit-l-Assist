@@ -56,4 +56,4 @@ Trabalhar uma por vez, na ordem. Decisões importantes vão para `memory.md`.
 - [x] 0.14.0 Gaveta Ferramentas + Kahoot (host opcional)
 - [x] 0.15.0 Modelos de mensagem + retornos agendados + comparativo entre leituras
 - [x] 0.16.0 Resumo do dia + Ajustes por UC + régua de nota (commit local; sem push)
-- [ ] 1.0.0 Homologação real + pacote da loja do Edge
+- [ ] 1.0.0 Homologação real + política de privacidade pública (loja do Edge: adiada por decisão do usuário em 31/10/2026)
