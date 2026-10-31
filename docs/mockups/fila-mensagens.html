@@ -1,0 +1,31 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Fila de mensagens</title>
+<style>
+:root{--p:#0b5cad;--m:#5b6b7c;--line:#dbe3ec;--card:#f8fafd;--ok:#157a4c;--warn:#a86400;--err:#b3261e}
+body{margin:0;padding:28px;background:#eef2f7;font:14px/1.4 system-ui,sans-serif;color:#14202e;display:flex;gap:24px;flex-wrap:wrap}
+.box{width:430px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 10px 30px rgba(29,42,74,.12)}
+h2{margin:0 0 4px;font-size:17px}.sub{color:var(--m);font-size:12.5px;margin:0 0 12px}
+.bar{height:10px;border-radius:6px;background:var(--line);overflow:hidden;margin:8px 0 4px}.bar i{display:block;height:100%;width:60%;background:var(--p)}
+.row{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);margin-top:6px}
+.row b{flex:1}.row small{color:var(--m);display:block;font-weight:400}
+.st{font-size:12px;padding:2px 9px;border-radius:8px;white-space:nowrap}
+.ok{background:#e1f5ec;color:var(--ok)}.wait{background:#eee;color:var(--m)}.go{background:#e3f0fc;color:var(--p)}.er{background:#fde8e5;color:var(--err)}
+button{font:inherit;min-height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer}
+button.main{background:var(--p);color:#fff;border-color:var(--p)}.acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.tag{font-size:11px;color:var(--m);text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px;width:100%}
+</style>
+<div class="box"><p class="tag">1 · Antes de enviar</p><h2>Enviar a 12 alunos</h2><p class="sub">Um por vez, com conferência de cada envio. Você pode parar a qualquer momento.</p>
+<div class="row"><b>Revisar as mensagens<small>cada texto pode ser editado antes</small></b><button>Revisar</button></div>
+<div class="acts"><button class="main">Enviar fila (12)</button><button>Cancelar</button></div></div>
+
+<div class="box"><p class="tag">2 · Enviando</p><h2>Enviando… 7 de 12</h2><p class="sub">Pausa de 2 s entre mensagens para não sobrecarregar o Moodle.</p>
+<div class="bar"><i></i></div>
+<div class="row"><b>Ana Souza</b><span class="st ok">enviada ✓</span></div>
+<div class="row"><b>Bruno Lima<small>não confirmou na conferência</small></b><span class="st er">falhou</span></div>
+<div class="row"><b>Carla Dias</b><span class="st go">enviando…</span></div>
+<div class="row"><b>Diego Reis</b><span class="st wait">na fila</span></div>
+<div class="acts"><button>Parar fila</button></div></div>
+
+<div class="box"><p class="tag">3 · Resultado</p><h2>10 enviadas, 2 falharam</h2><p class="sub">Só as que falharam são reenviadas; as já enviadas ficam registradas e não se repetem.</p>
+<div class="row"><b>Bruno Lima<small>sem resposta do Moodle</small></b><span class="st er">falhou</span></div>
+<div class="row"><b>Elisa Prado<small>sessão expirada — recarregue o Moodle</small></b><span class="st er">falhou</span></div>
+<div class="acts"><button class="main">Tentar de novo (2)</button><button>Baixar relatório do envio</button></div></div>
