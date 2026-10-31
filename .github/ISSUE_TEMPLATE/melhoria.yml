@@ -1,6 +1,6 @@
 name: Ideia ou melhoria
 description: Sugerir algo novo ou melhorar o que existe
-labels: [melhoria]
+labels: [enhancement]
 body:
   - type: textarea
     id: problema

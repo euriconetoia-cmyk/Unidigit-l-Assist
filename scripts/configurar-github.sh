@@ -19,11 +19,6 @@ if [ "${1:-}" = "--privado" ]; then
   gh repo edit "$R" --visibility private --accept-visibility-change-consequences && ok "repositório privado" || falha "visibilidade"
 fi
 
-for l in "bug|d73a4a|Algo não funciona" "melhoria|0b5cad|Ideia ou melhoria" "dependências|ededed|Atualização de dependências"; do
-  IFS='|' read -r nome cor desc <<<"$l"
-  gh label create "$nome" --color "$cor" --description "$desc" --force >/dev/null 2>&1 && ok "etiqueta $nome" || falha "etiqueta $nome"
-done
-
 gh api -X PUT "repos/$R/vulnerability-alerts" >/dev/null 2>&1 && ok "alertas de dependências vulneráveis" || falha "alertas de vulnerabilidade"
 gh api -X PUT "repos/$R/automated-security-fixes" >/dev/null 2>&1 && ok "correções automáticas de segurança (Dependabot)" || falha "Dependabot security updates"
 gh api -X PUT "repos/$R/private-vulnerability-reporting" >/dev/null 2>&1 && ok "relato privado de vulnerabilidade" || falha "relato privado"
