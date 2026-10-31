@@ -26,3 +26,6 @@ Mensagens curtas no imperativo, em português, com prefixo: `feat:`, `fix:`, `do
 
 ## Código vindo de outros projetos
 `src/modules/importar-notas/vendor` e `src/modules/alunos/vendor` são cópias geradas por `npm run sync`. Não edite à mão: mude no projeto de origem e sincronize.
+
+## Configuração do GitHub
+`bash scripts/configurar-github.sh` (uma vez, com o `gh` logado) ajusta descrição, tópicos, merge por squash, etiquetas, alertas de segurança e a proteção da `main`.
