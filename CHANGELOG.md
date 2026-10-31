@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.11.0 — 2026-10-31
+
+### Novo
+- **Excel (.xlsx)** ao lado do CSV em **Alunos, Notas, Acompanhamento e Relatório da UC**. Arquivo real do Excel (abre sem aviso de incompatibilidade, no Excel e no LibreOffice), com cabeçalho azul, linha fixa e filtro. Notas são números; **sem nota fica célula vazia, nunca zero**; texto que parece fórmula continua texto. O CSV continua existindo. Gerador sem dependências, com ideia de partida do projeto *SENAI Extensões* (Julio Alves, MIT), reescrito e testado aqui.
+
 ## 0.10.0 — 2026-10-31
 
 ### Novo

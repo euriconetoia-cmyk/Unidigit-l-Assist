@@ -13,6 +13,11 @@ if (!fs.existsSync(path.join(ext, 'manifest.json'))) { console.error('✗ rode "
 const manifest = JSON.parse(read('manifest.json'));
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 
+// O Chrome recusa arquivo que não seja UTF-8 válido (ex.: caracteres "não-caractere" como U+FFFE) — já aconteceu uma vez.
+const walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
+for (const f of walk(ext).filter(x => /\.(js|json|css|html)$/.test(x))) {
+  try { const t = new TextDecoder('utf-8', { fatal: true }).decode(fs.readFileSync(f)); if (/[\uFFFE\uFFFF]/.test(t)) fail(`caractere inválido (U+FFFE/FFFF) em ${path.relative(ext, f)}`); } catch (_) { fail(`arquivo não é UTF-8 válido: ${path.relative(ext, f)}`); }
+}
 if (manifest.manifest_version !== 3) fail('manifest_version deve ser 3');
 if (manifest.version !== pkg.version) fail(`versão do manifest (${manifest.version}) difere do package.json (${pkg.version})`);
 const withBlocos = Boolean(manifest.side_panel);

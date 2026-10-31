@@ -166,11 +166,34 @@
       ['atividade', 'nota_maxima', 'alunos_com_nota', 'alunos', 'media_valor', 'media_percentual'],
       ...report.perItem.map(x => [x.name, x.maxGrade == null ? '' : x.maxGrade, x.graded, x.total, x.avg == null ? '' : round1(x.avg), x.avgPct == null ? '' : round1(x.avgPct)])]);
   }
+  // ---------- Planilhas para o Excel (.xlsx): mesmos dados dos CSV, com números de verdade; sem nota = célula vazia (nunca 0) ----------
+  const num = v => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+  function studentsSheet(students) {
+    return { name: 'Alunos', rows: [['Aluno', 'E-mail', 'Último acesso', 'Itens com nota', 'Itens sem nota', 'Nota total', 'Situação'],
+      ...students.map(st => [st.name, st.email, st.lastAccessText, st.itemsGraded, st.itemsMissing, num(st.total), SITUATION_LABEL[st.situation]])] };
+  }
+  function gradesSheet(students, gradebook, category) {
+    const items = gradebook.items.filter(isActivityItem).filter(it => !category || it.category === category);
+    return { name: 'Notas', rows: [['Aluno', 'E-mail', ...items.map(it => (it.maxGrade != null ? `${it.name} (máx. ${it.maxGrade})` : it.name)), 'Nota total', 'Situação'],
+      ...students.map(st => [st.name, st.email, ...items.map(it => num(st.grades[it.key] && st.grades[it.key].value)), num(st.total), SITUATION_LABEL[st.situation]])] };
+  }
+  function riskSheet(students) {
+    return { name: 'Acompanhamento', rows: [['Aluno', 'E-mail', 'Nível', 'Motivos', 'Próxima ação'],
+      ...students.filter(st => st.risk.level !== 'regular').map(st => [st.name, st.email, LEVEL_LABEL[st.risk.level], st.risk.reasons.map(r => r.text).join(' | ') || (st.risk.unknown.length ? `Sem leitura de: ${st.risk.unknown.join(', ')}` : ''), st.risk.action])] };
+  }
+  function reportSheets(report, label) {
+    return [
+      { name: 'Resumo', header: false, widths: [28, 40], rows: [['Relatório da UC', label || 'Curso completo'], ['Alunos', report.students], ['Média da turma', report.meanPct == null ? null : round1(report.meanPct)],
+        ['Alunos com média', report.counts.media], ['Em recuperação', report.counts.recuperacao], ['Abaixo da faixa', report.counts.abaixo], ['Sem nota', report.counts.sem_nota]] },
+      { name: 'Atividades', rows: [['Atividade', 'Nota máxima', 'Alunos com nota', 'Alunos', 'Média (valor)', 'Média (%)'],
+        ...report.perItem.map(x => [x.name, num(x.maxGrade), x.graded, x.total, x.avg == null ? null : round1(x.avg), x.avgPct == null ? null : round1(x.avgPct)])] }
+    ];
+  }
   // Mensagem de contato para copiar (a extensão não envia nada).
   function contactText(st, courseName) {
     const motivos = st.risk.reasons.map(r => r.text.toLowerCase()).join('; ');
     return `Olá, ${st.name.split(' ')[0]}! Aqui é o tutor do curso${courseName ? ` ${courseName}` : ''}. Percebi que ${motivos || 'há pontos a conferir na sua participação'}. Posso ajudar com alguma dificuldade? Estou à disposição para combinarmos os próximos passos.`;
   }
 
-  Object.assign(ALN, { DEFAULTS, toPct, situation, SITUATION_LABEL, LEVEL_LABEL, buildStudents, assessRisk, buildReport, categoriesOf, studentsCsv, gradesCsv, riskCsv, reportCsv, contactText, fmt, isActivityItem });
+  Object.assign(ALN, { DEFAULTS, toPct, situation, SITUATION_LABEL, LEVEL_LABEL, buildStudents, assessRisk, buildReport, categoriesOf, studentsCsv, gradesCsv, riskCsv, reportCsv, studentsSheet, gradesSheet, riskSheet, reportSheets, contactText, fmt, isActivityItem });
 })(globalThis);

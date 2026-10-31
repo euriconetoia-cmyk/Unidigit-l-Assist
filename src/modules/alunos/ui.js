@@ -107,6 +107,11 @@ nav button.off{opacity:.55}
     const a = h('a', { href: URL.createObjectURL(new Blob([text], { type: type || 'text/csv;charset=utf-8' })), download: name });
     root.document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   }
+  function downloadXlsx(name, sheets) {
+    const bytes = ALN.xlsx.build(sheets);
+    const a = h('a', { href: URL.createObjectURL(new Blob([bytes], { type: ALN.xlsx.MIME })), download: name });
+    root.document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
   const slug = s => String(s || 'curso').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'curso';
 
   function open(initialTab) {
@@ -174,6 +179,7 @@ nav button.off{opacity:.55}
     const search = () => h('input', { type: 'search', placeholder: 'Buscar aluno ou e-mail', 'aria-label': 'Buscar aluno ou e-mail', value: st.search, oninput: e => { st.search = e.target.value; renderBody(); } });
     const readBtn = () => iconBtn(st.data && st.data.pending && st.data.pending.length ? 'btn' : 'btn pri', 'refresh', st.data ? 'Ler de novo' : 'Ler alunos e notas', read, st.data ? 'Atualizar' : 'Ler');
     const csvBtn = (label, fn) => iconBtn('btn', 'down', label, fn, 'CSV');
+    const xlsxBtn = (label, fn) => iconBtn('btn', 'down', label, fn, 'Excel');
 
     // ---- abas ----
     // ---- entregas das atividades (leitura à parte, só ao clicar; "Continuar" repete só o que falhou) ----
@@ -239,7 +245,7 @@ nav button.off{opacity:.55}
       const all = st.data.students;
       const list = F.sortStudents(F.filterStudents(all, withQ()), st.sortKey, st.sortDir);
       const active = F.activeCount(withQ());
-      const toolbar = h('div', { class: 'bar' }, search(), readBtn(), csvBtn('Exportar alunos em CSV', () => download(`alunos-${slug(st.data.course.name)}.csv`, ALN.studentsCsv(list))));
+      const toolbar = h('div', { class: 'bar' }, search(), readBtn(), csvBtn('Exportar alunos em CSV', () => download(`alunos-${slug(st.data.course.name)}.csv`, ALN.studentsCsv(list))), xlsxBtn('Exportar alunos em Excel (.xlsx)', () => downloadXlsx(`alunos-${slug(st.data.course.name)}.xlsx`, [ALN.studentsSheet(list)])));
       const filters = h('div', { class: 'filters' }, chipGroup('access'), chipGroup('graded'), chipGroup('pend'), chipGroup('situation'));
       const resumo = h('div', { class: 'resline' }, `Mostrando ${list.length} de ${all.length} aluno(s)`, active ? h('button', { type: 'button', class: 'linkbtn', style: 'margin-left:auto', onclick: () => { st.f = { access: 'todos', graded: 'todos', pend: 'todos', situation: 'todos' }; st.search = ''; render(); } }, 'Limpar filtros') : null);
       const table = h('table', {}, h('thead', {}, h('tr', {}, sortTh('name', 'Aluno'), sortTh('access', 'Último acesso'), sortTh('graded', 'Itens com nota'), h('th', { class: 'n' }, 'Pendentes'), sortTh('total', 'Nota', 'n'), sortTh('situation', 'Situação'), h('th', {}, h('span', { class: 'sr' }, 'Mensagem')))),
@@ -259,7 +265,7 @@ nav button.off{opacity:.55}
       const list = studentsFiltered().filter(s => !st.onlyBelow || (s.totalPct != null && s.totalPct < settings.minimumGrade));
       const rep = ALN.buildReport(st.data.students, gb, settings, cat);
       const below = h('label', { style: 'display:flex;gap:6px;align-items:center' }, h('input', { type: 'checkbox', checked: st.onlyBelow, onchange: e => { st.onlyBelow = e.target.checked; renderBody(); } }), 'Só abaixo da média');
-      const toolbar = h('div', { class: 'bar' }, search(), categorySelect(), below, readBtn(), csvBtn('Exportar notas em CSV', () => download(`notas-${slug(st.data.course.name)}.csv`, ALN.gradesCsv(list, gb, cat))));
+      const toolbar = h('div', { class: 'bar' }, search(), categorySelect(), below, readBtn(), csvBtn('Exportar notas em CSV', () => download(`notas-${slug(st.data.course.name)}.csv`, ALN.gradesCsv(list, gb, cat))), xlsxBtn('Exportar notas em Excel (.xlsx)', () => downloadXlsx(`notas-${slug(st.data.course.name)}.xlsx`, [ALN.gradesSheet(list, gb, cat)])));
       const head = h('tr', {}, h('th', {}, 'Aluno'), ...items.map(it => h('th', { class: 'n', title: it.name }, it.name.split('›').pop().trim(), it.maxGrade != null ? h('span', { class: 'why' }, `máx. ${it.maxGrade}`) : null)), h('th', { class: 'n' }, 'Total'));
       const rows = list.map(s => h('tr', {}, h('td', {}, s.name), ...items.map(it => { const g = s.grades[it.key]; const v = g ? g.value : null; const p = ALN.toPct(v, it.maxGrade); return h('td', { class: `n ${v === null ? 'blank' : p < settings.minimumGrade ? 'low' : ''}` }, v === null ? '—' : g.display || String(v)); }), h('td', { class: 'n' }, h('b', {}, s.totalDisplay || '—'))));
       const foot = h('tr', {}, h('td', {}, h('b', {}, 'Média da turma')), ...items.map(it => { const x = rep.perItem.find(p => p.key === it.key); return h('td', { class: 'n' }, x && x.avg != null ? ALN.fmt(x.avg) : '—'); }), h('td', { class: 'n' }, h('b', {}, rep.meanPct == null ? '—' : ALN.fmt(rep.meanPct))));
@@ -274,7 +280,7 @@ nav button.off{opacity:.55}
       const sel = h('select', { 'aria-label': 'Filtrar por nível', onchange: e => { st.fLevel = e.target.value; renderBody(); } },
         ['todos', ...LEVELS].map(k => h('option', { value: k, selected: k === st.fLevel }, k === 'todos' ? 'Precisam de atenção' : ALN.LEVEL_LABEL[k])));
       const filaBtn = list.some(canSend) ? iconBtn('btn', 'send', `Enviar mensagem a todos os ${list.filter(canSend).length} alunos desta lista, em fila`, () => openFila(list), `Enviar em fila (${list.filter(canSend).length})`) : null;
-      const toolbar = h('div', { class: 'bar' }, search(), sel, readBtn(), filaBtn, csvBtn('Exportar lista de contato em CSV', () => download(`acompanhamento-${slug(st.data.course.name)}.csv`, ALN.riskCsv(list.length ? list : all))));
+      const toolbar = h('div', { class: 'bar' }, search(), sel, readBtn(), filaBtn, csvBtn('Exportar lista de contato em CSV', () => download(`acompanhamento-${slug(st.data.course.name)}.csv`, ALN.riskCsv(list.length ? list : all))), xlsxBtn('Exportar lista de contato em Excel (.xlsx)', () => downloadXlsx(`acompanhamento-${slug(st.data.course.name)}.xlsx`, [ALN.riskSheet(list.length ? list : all)])));
       const cards = h('div', { class: 'cards' }, LEVELS.map(k => h('div', { class: 'card' }, h('b', {}, counts[k]), h('span', {}, ALN.LEVEL_LABEL[k]))));
       const table = h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Aluno'), h('th', {}, 'Nível'), h('th', {}, 'Motivos e próxima ação'), h('th', {}, ''))),
         h('tbody', {}, list.map(s => h('tr', {}, h('td', {}, h('b', {}, s.name), contactMark(s)), h('td', {}, pill(s.risk.level, ALN.LEVEL_LABEL[s.risk.level])),
@@ -337,7 +343,7 @@ nav button.off{opacity:.55}
       const rep = ALN.buildReport(st.data.students, gb, settings, cat);
       const label = cat || 'Todo o curso';
       const toolbar = h('div', { class: 'bar' }, categorySelect(), iconBtn('btn pri', 'down', 'Exportar relatório completo em HTML', exportHtml, 'Exportar HTML'), iconBtn('btn', 'refresh', 'Ler de novo', read, 'Atualizar'),
-        iconBtn('btn', 'down', 'Exportar relatório em CSV', () => download(`relatorio-${slug(label)}.csv`, ALN.reportCsv(rep, `${st.data.course.name} · ${label}`)), 'CSV'), iconBtn('btn', 'down', 'Imprimir ou salvar em PDF', () => root.print(), 'PDF'));
+        iconBtn('btn', 'down', 'Exportar relatório em CSV', () => download(`relatorio-${slug(label)}.csv`, ALN.reportCsv(rep, `${st.data.course.name} · ${label}`)), 'CSV'), iconBtn('btn', 'down', 'Exportar relatório em Excel (.xlsx)', () => downloadXlsx(`relatorio-${slug(label)}.xlsx`, ALN.reportSheets(rep, `${st.data.course.name} · ${label}`)), 'Excel'), iconBtn('btn', 'down', 'Imprimir ou salvar em PDF', () => root.print(), 'PDF'));
       const all = st.data.students;
       const sem30 = all.filter(x => x.accessKnown && x.lastAccessDays != null && x.lastAccessDays >= 30).length;
       const sum = h('div', { class: 'sumbar' },

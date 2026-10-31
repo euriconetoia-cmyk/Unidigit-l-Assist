@@ -50,7 +50,7 @@ Trabalhar uma por vez, na ordem. Decisões importantes vão para `memory.md`.
 - [ ] Q4. Homologar em Moodle real.
 
 ## Plano 0.11 → 1.0 (detalhes em `plano.md`)
-- [ ] 0.11.0 Excel (.xlsx) + botões nas telas
+- [x] 0.11.0 Excel (.xlsx) + botões nas telas (Alunos, Notas, Acompanhamento, Relatório da UC)
 - [ ] 0.12.0 Relatório da turma (`/my/`)
 - [ ] 0.13.0 Compatibilidade + Sobre + Meus dados + armazenamento versionado + `key` fixa
 - [ ] 0.14.0 Gaveta Ferramentas + Kahoot (host opcional)

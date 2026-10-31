@@ -521,3 +521,65 @@ test('fila de envio: um por vez, não reenvia enviadas, tentar de novo só nas f
   assert.equal(rf.parou, true);
   assert.equal(c[3].state, 'fila');
 });
+
+// ---- Excel (.xlsx) ----
+function readZip(bytes) {
+  const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  let end = bytes.length - 22; while (end >= 0 && dv.getUint32(end, true) !== 0x06054B50) end--;
+  assert.ok(end >= 0, 'fim do ZIP não encontrado');
+  const count = dv.getUint16(end + 10, true); let p = dv.getUint32(end + 16, true); const out = {};
+  for (let i = 0; i < count; i++) {
+    assert.equal(dv.getUint32(p, true), 0x02014B50);
+    const crc = dv.getUint32(p + 16, true), size = dv.getUint32(p + 24, true), nl = dv.getUint16(p + 28, true), el = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
+    const name = new TextDecoder().decode(bytes.subarray(p + 46, p + 46 + nl));
+    const lnl = dv.getUint16(off + 26, true), lel = dv.getUint16(off + 28, true), start = off + 30 + lnl + lel;
+    const data = bytes.subarray(start, start + size);
+    out[name] = { text: new TextDecoder().decode(data), crc, data };
+    p += 46 + nl + el + cl;
+  }
+  return out;
+}
+
+test('xlsx: pacote válido, CRC conferido, abas com nomes seguros e únicos', () => {
+  const w = load();
+  const bytes = w.ALN.xlsx.build([
+    { name: 'Téc. Redes: Turma A/B?', rows: [['Aluno', 'Nota'], ['Ana', 88.5], ['Bia', null]] },
+    { name: 'téc. redes: turma a/b?', rows: [['x']] },
+    { name: '', rows: [] }
+  ]);
+  const z = readZip(bytes);
+  assert.deepEqual(Object.keys(z).sort(), ['[Content_Types].xml', '_rels/.rels', 'xl/_rels/workbook.xml.rels', 'xl/styles.xml', 'xl/workbook.xml', 'xl/worksheets/sheet1.xml', 'xl/worksheets/sheet2.xml', 'xl/worksheets/sheet3.xml']);
+  Object.values(z).forEach(f => assert.equal(w.ALN.xlsx.crc32(f.data), f.crc));
+  const names = [...z['xl/workbook.xml'].text.matchAll(/<sheet name="([^"]*)"/g)].map(m => m[1]);
+  assert.equal(names.length, 3);
+  assert.ok(names.every(n => n.length <= 31 && !/[\\/?*[\]:]/.test(n)));
+  assert.equal(new Set(names.map(n => n.toLowerCase())).size, 3);
+});
+
+test('xlsx: números viram números, sem nota fica vazio (nunca 0), texto com fórmula continua texto e XML é escapado', () => {
+  const w = load();
+  const z = readZip(w.ALN.xlsx.build([{ name: 'T', rows: [['Aluno', 'Nota', 'Obs'], ['=HYPERLINK("http://x")', 0, 'a <b> & "c"\u0001'], ['Sem nota', null, '']] }]));
+  const s = z['xl/worksheets/sheet1.xml'].text;
+  assert.match(s, /<c r="B2" s="2"><v>0<\/v><\/c>/);           // o zero digitado continua zero
+  assert.doesNotMatch(s, /<c r="B3"/);                            // sem nota = sem célula
+  assert.match(s, /t="inlineStr"[^>]*><is><t xml:space="preserve">=HYPERLINK/); // texto, não fórmula
+  assert.doesNotMatch(s, /<f>/);
+  assert.match(s, /a &lt;b&gt; &amp; &quot;c&quot;<\/t>/);
+  assert.doesNotMatch(s, /\u0001/);
+  assert.match(s, /<pane ySplit="1"/);
+  assert.match(s, /<autoFilter ref="A1:C3"\/>/);
+});
+
+test('planilhas das telas: mesmos alunos e notas dos CSV, números reais e vazio sem nota', () => {
+  const { w, gb, students } = buildAll();
+  const g = w.ALN.gradesSheet(students, gb, '');
+  assert.equal(g.rows.length, students.length + 1);
+  assert.ok(g.rows[0].includes('Nota total'));
+  const body = g.rows.slice(1);
+  assert.ok(body.every(r => r.slice(2, -2).every(v => v === null || typeof v === 'number')));
+  assert.ok(body.some(r => r.slice(2, -2).some(v => v === null)), 'esperava ao menos um item sem nota');
+  const csvLines = w.ALN.gradesCsv(students, gb, '').trim().split(/\r\n/).length - 1;
+  assert.equal(csvLines, body.length);
+  assert.equal(w.ALN.studentsSheet(students).rows.length, students.length + 1);
+  assert.ok(w.ALN.reportSheets(w.ALN.buildReport(students, gb, w.ALN.DEFAULTS, ''), 'X').length === 2);
+});

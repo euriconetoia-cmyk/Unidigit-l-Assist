@@ -7,6 +7,7 @@
     "core/report.js",
     "core/filters.js",
     "core/fila.js",
+    "core/xlsx.js",
     "core/report-html.js",
     "messenger.js",
     "reader.js",

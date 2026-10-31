@@ -208,6 +208,13 @@ try {
   const copied = await pg.evaluate(() => navigator.clipboard.readText());
   check('copiar mensagem coloca o texto na área de transferência (nada é enviado)', /^Olá, /.test(copied), copied);
 
+  // ---- Excel (.xlsx) ----
+  await shadow('nav button:has-text("Notas")').click();
+  const [dlX] = await Promise.all([pg.waitForEvent('download', { timeout: 10000 }), shadow('.bar button:has-text("Excel")').click()]);
+  const xPath = path.join(SHOTS, 'notas-exportadas.xlsx'); await dlX.saveAs(xPath);
+  const xb = fs.readFileSync(xPath);
+  check('Excel: botão baixa um .xlsx de verdade (ZIP com planilha de notas e todos os alunos)', /^notas-.*\.xlsx$/.test(dlX.suggestedFilename()) && xb.slice(0, 2).toString() === 'PK' && xb.includes(Buffer.from('xl/worksheets/sheet1.xml')) && ['Ana Beatriz Souza', 'Fábio Rocha'].every(n => xb.includes(Buffer.from(n))), dlX.suggestedFilename());
+  await pg.screenshot({ path: path.join(SHOTS, '28-notas-excel.png') });
   // ---- enviar mensagem ao aluno pelo Moodle (Acompanhamento) ----
   await shadow('nav button:has-text("Acompanhamento")').click();
   const firstRow = shadow('tbody tr').first();
