@@ -1,0 +1,110 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Relatório da turma + Excel</title>
+<style>
+:root{--p:#0b5cad;--p2:#0a3f78;--m:#5b6b7c;--line:#dbe3ec;--card:#f8fafd;--ok:#157a4c;--okbg:#e1f5ec;--wn:#a86400;--wnbg:#fff3d6;--er:#b3261e;--erbg:#fde8e5;--new:#6a3fd1}
+*{box-sizing:border-box}body{margin:0;padding:24px;background:#eef2f7;font:14px/1.4 system-ui,sans-serif;color:#14202e;width:1500px}
+h1{font-size:20px;margin:0 0 4px}.lead{color:var(--m);margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 10px 30px rgba(29,42,74,.1)}
+.tag{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#fff;background:var(--p);border-radius:6px;padding:2px 8px;margin-bottom:8px}
+.tag.n{background:var(--new)}
+h2{margin:0 0 4px;font-size:16px}.sub{color:var(--m);font-size:12.5px;margin:0 0 10px}
+.app{display:flex;gap:10px;align-items:center;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:8px 10px;margin-top:6px}
+.sym{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:#e1f5ec;color:var(--ok);font-weight:700}
+.app small{display:block;color:var(--m);font-size:12px}.app b{display:block}
+.newb{margin-left:auto;font-size:11px;background:var(--new);color:#fff;border-radius:8px;padding:1px 8px}
+.soon{border-style:dashed;opacity:.75}.soon .sym{background:#eee9fb;color:var(--new)}
+.sec{font-size:11px;color:var(--m);text-transform:uppercase;letter-spacing:.07em;margin:10px 4px 2px}
+.moodle{background:#f4f6f9;border:1px solid var(--line);border-radius:10px;padding:10px}
+.bar{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--hb,#b9d3ee);border-radius:10px;padding:8px 10px;margin-bottom:8px;flex-wrap:wrap}
+.bar b{flex:1;min-width:120px}
+button{font:inherit;min-height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer}
+button.pri{background:var(--p);color:#fff;border-color:var(--p)}button.x{background:#e6f4ea;color:var(--ok);border-color:#b8dcc4;font-weight:600}
+.cc{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:6px}
+.cc.sel{border-color:var(--p);background:#eef5fc}.cc i{width:16px;height:16px;border:2px solid #8aa;border-radius:4px;display:inline-block;flex:none}.cc.sel i{background:var(--p);border-color:var(--p)}
+.cc small{color:var(--m);margin-left:auto}
+.prog{height:10px;border-radius:6px;background:var(--line);overflow:hidden;margin:8px 0}.prog i{display:block;width:62%;height:100%;background:var(--p)}
+.xl{border:1px solid #b8dcc4;border-radius:10px;overflow:hidden;background:#fff;font-size:12.5px}
+.tabs{display:flex;background:#f1f3f4;border-bottom:1px solid #d5d9dc}.tabs span{padding:5px 12px;border-right:1px solid #d5d9dc;color:#444}.tabs .on{background:#fff;font-weight:600;border-bottom:2px solid #1e8e3e}
+table{border-collapse:collapse;width:100%}th{background:#1769e0;color:#fff;text-align:left;padding:5px 8px;font-weight:600}td{padding:4px 8px;border-bottom:1px solid #eee}td.n{text-align:center}
+.legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.pill{font-size:11.5px;padding:2px 9px;border-radius:999px}
+.chg{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.chg h2{margin-bottom:8px}.chg ul{margin:0;padding-left:18px}.chg li{margin:4px 0}.k{color:var(--new);font-weight:700}
+.diff{width:100%;font-size:13px}.diff td,.diff th{border-bottom:1px solid var(--line);padding:6px 8px}.diff th{background:#eef2f7;color:#14202e}
+.o{color:var(--er)}.g{color:var(--ok);font-weight:600}
+</style>
+<h1>Unidigit@l Assist 0.11.0 — Excel (.xlsx) e Relatório da turma</h1>
+<p class="lead">Mockup para validar antes de implementar. Dados fictícios. O que é novo está marcado em roxo.</p>
+
+<div class="grid">
+<div class="panel"><span class="tag">1 · Menu</span><h2>Um item novo no menu lateral</h2><p class="sub">Aparece na página “Meus cursos” (<code>/my/</code>). Nas outras páginas fica esmaecido e explica onde funciona.</p>
+<div class="sec">Correção</div>
+<div class="app"><span class="sym" style="background:#e3f0fc;color:#0b5cad">◷</span><span><b>Pendências</b><small>Buscar o que falta corrigir</small></span></div>
+<div class="app"><span class="sym" style="background:#e3f0fc;color:#0b5cad">✎</span><span><b>Correção</b><small>Lançar notas e feedback por CSV</small></span></div>
+<div class="sec">Alunos</div>
+<div class="app"><span class="sym">▤</span><span><b>Relatório da UC</b><small>Desempenho geral da turma · agora com Excel</small></span></div>
+<div class="app" style="border-color:var(--new);background:#f4efff"><span class="sym" style="background:#eee9fb;color:var(--new)">▥</span><span><b>Relatório da turma</b><small>Várias UCs de uma vez, uma aba por turma</small></span><span class="newb">novo</span></div>
+<div class="sec">Em breve (opcional, pede permissão ao clicar)</div>
+<div class="app soon"><span class="sym">⇩</span><span><b>Baixar PDF do Drive</b><small>Pede acesso ao Google Drive só ao usar</small></span></div>
+<div class="app soon"><span class="sym">?</span><span><b>Importar perguntas no Kahoot</b><small>Por CSV · pede acesso ao Kahoot só ao usar</small></span></div>
+</div>
+
+<div class="panel"><span class="tag n">2 · Escolher as UCs</span><h2>Na página “Meus cursos”</h2><p class="sub">Cada cartão ganha uma caixa de seleção. Nada é lido antes de você clicar em Gerar.</p>
+<div class="moodle">
+<div class="bar"><b>Relatório da turma<br><small style="color:var(--m);font-weight:400">3 unidades selecionadas</small></b><button>Selecionar todas</button><button class="pri">Gerar relatório</button></div>
+<div class="cc sel"><i></i><b>Redes de Computadores</b><small>Téc. Redes · Turma A</small></div>
+<div class="cc sel"><i></i><b>Segurança em Redes</b><small>Téc. Redes · Turma A</small></div>
+<div class="cc"><i></i><b>Lógica de Programação</b><small>Téc. Informática · Turma B</small></div>
+<div class="cc sel"><i></i><b>Banco de Dados</b><small>Téc. Informática · Turma B</small></div>
+<div class="cc" style="opacity:.55"><i></i><b>Projeto Integrador</b><small>começa em 10/12 · fora</small></div>
+</div>
+<p class="sub" style="margin-top:8px">Cursos que ainda não começaram ficam de fora automaticamente (usa a vigência que já lemos).</p></div>
+
+<div class="panel"><span class="tag n">3 · Lendo</span><h2>Progresso com cancelar</h2><p class="sub">Lê o livro de notas de cada UC, página por página, sem sobrecarregar o Moodle.</p>
+<p style="margin:0"><b>Lendo 2 de 3</b> — Segurança em Redes, página 2…</p>
+<div class="prog"><i></i></div>
+<div class="app"><span class="sym" style="background:var(--okbg);color:var(--ok)">✓</span><span><b>Redes de Computadores</b><small>28 alunos lidos</small></span></div>
+<div class="app"><span class="sym" style="background:var(--wnbg);color:var(--wn)">…</span><span><b>Segurança em Redes</b><small>lendo</small></span></div>
+<div class="app"><span class="sym" style="background:#eee">·</span><span><b>Banco de Dados</b><small>na fila</small></span></div>
+<div style="margin-top:10px"><button>Cancelar</button> <span class="sub">Cancelar não gera arquivo nenhum.</span></div>
+<p class="sub" style="margin-top:10px">Se uma UC falhar, as outras continuam e o relatório avisa quais não entraram. Falha nunca vira nota zero.</p></div>
+</div>
+
+<div class="grid" style="margin-top:18px;grid-template-columns:1.4fr 1fr">
+<div class="panel"><span class="tag n">4 · Resultado</span><h2>Arquivo Excel real (.xlsx), sem aviso de incompatibilidade</h2><p class="sub">Uma aba por turma, uma coluna por UC, mais a aba “Situação” com o resumo. Cabeçalho azul, linha fixa e filtro.</p>
+<div class="xl"><div class="tabs"><span class="on">Téc. Redes · Turma A</span><span>Téc. Informática · Turma B</span><span>Situação</span></div>
+<table><tr><th>Aluno</th><th>Redes de Computadores</th><th>Segurança em Redes</th></tr>
+<tr><td>Ana Beatriz Souza</td><td class="n">88,0</td><td class="n">92,5</td></tr>
+<tr><td>Bruno Henrique Lima</td><td class="n">61,0</td><td class="n">—</td></tr>
+<tr><td>Camila Ferreira</td><td class="n">58,0</td><td class="n">47,5</td></tr>
+<tr><td>Diego Martins</td><td class="n">—</td><td class="n">—</td></tr></table></div>
+<p class="sub" style="margin-top:8px">“—” = sem nota lançada, nunca zero.</p>
+<div class="xl" style="margin-top:10px"><div class="tabs"><span>Téc. Redes · Turma A</span><span>Téc. Informática · Turma B</span><span class="on">Situação</span></div>
+<table><tr><th>Turma</th><th>UC</th><th>Sem nota</th><th>Abaixo</th><th>Recuperação</th><th>Na média</th></tr>
+<tr><td>Téc. Redes · A</td><td>Redes de Computadores</td><td class="n">3</td><td class="n">4</td><td class="n">6</td><td class="n">15</td></tr>
+<tr><td>Téc. Redes · A</td><td>Segurança em Redes</td><td class="n">5</td><td class="n">2</td><td class="n">7</td><td class="n">14</td></tr></table></div>
+<p class="sub" style="margin-top:8px">As faixas usam a <b>sua</b> nota mínima e de recuperação (as mesmas do Acompanhamento), não valores fixos.</p></div>
+
+<div class="panel"><span class="tag n">5 · Excel nas telas que já existem</span><h2>Botão “Excel (.xlsx)” ao lado do CSV</h2>
+<div class="bar" style="margin-top:8px"><b>Notas</b><button>CSV</button><button class="x">Excel (.xlsx)</button></div>
+<div class="bar"><b>Relatório da UC</b><button>CSV</button><button>HTML</button><button class="x">Excel (.xlsx)</button></div>
+<div class="bar"><b>Acompanhamento</b><button>CSV</button><button class="x">Excel (.xlsx)</button></div>
+<p class="sub">Mesmos dados dos CSV de hoje, com colunas formatadas, filtros e linha de cabeçalho fixa. O CSV continua existindo.</p>
+<h2 style="margin-top:14px">Créditos</h2><p class="sub">A ideia do gerador de XLSX vem do projeto “SENAI Extensões” (Julio Alves, MIT). Reescrevo no nosso padrão, com testes, e registro o crédito em <code>CREDITOS.md</code> e no aviso de licença.</p></div>
+</div>
+
+<div class="chg">
+<div class="panel"><h2>O que muda</h2>
+<table class="diff"><tr><th></th><th>Hoje (0.10.0)</th><th>Depois (0.11.0)</th></tr>
+<tr><td>Saída das tabelas</td><td class="o">CSV e impressão</td><td class="g">+ Excel (.xlsx) real</td></tr>
+<tr><td>Relatório</td><td class="o">uma UC por vez</td><td class="g">várias UCs, uma aba por turma</td></tr>
+<tr><td>Onde funciona</td><td class="o">curso e atividade</td><td class="g">+ página “Meus cursos”</td></tr>
+<tr><td>Faixas de situação</td><td>suas configurações</td><td class="g">as mesmas, também no Excel</td></tr>
+<tr><td>Permissões / hosts</td><td>2 Moodles</td><td class="g">continuam os mesmos 2 (nada novo)</td></tr>
+<tr><td>Script na página</td><td>1 (só o botão)</td><td class="g">continua 1 (o resto entra ao clicar)</td></tr></table></div>
+<div class="panel"><h2>Ordem de implementação (uma etapa por vez)</h2>
+<ul><li><span class="k">Etapa A</span> — gerador de XLSX + testes (abre no Excel e no LibreOffice).</li>
+<li><span class="k">Etapa B</span> — botões “Excel” em Notas, Relatório da UC e Acompanhamento.</li>
+<li><span class="k">Etapa C</span> — “Relatório da turma” em Meus cursos (seleção, leitura, cancelar, abas).</li>
+<li><span class="k">Depois, se quiser</span> — Drive PDF e Kahoot como módulos opcionais, com permissão pedida só ao clicar (exige registrar a decisão em <code>memory.md</code>).</li></ul>
+<p class="sub">Cada etapa vira uma versão que você pode instalar e testar no Moodle real antes da próxima.</p></div>
+</div>
