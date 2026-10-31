@@ -14,6 +14,7 @@ h2{margin:0 0 2px;font-size:18px}.sub{color:var(--m);font-size:12.5px;margin:0 0
 button{font:inherit;min-height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--bd);background:var(--s);color:inherit;cursor:pointer}
 button.pri{background:var(--p);border-color:var(--p);color:#fff}button:disabled{opacity:.5;cursor:default}
 button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offset:2px}
+.q{width:100%;min-height:38px;margin-top:8px;padding:0 12px;border-radius:8px;border:1px solid var(--bd);background:var(--s);color:inherit;font:inherit}
 .list{display:grid;gap:6px;max-height:46vh;overflow:auto}
 .it{display:flex;gap:10px;align-items:center;border:1px solid var(--bd);background:var(--c);border-radius:10px;padding:8px 10px}
 .it.on{border-color:var(--p)}.it b{flex:1}.it small{color:var(--m)}.it label{display:flex;gap:10px;align-items:center;flex:1;cursor:pointer}
@@ -42,7 +43,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
     shadow.append(h('style', {}, CSS));
     const courses = ALN.turma.detectCourses(root.document, root.location.origin);
     const sel = new Set();
-    const st = { running: false, ctl: null, status: new Map(), result: null };
+    const st = { q: '', running: false, ctl: null, status: new Map(), result: null };
     const box = h('div', { class: 'box', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Relatório da turma' });
     const back = h('div', { class: 'back', onclick: e => { if (e.target === back && !st.running) close(); } }, box);
     shadow.append(back);
@@ -55,17 +56,27 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
       box.replaceChildren(h('h2', {}, 'Relatório da turma'),
         h('p', { class: 'sub' }, 'Escolha as unidades curriculares. Lê só o “Total do curso” de cada uma, em ordem e com pausa, e gera um Excel com uma aba por turma. Nada é gravado no Moodle.'));
       if (!courses.length) { box.append(h('div', { class: 'empty' }, 'Não encontrei cursos nesta página. Role a página até os cursos aparecerem (ou use o filtro “Em andamento” do Moodle) e abra de novo.'), h('div', { class: 'row2' }, h('button', { type: 'button', onclick: close }, 'Fechar'))); return; }
-      const all = h('button', { type: 'button', disabled: st.running, onclick: () => { if (countOn() === courses.length) sel.clear(); else courses.forEach(c => sel.add(c.id)); draw(); } }, countOn() === courses.length ? 'Limpar seleção' : 'Selecionar todas');
-      box.append(h('div', { class: 'bar' }, all, h('span', { class: 'sp', role: 'status', 'aria-live': 'polite' }, countOn() ? `${countOn()} unidade(s) selecionada(s)` : 'Nenhuma unidade selecionada')));
-      box.append(h('div', { class: 'list' }, courses.map(c => {
-        const s = st.status.get(c.id);
-        const chk = h('input', { type: 'checkbox', checked: sel.has(c.id), disabled: st.running, onchange: e => { if (e.target.checked) sel.add(c.id); else sel.delete(c.id); draw(); } });
-        return h('div', { class: `it${sel.has(c.id) ? ' on' : ''}` }, h('label', {}, chk, h('b', {}, c.name), c.category ? h('small', {}, c.category) : null),
-          s ? h('span', { class: `st ${s.tone}` }, s.text) : null);
-      })));
+      const fold = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+      const visible = () => { const q = fold(st.q).trim(); return q ? courses.filter(c => fold(`${c.name} ${c.category || ''}`).includes(q)) : courses; };
+      const searchIn = h('input', { type: 'search', class: 'q', placeholder: 'Buscar curso ou categoria', 'aria-label': 'Buscar curso ou categoria', value: st.q || '', disabled: st.running });
+      const barEl = h('div', { class: 'bar' }), listEl = h('div', { class: 'list' });
+      function refresh() {
+        const vis = visible(); const allOn = vis.length > 0 && vis.every(c => sel.has(c.id)); const hidden = countOn() - vis.filter(c => sel.has(c.id)).length;
+        const all = h('button', { type: 'button', disabled: st.running || !vis.length, onclick: () => { if (allOn) vis.forEach(c => sel.delete(c.id)); else vis.forEach(c => sel.add(c.id)); draw(); } }, st.q && st.q.trim() ? (allOn ? 'Limpar os encontrados' : 'Selecionar os encontrados') : (allOn ? 'Limpar seleção' : 'Selecionar todas'));
+        barEl.replaceChildren(all, h('span', { class: 'sp', role: 'status', 'aria-live': 'polite' }, `${countOn() ? `${countOn()} unidade(s) selecionada(s)` : 'Nenhuma unidade selecionada'}${st.q && st.q.trim() ? ` · ${vis.length} de ${courses.length} na busca${hidden ? ` · ${hidden} selecionada(s) fora da busca` : ''}` : ''}`));
+        listEl.replaceChildren(...(vis.length ? vis.map(c => {
+          const s = st.status.get(c.id);
+          const chk = h('input', { type: 'checkbox', checked: sel.has(c.id), disabled: st.running, onchange: e => { if (e.target.checked) sel.add(c.id); else sel.delete(c.id); draw(); } });
+          return h('div', { class: `it${sel.has(c.id) ? ' on' : ''}` }, h('label', {}, chk, h('b', {}, c.name), c.category ? h('small', {}, c.category) : null), s ? h('span', { class: `st ${s.tone}` }, s.text) : null);
+        }) : [h('div', { class: 'empty' }, `Nenhum curso encontrado para “${st.q.trim()}”.`)]));
+        go.disabled = st.running || !countOn();
+      }
+      const go = h('button', { class: 'pri', type: 'button', onclick: generate }, 'Gerar relatório');
+      searchIn.addEventListener('input', () => { st.q = searchIn.value; refresh(); });
+      box.append(searchIn, barEl, listEl);
+      refresh();
       if (st.running) box.append(h('div', { class: 'prog', role: 'progressbar', 'aria-label': 'Progresso' }, h('i', { style: `width:${st.pct || 0}%` })), h('div', { class: 'msg', role: 'status', 'aria-live': 'polite' }, st.msg || 'Lendo…'));
       if (st.result) box.append(h('div', { class: `msg ${st.result.tone}`, role: 'status' }, st.result.text));
-      const go = h('button', { class: 'pri', type: 'button', disabled: st.running || !countOn(), onclick: generate }, 'Gerar relatório');
       box.append(h('div', { class: 'row2' }, st.running ? h('button', { type: 'button', onclick: cancel }, 'Cancelar') : h('button', { type: 'button', onclick: close }, 'Fechar'), st.running ? null : go));
     }
 

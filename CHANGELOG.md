@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.16.1 — 2026-10-31
+
+### Novo
+- **Relatório da turma: campo de busca.** Digite parte do nome do curso ou da categoria (sem diferenciar maiúsculas nem acentos) e a lista mostra só os encontrados. “Selecionar os encontrados” marca só esses; a seleção feita antes continua valendo e a tela avisa quantas ficaram fora da busca. Sem resultado, aparece um aviso. Nada é lido antes de “Gerar relatório”.
+
 ## 0.16.0 — 2026-10-31
 
 ### Novo

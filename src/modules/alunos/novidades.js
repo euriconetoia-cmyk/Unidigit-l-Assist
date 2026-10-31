@@ -2,6 +2,7 @@
 (function (root) {
   'use strict';
   root.ALN.novidades = [
+    { versao: '0.16.1', itens: ['Relatório da turma: campo de busca para achar só os cursos que você quer (por nome ou categoria)'] },
     { versao: '0.16.0', itens: ['Resumo do dia: primeira tela do Alunos e notas (risco, sem acesso, a corrigir, retornos, piorou)', 'Ajustes por UC (nota mínima, recuperação, dias sem acesso, pausa, validade das leituras) com padrão para todas', 'Régua de nota na Correção, com prévia Antes/Depois'] },
     { versao: '0.15.0', itens: ['Modelos de mensagem com campos ({nome}, {uc}, {nota}…), na mensagem individual e na fila', 'Retornos agendados: “Ver de novo em…” e o painel Retornos de hoje', 'Comparativo desde a leitura anterior (só números guardados)'] },
     { versao: '0.14.0', itens: ['Menu com a gaveta “Ferramentas” (Kahoot, modelo de perguntas, Compatibilidade, Meus dados e Sobre)', 'Kahoot: importar perguntas de um CSV no editor, com conferência, progresso e cancelar', 'Permissão do Kahoot opcional, só quando você pede'] },
