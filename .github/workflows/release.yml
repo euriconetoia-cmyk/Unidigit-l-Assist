@@ -39,4 +39,11 @@ jobs:
       - name: Criar release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${GITHUB_REF_NAME}" dist/*.zip --title "Unidigit@l Assist ${GITHUB_REF_NAME}" --notes-file notas.md
+        run: |
+          # Se a release já foi criada pela página do GitHub, só anexa o ZIP e as notas; senão cria.
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" dist/*.zip --clobber
+            gh release edit "${GITHUB_REF_NAME}" --title "Unidigit@l Assist ${GITHUB_REF_NAME}" --notes-file notas.md
+          else
+            gh release create "${GITHUB_REF_NAME}" dist/*.zip --title "Unidigit@l Assist ${GITHUB_REF_NAME}" --notes-file notas.md
+          fi
