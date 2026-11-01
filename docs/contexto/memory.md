@@ -151,3 +151,6 @@ Usuário propôs cadastrar o dia e a hora (início/término) das webaulas na ext
 
 ## Decisão (01/11/2026): webaulas por dia da semana
 Usuário: aulas geralmente 1x por semana, exceto Aprendizagem (datas já no cronograma). Proposta: escolher dia da semana + horário (+ frequência), a extensão gera as datas entre início e término da UC (pulando feriados/férias do JSON) e lança junto com os demais dados; na Aprendizagem puxa do cronograma. Conferido com a amostra: quinzenal às quintas dá 22/10 e 05/11/2026 (as do texto real). Mockup Tela 4b. Pendente: valor de `curso.modeloCronograma` da Aprendizagem; aprovação.
+
+## Confirmação (01/11/2026): webaulas
+Usuário confirmou a regra (JSON quando tem datas; gerador por dia/horário quando não tem; Aprendizagem sempre do cronograma) e que **geralmente é uma vez por semana** → frequência padrão do gerador = toda semana. Dúvida dele: como lançar (automático ou arquivo)? Resposta: a extensão preenche e a pessoa salva no Moodle (regra do projeto); arquivo só como relatório opcional.
