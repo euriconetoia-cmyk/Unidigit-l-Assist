@@ -108,4 +108,26 @@ table{width:100%;border-collapse:collapse;font-size:13px}th{background:#eaf0f7;t
 <div class="st" style="margin:8px 0"><b>3</b>A extensão relê e confere tudo: <span class="pill ok">conferido</span> / <span class="pill dif">diferente</span>.</div>
 <div class="note">Opcional depois: o Cronograma-WP exportar também o término e o link da webaula, para você não precisar cadastrar.</div></div>
 </div>
+
+<h2>Tela 4b — Gerar as webaulas pelo dia da semana (ou puxar do cronograma)</h2>
+<div class="grid">
+<div class="card"><span class="tagc">WEBAULAS</span><h3>UC 5 – Infraestrutura de Redes de Computadores</h3>
+<p class="sub">Janela da UC: 16/10/2026 → 16/11/2026 · modelo do cronograma: <b>Técnico</b></p>
+<div class="bar"><span class="sel">● Gerar pelo dia da semana</span><span class="sel">○ Usar as datas do cronograma (JSON)</span><span class="pill ok" style="margin-left:auto">Aprendizagem: sempre do cronograma</span></div>
+<div class="row" style="grid-template-columns:170px 1fr"><span>Dia da semana</span><span><span class="sel">Quinta-feira ▾</span></span></div>
+<div class="row" style="grid-template-columns:170px 1fr"><span>Horário</span><span><span class="inp ed">19h</span> até <span class="inp ed">20h</span></span></div>
+<div class="row" style="grid-template-columns:170px 1fr"><span>Frequência</span><span><span class="sel">A cada 2 semanas ▾</span> <span style="color:var(--m)">(toda semana · a cada 2 semanas · a cada 3)</span></span></div>
+<div class="row" style="grid-template-columns:170px 1fr"><span>Pular feriados e férias</span><span>☑ usa os feriados do cronograma</span></div>
+<table style="margin-top:8px"><thead><tr><th>Webaula</th><th>Data gerada (editável)</th><th>Horário</th><th>Observação</th></tr></thead><tbody>
+<tr><td>Webaula 1</td><td><span class="inp ed">22/10/2026</span></td><td>19h–20h</td><td><span class="pill ok">quinta</span></td></tr>
+<tr><td>Webaula 2</td><td><span class="inp ed">05/11/2026</span></td><td>19h–20h</td><td><span class="pill ok">quinta</span></td></tr>
+<tr><td colspan="4" style="color:var(--m)">Toda semana geraria 4 datas (22/10, 29/10, 05/11, 12/11). Com “a cada 2 semanas” saem as 2 que já estão no texto do curso.</td></tr></tbody></table>
+<div class="note">Quantidade diferente da tabela do texto? A extensão <b>acrescenta ou remove linhas</b> copiando o estilo da última e avisa antes. Fora da janela da UC ou em feriado: aviso, nunca silêncio.</div>
+<p><span class="btn pri">Lançar com os demais dados</span><span class="btn">Guardar como padrão da turma</span></p></div>
+<div class="card"><span class="tagc">REGRAS</span><h3>De onde vêm as datas</h3>
+<div class="st" style="margin:8px 0"><b>Aprendizagem</b>As datas já vêm no cronograma: a extensão <b>puxa</b> e não gera nada.</div>
+<div class="st" style="margin:8px 0"><b>Técnico com datas no JSON</b>Usa o JSON. O gerador só aparece se você escolher “Gerar pelo dia da semana”.</div>
+<div class="st" style="margin:8px 0"><b>Técnico sem datas</b>Gerador por dia/horário/frequência.</div>
+<div class="note">Dia, horário e frequência ficam guardados por turma neste navegador; o que você editar à mão numa data vale mais que o gerado.</div></div>
+</div>
 </body></html>

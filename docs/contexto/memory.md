@@ -148,3 +148,6 @@ Além das atividades, atualizar as datas no **cabeçalho** ("Período de Realiza
 
 ## Ideia (01/11/2026): cadastrar dia/hora das webaulas
 Usuário propôs cadastrar o dia e a hora (início/término) das webaulas na extensão e lançar junto com os demais dados. Prioridade: cadastrado pela pessoa → JSON → texto atual; guardado só no navegador; aviso quando o JSON mudar depois de um valor manual. Mockup Tela 4 em `docs/mockups/cronograma-json.png`. Aguardando aprovação.
+
+## Decisão (01/11/2026): webaulas por dia da semana
+Usuário: aulas geralmente 1x por semana, exceto Aprendizagem (datas já no cronograma). Proposta: escolher dia da semana + horário (+ frequência), a extensão gera as datas entre início e término da UC (pulando feriados/férias do JSON) e lança junto com os demais dados; na Aprendizagem puxa do cronograma. Conferido com a amostra: quinzenal às quintas dá 22/10 e 05/11/2026 (as do texto real). Mockup Tela 4b. Pendente: valor de `curso.modeloCronograma` da Aprendizagem; aprovação.
