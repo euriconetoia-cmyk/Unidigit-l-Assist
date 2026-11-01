@@ -1,0 +1,71 @@
+<!doctype html><meta charset="utf-8"><title>Opções de posição do menu</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:24px;background:#e9eef5;font:14px/1.4 Inter,Segoe UI,system-ui,sans-serif;color:#14202e}
+h1{margin:0 0 4px;font-size:22px}p.s{margin:0 0 18px;color:#5b6b7c}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:#fff;border-radius:14px;padding:12px;box-shadow:0 4px 18px rgba(20,40,70,.1)}
+.card h2{margin:2px 4px 2px;font-size:15px}.card .d{margin:0 4px 10px;color:#5b6b7c;font-size:12.5px;min-height:34px}
+.pg{position:relative;height:330px;border:1px solid #d3dbe6;border-radius:10px;overflow:hidden;background:#f6f8fb}
+.nav{height:30px;background:#0b3f78;display:flex;align-items:center;gap:8px;padding:0 10px;color:#fff;font-size:11px}
+.nav i{margin-left:auto;display:flex;gap:8px;align-items:center}.nav i b{width:16px;height:16px;border-radius:50%;background:#ffffff55}
+.side{position:absolute;left:0;top:30px;bottom:0;width:46px;background:#fff;border-right:1px solid #e0e6ee}
+.cont{position:absolute;left:58px;right:46px;top:42px;bottom:10px}
+.cont u{display:block;height:9px;background:#d9e1ec;border-radius:5px;margin:0 0 9px;text-decoration:none}.cont u:nth-child(3n){width:70%}.cont u:nth-child(4n){width:45%}
+.rail{position:absolute;right:0;top:30px;bottom:0;width:30px;background:#eef1f6;border-left:1px solid #e0e6ee}
+.libras{position:absolute;right:4px;top:128px;width:26px;height:26px;border-radius:6px;background:#3b82f6}
+.chat{position:absolute;right:6px;bottom:8px;width:22px;height:22px;border-radius:50%;background:#7c8aa0}
+.lbl{position:absolute;font-size:9.5px;color:#7a8799}
+.c{border-radius:50%;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:700}
+.main{background:linear-gradient(135deg,#0b5cad,#0a3f78);box-shadow:0 5px 14px rgba(11,92,173,.4)}
+.b{background:#0b5cad}.g{background:#13795b}.o{background:#b4580a}.x{background:#8d9bab}
+.abs{position:absolute}
+.tip{position:absolute;background:#14202e;color:#fff;font-size:10px;padding:3px 7px;border-radius:6px;white-space:nowrap}
+.note{margin:10px 4px 0;font-size:12px;color:#5b6b7c}.note b{color:#157a4c}
+.tag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:9px;background:#e1f5ec;color:#157a4c;font-size:11px;font-weight:600}
+</style>
+<h1>Onde colocar o menu sem atrapalhar o Moodle?</h1>
+<p class="s">Cinza claro = o que o Moodle já usa: faixa à direita (VLibras / acessibilidade, barra de rolagem, gaveta de blocos) e balão de chat no canto. Escolha o modelo que fica melhor.</p>
+<div class="grid">
+
+<div class="card"><h2>1 · Canto inferior esquerdo</h2><p class="d">O mesmo botão FAB, só que do outro lado: a direita é onde o Moodle e o VLibras ficam.</p>
+<div class="pg"><div class="nav">Moodle<i><b></b><b></b></i></div><div class="side"></div><div class="rail"></div><div class="libras"></div><div class="chat"></div>
+<div class="cont"><u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u></div>
+<div class="abs c b" style="left:58px;bottom:84px;width:28px;height:28px"></div><div class="abs c b" style="left:58px;bottom:116px;width:28px;height:28px"></div><div class="abs c g" style="left:58px;bottom:148px;width:28px;height:28px"></div><div class="abs c g" style="left:58px;bottom:180px;width:28px;height:28px"></div><div class="abs c o" style="left:58px;bottom:212px;width:28px;height:28px"></div>
+<div class="abs c main" style="left:52px;bottom:10px;width:40px;height:40px">×</div><div class="tip" style="left:96px;bottom:150px">Pendências</div></div>
+<p class="note"><b>Livre:</b> direita intacta. Cuidado só com o menu lateral do Moodle (em tela estreita ele abre por cima).</p></div>
+
+<div class="card"><h2>2 · Barra recolhida no rodapé (centro)</h2><p class="d">Uma pílula pequena colada na base, no meio da tela. Abre uma fileira horizontal de ícones.</p>
+<div class="pg"><div class="nav">Moodle<i><b></b><b></b></i></div><div class="side"></div><div class="rail"></div><div class="libras"></div><div class="chat"></div>
+<div class="cont"><u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u></div>
+<div class="abs" style="left:50%;margin-left:-100px;bottom:8px;width:200px;height:40px;border-radius:20px;background:#fff;border:1px solid #d3dbe6;box-shadow:0 8px 22px rgba(20,40,70,.22);display:flex;align-items:center;justify-content:center;gap:8px;padding:0 8px">
+<span class="c main" style="width:30px;height:30px">×</span><span class="c b" style="width:26px;height:26px"></span><span class="c b" style="width:26px;height:26px"></span><span class="c g" style="width:26px;height:26px"></span><span class="c g" style="width:26px;height:26px"></span><span class="c o" style="width:26px;height:26px"></span></div></div>
+<p class="note"><b>Livre:</b> laterais inteiras. Fechada é só um ícone de 36 px; pode cobrir o fim do texto da página.</p></div>
+
+<div class="card"><h2>3 · Aba fina na borda esquerda</h2><p class="d">Uma lingueta de 18 px colada à borda esquerda, perto da base. Passou o mouse/clicou: abre o painel.</p>
+<div class="pg"><div class="nav">Moodle<i><b></b><b></b></i></div><div class="side"></div><div class="rail"></div><div class="libras"></div><div class="chat"></div>
+<div class="cont"><u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u></div>
+<div class="abs main" style="left:46px;bottom:70px;width:18px;height:56px;border-radius:0 12px 12px 0;display:grid;place-items:center;color:#fff;font-size:10px">›</div>
+<div class="abs" style="left:70px;bottom:40px;width:150px;background:#fff;border:1px solid #d3dbe6;border-radius:12px;padding:8px;box-shadow:0 10px 26px rgba(20,40,70,.22);font-size:10.5px;display:grid;gap:5px"><span><b style="color:#0b5cad">●</b> Pendências</span><span><b style="color:#0b5cad">●</b> Correção</span><span><b style="color:#13795b">●</b> Alunos e notas</span><span><b style="color:#13795b">●</b> Relatório</span><span><b style="color:#b4580a">●</b> Ferramentas</span></div></div>
+<p class="note"><b>Livre:</b> direita e centro. Quase invisível fechada; sem animação de subir.</p></div>
+
+<div class="card"><h2>4 · Leque no canto inferior esquerdo</h2><p class="d">Botão pequeno (44 px) que abre os círculos em arco, sem formar uma coluna alta.</p>
+<div class="pg"><div class="nav">Moodle<i><b></b><b></b></i></div><div class="side"></div><div class="rail"></div><div class="libras"></div><div class="chat"></div>
+<div class="cont"><u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u></div>
+<div class="abs c b" style="left:58px;bottom:66px;width:28px;height:28px"></div><div class="abs c b" style="left:70px;bottom:98px;width:28px;height:28px"></div><div class="abs c g" style="left:92px;bottom:124px;width:28px;height:28px"></div><div class="abs c g" style="left:124px;bottom:138px;width:28px;height:28px"></div><div class="abs c o" style="left:158px;bottom:140px;width:28px;height:28px"></div>
+<div class="abs c main" style="left:54px;bottom:10px;width:44px;height:44px">×</div></div>
+<p class="note"><b>Livre:</b> ocupa só um quarto de círculo; some da frente do texto ao fechar.</p></div>
+
+<div class="card"><h2>5 · Ícone na barra azul do Moodle <span class="tag">não cobre nada</span></h2><p class="d">O botão vai para dentro da barra superior, ao lado do sino e do perfil. O menu cai como um dropdown.</p>
+<div class="pg"><div class="nav">Moodle<i><b style="width:22px;height:22px;background:linear-gradient(135deg,#f6b900,#e08a00);display:grid;place-items:center;font-size:10px;color:#14202e;font-weight:800">U</b><b></b><b></b></i></div><div class="side"></div><div class="rail"></div><div class="libras"></div><div class="chat"></div>
+<div class="cont"><u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u></div>
+<div class="abs" style="right:42px;top:36px;width:150px;background:#fff;border:1px solid #d3dbe6;border-radius:12px;padding:8px;box-shadow:0 10px 26px rgba(20,40,70,.22);font-size:10.5px;display:grid;gap:5px"><span><b style="color:#0b5cad">●</b> Pendências</span><span><b style="color:#0b5cad">●</b> Correção</span><span><b style="color:#13795b">●</b> Alunos e notas</span><span><b style="color:#13795b">●</b> Relatório</span><span><b style="color:#b4580a">●</b> Ferramentas</span></div></div>
+<p class="note"><b>Livre:</b> nada flutuando sobre a página. Depende de achar a barra do Moodle (SENAI/FIEG); se não achar, cai no modelo 1.</p></div>
+
+<div class="card"><h2>6 · Bolinha arrastável (bônus)</h2><p class="d">Qualquer um dos modelos, mas você arrasta o botão para onde quiser e ele lembra a posição.</p>
+<div class="pg"><div class="nav">Moodle<i><b></b><b></b></i></div><div class="side"></div><div class="rail"></div><div class="libras"></div><div class="chat"></div>
+<div class="cont"><u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u></div>
+<div class="abs c main" style="left:46%;top:46%;width:40px;height:40px;opacity:.9">⠿</div>
+<div class="abs" style="left:46%;top:46%;margin:-14px 0 0 44px;font-size:10px;color:#5b6b7c">← arraste</div>
+<div class="abs c main" style="left:68px;bottom:12px;width:40px;height:40px;opacity:.35">·</div><div class="abs" style="left:112px;bottom:22px;font-size:10px;color:#7a8799">posição salva</div></div>
+<p class="note"><b>Livre:</b> você resolve qualquer conflito. Um pouco mais de código; combina com 1, 2 ou 4.</p></div>
+</div>
