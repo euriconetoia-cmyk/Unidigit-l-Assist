@@ -145,3 +145,6 @@ Mockup `docs/mockups/ajustar-datas.png` aprovado. Nome **Conferir datas**; escop
 
 ## Pedido (01/11/2026): atualizar também os textos (rótulos) do curso
 Além das atividades, atualizar as datas no **cabeçalho** ("Período de Realização") e no **"Cronograma completo da UC"** (Período, atividades, webaulas, encontros). Spike com os HTMLs reais: só as datas mudam, resto idêntico. Aplicação: copiar HTML atualizado e colar no Código-fonte do editor (editor do Moodle refaz o campo). Pendente: regra das linhas Fórum/SAP/Avaliação (término = 2 dias antes do 1º encontro?) e aprovação do mockup (Tela 3).
+
+## Ideia (01/11/2026): cadastrar dia/hora das webaulas
+Usuário propôs cadastrar o dia e a hora (início/término) das webaulas na extensão e lançar junto com os demais dados. Prioridade: cadastrado pela pessoa → JSON → texto atual; guardado só no navegador; aviso quando o JSON mudar depois de um valor manual. Mockup Tela 4 em `docs/mockups/cronograma-json.png`. Aguardando aprovação.
