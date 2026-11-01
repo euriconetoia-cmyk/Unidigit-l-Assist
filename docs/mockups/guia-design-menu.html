@@ -1,0 +1,142 @@
+<title>Guia de design do menu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root{--bg:#eef2f7;--fg:#14202e;--mut:#55657a;--card:#fff;--line:#d6dee9;--p:#0b5cad;--g:#0f6b4f;--o:#a14d08;--off:#657587;--soft:#e8f0fa;--ok:#157a4c;--warn:#b4580a;--bad:#b3261e;--code:#f1f5fa}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121821;--fg:#e6ecf5;--mut:#9aa8bd;--card:#1b2431;--line:#2e3a4b;--p:#2f7fd1;--g:#238a68;--o:#c26a1a;--off:#6f7d8f;--soft:#22344a;--ok:#6fd0a0;--warn:#e8a15c;--bad:#ff8a80;--code:#222d3b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121821;--fg:#e6ecf5;--mut:#9aa8bd;--card:#1b2431;--line:#2e3a4b;--p:#2f7fd1;--g:#238a68;--o:#c26a1a;--off:#6f7d8f;--soft:#22344a;--ok:#6fd0a0;--warn:#e8a15c;--bad:#ff8a80;--code:#222d3b;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 Inter,"Segoe UI",system-ui,sans-serif;padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.w{max-width:1040px;margin:auto}h1{margin:0 0 4px;font-size:26px;text-wrap:balance}h2{margin:34px 0 4px;font-size:20px}h3{margin:0 0 6px;font-size:15px}.lead{color:var(--mut);margin:0 0 12px}
+nav.t{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}nav.t a{padding:5px 12px;border-radius:99px;background:var(--card);border:1px solid var(--line);color:var(--fg);text-decoration:none;font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:10px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}.grid>*{min-width:0}
+table{width:100%;border-collapse:collapse;font-size:13.5px}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}.tw{overflow-x:auto}
+.sev{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap}.c{background:#fde8e5;color:#8e1b1b}.m{background:#fff0d6;color:#7a4300}.l{background:#e1f5ec;color:#0f5c3a}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .c{background:#4a1d1a;color:#ffb4ab}:root:not([data-theme="light"]) .m{background:#4a3410;color:#ffd08a}:root:not([data-theme="light"]) .l{background:#143a2b;color:#8fe0b4}}
+:root[data-theme="dark"] .c{background:#4a1d1a;color:#ffb4ab}:root[data-theme="dark"] .m{background:#4a3410;color:#ffd08a}:root[data-theme="dark"] .l{background:#143a2b;color:#8fe0b4}
+code{background:var(--code);padding:1px 6px;border-radius:5px;font-size:12.5px}
+svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic{display:grid;grid-template-columns:1fr 1fr;gap:8px}.opt{border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;font-size:12px;color:var(--mut)}.opt.rec{border:2px solid var(--p);background:var(--soft);color:var(--fg)}
+.dot{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;color:#fff;margin:0 auto 6px}
+.sw{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--line);border-radius:10px}.sw i{flex:0 0 34px;height:34px;border-radius:8px;border:1px solid #0002}.sw b{display:block;font-size:13px}.sw span{font-size:12px;color:var(--mut)}
+.stage{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
+.aba{width:24px;height:64px;border-radius:14px 0 0 14px;background:linear-gradient(135deg,var(--p),#0a3f78);color:#fff;display:grid;place-items:center;box-shadow:-2px 4px 12px rgba(11,92,173,.4);position:relative}.aba.h{width:32px}.aba svg{width:16px;height:16px}
+.aba.f{outline:2px solid #14202e;outline-offset:1px;box-shadow:0 0 0 5px #f6b900}
+.lab{font-size:12px;color:var(--mut);text-align:center;margin-top:6px}
+.item{display:flex;gap:10px;align-items:center;width:250px;padding:8px 10px;border-radius:12px;border:1px solid transparent;background:var(--card);font-size:13px}.item small{display:block;color:var(--mut);font-size:12px}
+.item.hv{background:var(--soft);border-color:var(--p)}.item.fo{outline:2px solid #14202e;outline-offset:1px;box-shadow:0 0 0 5px #f6b900}.item.no .dot{background:var(--off)}.item .nt{margin-left:auto;font-size:11.5px;background:var(--line);padding:1px 8px;border-radius:99px;white-space:nowrap}
+.item .dot{width:34px;height:34px;margin:0;flex:none}
+.moto{font-variant-numeric:tabular-nums}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+</style>
+<div class="w">
+<h1>Guia de design do menu — Unidigit@l Assist</h1>
+<p class="lead">Aba na borda direita, painel de ferramentas, ícones e regras de interface. Três partes: <b>crítica</b> do que já temos, <b>sistema de design</b> (cores, ícones, componentes) e <b>especificação para implementar</b>.</p>
+<nav class="t"><a href="#critica">1 · Crítica</a><a href="#icones">2 · Ícones</a><a href="#sistema">3 · Sistema</a><a href="#handoff">4 · Especificação</a></nav>
+
+<h2 id="critica">1 · Crítica do menu atual</h2>
+<p class="lead">Estado: refinamento (já escolhemos o formato; falta acertar detalhes). Medi os contrastes pelas cores reais do código.</p>
+<div class="card"><h3>Impressão geral</h3><p style="margin:0">A ideia é clara e leve: uma lingueta discreta e um painel organizado por cor. O maior risco hoje não é beleza, é <b>legibilidade e toque</b>: lingueta estreita demais, texto esmaecido que não passa no contraste e três ferramentas diferentes com o mesmo ícone de barras.</p></div>
+<div class="card tw"><table><thead><tr><th>Achado</th><th>Gravidade</th><th>Medido</th><th>Como corrigir</th></tr></thead><tbody>
+<tr><td>Lingueta com 18 px de largura</td><td><span class="sev c">Crítico</span></td><td>Mínimo recomendado para alvo de toque: 24 px (WCAG 2.2); ideal 44 px</td><td>24 px de largura visível, 32 px no hover e uma <b>área de clique invisível de 44 px</b>.</td></tr>
+<tr><td>Anel de foco amarelo <code>#f6b900</code> sobre fundo claro</td><td><span class="sev c">Crítico</span></td><td>1,77:1 no claro (precisa de 3:1); 8,8:1 no escuro</td><td>Anel duplo: 2 px escuro por dentro + 3 px amarelo por fora. Funciona nos dois temas.</td></tr>
+<tr><td>Item “não se aplica aqui” a 55% de opacidade</td><td><span class="sev c">Crítico</span></td><td>Texto fica com ~2,5:1</td><td>Manter o texto 100% e marcar com um <b>chip “não se aplica aqui”</b> e círculo cinza. Nada de opacidade em texto.</td></tr>
+<tr><td>Círculo cinza <code>#8d9bab</code> com ícone branco</td><td><span class="sev m">Médio</span></td><td>2,83:1 (precisa de 3:1 para ícone)</td><td>Cinza <code>#657587</code> (4,7:1).</td></tr>
+<tr><td>Relatório, Conferir datas e Cronograma usam o <b>mesmo ícone de barras</b></td><td><span class="sev m">Médio</span></td><td>3 de 12 ícones repetidos</td><td>Um ícone único por ferramenta (veja a seção 2).</td></tr>
+<tr><td>Cor como única pista do grupo (azul/verde/laranja)</td><td><span class="sev m">Médio</span></td><td>Daltonismo confunde verde e laranja</td><td>Cada grupo ganha também um <b>título de seção</b> (“Correção”, “Alunos”, “Mais”) e o ícone muda de forma.</td></tr>
+<tr><td>Dica só aparece com o mouse</td><td><span class="sev m">Médio</span></td><td>No celular/tablet não existe hover</td><td>No painel os nomes sempre aparecem; a dica fica só na lingueta fechada, com <code>aria-label</code>.</td></tr>
+<tr><td>Selo vermelho de pendências</td><td><span class="sev l">Leve</span></td><td>Branco sobre <code>#d6361f</code> = 4,8:1 (passa)</td><td>Manter; incluir o número no <code>aria-label</code> (“3 pendências”).</td></tr>
+<tr><td>Texto secundário 11,5 px</td><td><span class="sev l">Leve</span></td><td>Pequeno demais para leitura prolongada</td><td>Mínimo de 12 px; 13 px para descrições.</td></tr>
+<tr><td>Tema escuro: branco sobre verde <code>#2f9c76</code> / laranja <code>#d9772a</code></td><td><span class="sev l">Leve</span></td><td>3,4:1 e 3,2:1 (ok para ícone, não para texto)</td><td>Escurecer os fundos (<code>#238a68</code>, <code>#c26a1a</code>); círculos só com ícone, sem texto.</td></tr>
+</tbody></table></div>
+<div class="card"><h3>O que já funciona bem</h3><ul style="margin:0;padding-left:20px"><li>Direita livre do que o Moodle usa e fechado quase não aparece.</li><li>Ordem do painel segue o fluxo de trabalho do tutor (pendências → corrigir → alunos → relatório).</li><li>Mensagem de estado na própria tela (“Abrindo…”) e fechamento com <kbd>Esc</kbd>.</li><li>Tema claro/escuro e respeito a “menos movimento”.</li></ul></div>
+<div class="card"><h3>Três prioridades</h3><ol style="margin:0;padding-left:20px"><li><b>Acessibilidade de toque e foco</b> — lingueta 24/32 px com área de 44 px e anel de foco duplo.</li><li><b>Ícone próprio por ferramenta</b> — acaba a repetição e ajuda a achar rápido.</li><li><b>Estado “não se aplica”</b> sem opacidade, com texto que explica o motivo.</li></ol></div>
+
+<h2 id="icones">2 · Ícones sugeridos</h2>
+<p class="lead">Mesma família: traço de 1,8 px, cantos arredondados, caixa 24×24. O destaque azul é minha recomendação (opção B): cada ferramenta tem uma forma própria e todas “falam” do assunto.</p>
+<div class="grid" id="iconGrid"></div>
+<div class="card"><h3>Marca na lingueta</h3><p style="margin:0 0 8px;color:var(--mut)">Hoje a lingueta só tem uma seta. Sugestão: <b>capelo pequeno</b> (16 px) no topo e seta embaixo, para a pessoa reconhecer “é a ferramenta do tutor” sem abrir.</p><div class="stage"><div><div class="aba h" style="height:76px;display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center"><svg class="i" style="width:16px;height:16px" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5zM6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5M22 9v6"/></svg><svg class="i" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></div><div class="lab">com marca</div></div></div></div>
+
+<h2 id="sistema">3 · Sistema de design</h2>
+<p class="lead">Segue o que o projeto já define (<code>docs/contexto/design.md</code>: azul <code>#0b5cad</code>, raio 8 px, foco visível) e acrescenta o que falta, em nomes de token.</p>
+<div class="card"><h3>Cores</h3><div class="grid">
+<div class="sw"><i style="background:#0b5cad"></i><div><b>color-primary</b><span>#0b5cad · Correção, marca</span></div></div>
+<div class="sw"><i style="background:#0f6b4f"></i><div><b>color-alunos</b><span>#0f6b4f (antes #13795b) · 6,5:1</span></div></div>
+<div class="sw"><i style="background:#a14d08"></i><div><b>color-mais</b><span>#a14d08 (antes #b4580a) · 5,9:1</span></div></div>
+<div class="sw"><i style="background:#657587"></i><div><b>color-neutro</b><span>#657587 · “não se aplica” · 4,7:1</span></div></div>
+<div class="sw"><i style="background:#b3261e"></i><div><b>color-alerta</b><span>#b3261e · erro e selo</span></div></div>
+<div class="sw"><i style="background:#f6b900"></i><div><b>color-foco</b><span>#f6b900 + anel escuro #14202e</span></div></div>
+<div class="sw"><i style="background:#14202e"></i><div><b>color-texto</b><span>#14202e · claro / #e6ecf5 escuro</span></div></div>
+<div class="sw"><i style="background:#55657a"></i><div><b>color-texto-suave</b><span>#55657a · 5,9:1 no branco</span></div></div>
+</div><p style="margin:10px 0 0;color:var(--mut);font-size:13px">Escuro: azul #2f7fd1, verde #238a68, laranja #c26a1a, neutro #6f7d8f, superfície #1b2431.</p></div>
+<div class="card tw"><h3>Tipografia, espaço e forma</h3><table><thead><tr><th>Token</th><th>Valor</th><th>Uso</th></tr></thead><tbody>
+<tr><td><code>font-base</code></td><td>Inter / Segoe UI / sistema, 14 px</td><td>Corpo do painel</td></tr>
+<tr><td><code>font-titulo</code></td><td>15–16 px, 600</td><td>“Unidigit@l Assist”, título de gaveta</td></tr>
+<tr><td><code>font-item</code></td><td>13,5 px, 600 + descrição 12–13 px</td><td>Nome e descrição da ferramenta</td></tr>
+<tr><td><code>font-secao</code></td><td>11–12 px, 600, caixa alta, +0,07em</td><td>Títulos “Correção / Alunos / Mais”</td></tr>
+<tr><td><code>space-1…5</code></td><td>4 · 8 · 12 · 16 · 24 px</td><td>Gaps e paddings</td></tr>
+<tr><td><code>radius-md / lg / full</code></td><td>12 · 16 · 999 px</td><td>Item · painel · círculos e selo</td></tr>
+<tr><td><code>shadow-painel</code></td><td>0 14px 40px rgba(20,40,70,.28)</td><td>Painel aberto</td></tr>
+<tr><td><code>motion-rapido / medio</code></td><td>150–220 ms · 340 ms</td><td>Hover · painel</td></tr>
+<tr><td><code>ease-saida</code></td><td>cubic-bezier(.2,.9,.3,1)</td><td>Painel entrando</td></tr>
+</tbody></table></div>
+<div class="card"><h3>Componentes e estados</h3>
+<p style="margin:0 0 8px;color:var(--mut)"><b>Lingueta (Aba)</b></p>
+<div class="stage" style="margin-bottom:12px"><div><div class="aba"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></div><div class="lab">repouso 24 px</div></div><div><div class="aba h"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></div><div class="lab">hover 32 px</div></div><div><div class="aba f"><svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></div><div class="lab">foco (anel duplo)</div></div><div><div class="aba h"><svg class="i" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div><div class="lab">aberto (seta ›)</div></div></div>
+<p style="margin:0 0 8px;color:var(--mut)"><b>Item do painel</b></p>
+<div class="stage" id="itemStage"></div></div>
+<div class="card"><h3>Faça / Não faça</h3><div class="tw"><table><thead><tr><th class="ok">Faça</th><th class="bad">Não faça</th></tr></thead><tbody>
+<tr><td>Um ícone único por ferramenta, mais nome visível</td><td>Reaproveitar o ícone de barras em três itens</td></tr>
+<tr><td>Explicar por que a ferramenta não serve nesta página</td><td>Esmaecer o texto só com opacidade</td></tr>
+<tr><td>Foco com anel duplo, em qualquer tema</td><td>Só um contorno amarelo</td></tr>
+<tr><td>Fechar com <kbd>Esc</kbd>, clique fora ou na lingueta</td><td>Escurecer a página inteira (tira o Moodle do alcance)</td></tr>
+<tr><td>Guardar a altura da lingueta quando a pessoa ajustar</td><td>Mudar de lugar sozinho entre páginas</td></tr>
+</tbody></table></div></div>
+
+<h2 id="handoff">4 · Especificação para implementar</h2>
+<div class="card"><h3>Visão geral</h3><p style="margin:0">Aba fixa na borda direita (<code>position: fixed; right: 0</code>), 24 px de largura, 64 px de altura, a <code>bottom: 96px</code>, abaixo do VLibras e acima do chat. Ao abrir, um painel de 280 px desliza da direita. Nada é lido nem gravado no Moodle até a pessoa clicar numa ferramenta.</p></div>
+<div class="card tw"><h3>Movimento</h3><table class="moto"><thead><tr><th>Elemento</th><th>Gatilho</th><th>Animação</th><th>Duração</th><th>Curva</th></tr></thead><tbody>
+<tr><td>Aba</td><td>Página carrega</td><td>Pulsa 2× (halo azul)</td><td>1,6 s × 2</td><td>ease-in-out</td></tr>
+<tr><td>Aba</td><td>Hover / foco</td><td>24 → 32 px; dica à esquerda</td><td>220 ms</td><td>cubic-bezier(.3,1.4,.5,1)</td></tr>
+<tr><td>Painel</td><td>Abrir</td><td>translateX(105%) → 0, opacidade 0 → 1</td><td>340 ms</td><td>cubic-bezier(.2,.9,.3,1)</td></tr>
+<tr><td>Aba</td><td>Abrir</td><td>Acompanha o painel (right: 0 → 280 px); seta gira 180°</td><td>340 ms</td><td>mesma</td></tr>
+<tr><td>Itens</td><td>Abrir</td><td>Entram da direita (14 px), em sequência</td><td>300 ms + 45 ms por item</td><td>ease</td></tr>
+<tr><td>Ferramentas</td><td>Clique</td><td>Sub-lista abre dentro do painel; seta gira 90°</td><td>300 ms</td><td>ease</td></tr>
+<tr><td>Estado “Abrindo…”</td><td>Clique numa ferramenta</td><td>Círculo girando; painel fecha quando a ferramenta abre</td><td>700 ms (giro)</td><td>linear</td></tr>
+<tr><td colspan="5">Com “reduzir movimento” ligado no sistema: tudo em 0,01 ms, sem pulso.</td></tr>
+</tbody></table></div>
+<div class="card tw"><h3>Estados</h3><table><thead><tr><th>Elemento</th><th>Estado</th><th>Comportamento</th></tr></thead><tbody>
+<tr><td>Item</td><td>Hover</td><td>Fundo <code>color-soft</code>, contorno primário 1 px</td></tr>
+<tr><td>Item</td><td>Foco</td><td>Anel duplo (2 px #14202e + 3 px #f6b900)</td></tr>
+<tr><td>Item</td><td>Não se aplica</td><td>Círculo cinza, chip “não se aplica aqui”, texto em 100%; clique mostra o motivo no status</td></tr>
+<tr><td>Item</td><td>Ocupado</td><td><code>aria-busy="true"</code>, círculo girando, outros cliques ignorados</td></tr>
+<tr><td>Item</td><td>Em breve</td><td>Borda tracejada, chip “em breve”, não clicável</td></tr>
+<tr><td>Status</td><td>Erro</td><td>Fundo vermelho claro, texto <code>color-alerta</code> em negrito, sem sumir sozinho</td></tr>
+<tr><td>Selo</td><td>Zero pendências</td><td>Some (não mostra “0”)</td></tr>
+</tbody></table></div>
+<div class="card tw"><h3>Responsivo</h3><table><thead><tr><th>Largura</th><th>Mudança</th></tr></thead><tbody>
+<tr><td>Acima de 540 px</td><td>Painel de 280 px, aba 24/32 px.</td></tr>
+<tr><td>Até 540 px</td><td>Painel ocupa a largura menos 56 px; itens com 48 px de altura; aba mantém 44 px de área de toque.</td></tr>
+<tr><td>Altura baixa (&lt; 480 px)</td><td>Painel com rolagem interna (<code>max-height: calc(100vh - 24px)</code>); aba sobe para <code>bottom: 24px</code>.</td></tr>
+</tbody></table></div>
+<div class="card"><h3>Casos de borda</h3><ul style="margin:0;padding-left:20px"><li><b>Nome longo:</b> descrição em até 2 linhas, depois reticências; nome em 1 linha.</li><li><b>Conflito com botão do Moodle:</b> pessoa ajusta a altura pelo painel (“Mover aba”); a extensão guarda no navegador.</li><li><b>Página sem ferramenta aplicável:</b> aba continua; painel mostra todas com “não se aplica aqui”.</li><li><b>Falha ao abrir ferramenta:</b> mensagem de erro no status e o painel continua aberto.</li><li><b>Impressão:</b> a aba some.</li></ul></div>
+<div class="card"><h3>Acessibilidade</h3><ul style="margin:0;padding-left:20px"><li><b>Ordem do foco:</b> aba → itens (de cima para baixo) → Ferramentas → sub-itens.</li><li><b>Aba:</b> <code>button</code>, <code>aria-expanded</code>, <code>aria-controls</code>, <code>aria-label</code> “Abrir Unidigit@l Assist (3 pendências)”.</li><li><b>Painel:</b> <code>role="region"</code> com nome; <code>inert</code> quando fechado.</li><li><b>Status:</b> <code>role="status"</code>, <code>aria-live="polite"</code>; erros <code>role="alert"</code>.</li><li><b>Teclado:</b> <kbd>Enter</kbd>/<kbd>Espaço</kbd> abrem; <kbd>↑</kbd><kbd>↓</kbd> andam; <kbd>Esc</kbd> fecha e devolve o foco à aba.</li><li><b>Contraste:</b> texto ≥ 4,5:1; ícones e anéis ≥ 3:1 nos dois temas.</li></ul></div>
+</div>
+<script>
+const D=[
+['Pendências','M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM12 8v4l3 2','M7 3h10M7 21h10M8 3v3a4 4 0 0 0 1.6 3.2L12 12l-2.4 2.8A4 4 0 0 0 8 18v3M16 3v3a4 4 0 0 1-1.6 3.2L12 12l2.4 2.8A4 4 0 0 1 16 18v3','relógio','ampulheta'],
+['Correção','M4 20l4-1 11-11-3-3L5 16zM14 6l3 3','M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 14l2 2 4-4','lápis','documento com visto'],
+['Alunos e notas','M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M17 11a3 3 0 1 0 0-6M21 20c0-2.5-1.6-4.6-4-5.5','M2 9l10-5 10 5-10 5zM6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5M22 9v6','pessoas','capelo'],
+['Relatório da turma','M5 20V10M12 20V4M19 20v-7','M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 17v-3M12 17v-5M15 17v-2','barras','folha com gráfico'],
+['Mensagem em lote','M4 5h16v4H4zM4 11h16v4H4zM4 17h10v3H4z','M3 6h18v12H3zM3 7l9 6 9-6','linhas','envelope'],
+['Conferir datas','M5 20V10M12 20V4M19 20v-7','M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M9 15l2 2 4-4','barras (repetido)','calendário com visto'],
+['Cronograma da turma','M5 20V10M12 20V4M19 20v-7','M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M8 14h3M13 14h3M8 17h3','barras (repetido)','calendário com linhas'],
+['Kahoot','M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM9.6 9.2a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1.1.9-1.1 1.7M12 16.6v.1','M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM9.6 9.2a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1.1.9-1.1 1.7M12 16.6v.1','interrogação','mantém'],
+['Modelo de perguntas','M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M12 11v6M9.5 14.5L12 17l2.5-2.5','M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M12 11v6M9.5 14.5L12 17l2.5-2.5','arquivo com seta','mantém'],
+['Ferramentas','M14.7 6.3a4 4 0 0 0-5.4 5.4L3.5 17.5a1.4 1.4 0 0 0 2 2l5.8-5.8a4 4 0 0 0 5.4-5.4l-2.4 2.4-1.7-.4-.4-1.7z','M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z','chave inglesa','grade de módulos']
+];
+const col=['p','p','g','g','off','o','o','o','o','o'];
+document.getElementById('iconGrid').innerHTML=D.map((d,i)=>`<div class="card" style="margin:0"><h3>${d[0]}</h3><div class="ic"><div class="opt"><div class="dot" style="background:var(--${col[i]})"><svg class="i" viewBox="0 0 24 24"><path d="${d[1]}"/></svg></div>A · ${d[3]}<br><small>atual</small></div><div class="opt rec"><div class="dot" style="background:var(--${col[i]})"><svg class="i" viewBox="0 0 24 24"><path d="${d[2]}"/></svg></div>B · ${d[4]}<br><small><b>sugerido</b></small></div></div></div>`).join('');
+const P=n=>D.find(d=>d[0]===n)[2];
+const it=(n,s,cls,cor,nt,lab)=>`<div><div class="item ${cls}"><span class="dot" style="background:var(--${cor})"><svg class="i" viewBox="0 0 24 24"><path d="${P(n)}"/></svg></span><span><b>${n}</b><small>${s}</small></span>${nt?`<span class="nt">${nt}</span>`:''}</div><div class="lab">${lab}</div></div>`;
+document.getElementById('itemStage').innerHTML=it('Pendências','Quem ainda não entregou','','p','3','repouso')+it('Correção','Importar notas na atividade','hv','p','','hover')+it('Alunos e notas','Risco, acessos, resumo do dia','fo','g','','foco')+it('Relatório da turma','Excel de várias UCs','no','off','não se aplica aqui','não se aplica');
+</script>

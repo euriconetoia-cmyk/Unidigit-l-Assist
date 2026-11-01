@@ -160,3 +160,6 @@ Módulo `src/modules/cronograma`. Suposições: UC achada pelo nome nos próprio
 
 ## Decisão (01/11/2026): menu inicial em formato FAB
 Mockup `docs/mockups/fab-launcher.png` aprovado (“mais no canto e mais em baixo”): botão circular 60px a 12px das bordas (+ safe-area), ícone antigo (capelo) no lugar do “+”, vira “×”; ferramentas principais como círculos coloridos (Correção azul, Alunos verde, Ferramentas laranja, apagado cinza) com tooltip; gaveta Ferramentas vira card ao lado sem esconder o FAB. Classes/atributos dos testes mantidos. Extras sugeridos (anel de estado, selo do dia, próximo passo, arrastar) não escolhidos. Versão segue 0.16.0.
+
+## Decisão (01/11/2026): menu em aba na borda DIREITA (substitui o FAB redondo)
+O FAB cobriu o botão de Libras (VLibras) do Moodle. Entre 6 opções (`docs/mockups/launcher-opcoes.png`) o usuário escolheu a opção 3 (aba fina) e pediu que fique **à direita**. Posição: abaixo do VLibras e acima do chat, 24 px (32 px no hover, área de toque 44 px); painel de 280 px desliza da direita. Revisão de design (`docs/mockups/guia-design-menu.html`): anel de foco duplo (amarelo sozinho dá 1,77:1), “não se aplica” sem opacidade, cinza #657587, verde #0f6b4f, laranja #a14d08, um ícone por ferramenta (conjunto B). Falta aprovação do usuário para implementar; versão segue 0.16.0.

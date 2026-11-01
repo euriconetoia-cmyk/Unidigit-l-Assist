@@ -1,0 +1,152 @@
+<title>Menu em aba lateral</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root{--bg:#eef2f7;--fg:#14202e;--mut:#5b6b7c;--card:#fff;--line:#d6dee9;--p:#0b5cad;--p2:#0a3f78;--g:#13795b;--o:#b4580a;--off:#8d9bab;--pg:#f7f9fc;--nav:#0b3f78;--bar:#d9e1ec;--soft:#e8f0fa;--tip:#14202e;--tipf:#fff;--sh:0 14px 40px rgba(20,40,70,.28)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121821;--fg:#e6ecf5;--mut:#9aa8bd;--card:#1b2431;--line:#2e3a4b;--p:#3b8fe0;--p2:#1f5fa6;--g:#2f9c76;--o:#d9772a;--off:#6f7d8f;--pg:#18202b;--nav:#0d2c52;--bar:#2a3544;--soft:#22344a;--tip:#e6ecf5;--tipf:#14202e;--sh:0 14px 40px rgba(0,0,0,.55);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121821;--fg:#e6ecf5;--mut:#9aa8bd;--card:#1b2431;--line:#2e3a4b;--p:#3b8fe0;--p2:#1f5fa6;--g:#2f9c76;--o:#d9772a;--off:#6f7d8f;--pg:#18202b;--nav:#0d2c52;--bar:#2a3544;--soft:#22344a;--tip:#e6ecf5;--tipf:#14202e;--sh:0 14px 40px rgba(0,0,0,.55);color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 Inter,"Segoe UI",system-ui,sans-serif;padding-block:20px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrapall{max-width:1100px;margin:auto}
+h1{margin:0 0 4px;font-size:22px;text-wrap:balance}p.sub{margin:0 0 14px;color:var(--mut)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.ctrl button{font:inherit;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.ctrl button:hover{border-color:var(--p)}.ctrl button.on{background:var(--p);color:#fff;border-color:var(--p)}
+.cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:820px){.cols{grid-template-columns:minmax(0,1fr)}}
+/* página Moodle simulada */
+.pg{position:relative;height:520px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--pg)}
+.nav{height:34px;background:var(--nav);color:#fff;display:flex;align-items:center;gap:10px;padding:0 12px;font-size:12px}.nav i{margin-left:auto;display:flex;gap:9px}.nav i b{width:18px;height:18px;border-radius:50%;background:#ffffff55}
+.side{position:absolute;left:0;top:34px;bottom:0;width:48px;background:var(--card);border-right:1px solid var(--line)}
+.cont{position:absolute;left:64px;right:56px;top:50px;bottom:12px;overflow:hidden}.cont h3{margin:0 0 10px;font-size:15px}.cont u{display:block;height:10px;background:var(--bar);border-radius:5px;margin:0 0 10px}.cont u:nth-child(3n){width:72%}.cont u:nth-child(4n){width:48%}
+.rail{position:absolute;right:0;top:34px;bottom:0;width:40px;background:var(--bar);opacity:.55}
+.vl{position:absolute;right:6px;top:200px;width:28px;height:28px;border-radius:7px;background:#3b82f6;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:700}
+.chat{position:absolute;right:8px;bottom:10px;width:24px;height:24px;border-radius:50%;background:var(--off)}
+.legl{position:absolute;right:48px;top:206px;font-size:10.5px;color:var(--mut);background:var(--card);padding:2px 6px;border-radius:6px;border:1px solid var(--line)}
+/* o menu */
+.m{position:absolute;inset:34px 40px 0 48px;pointer-events:none;--w:0}
+.aba{pointer-events:auto;position:absolute;right:0;bottom:70px;width:18px;height:64px;border:0;padding:0;border-radius:14px 0 0 14px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;cursor:pointer;display:grid;place-items:center;box-shadow:-2px 4px 12px rgba(11,92,173,.4);transition:width .22s cubic-bezier(.3,1.4,.5,1),opacity .25s,transform .25s}
+.aba svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .35s cubic-bezier(.3,1.4,.5,1)}
+.aba:hover,.aba:focus-visible{width:30px}.aba:focus-visible{outline:3px solid #f6b900;outline-offset:2px}
+.aba .dot{position:absolute;top:-6px;left:-6px;min-width:20px;height:20px;border-radius:99px;background:#d6361f;color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;border:2px solid var(--pg);transform:scale(1)}
+.aba .dica{position:absolute;right:36px;top:50%;translate:6px -50%;white-space:nowrap;background:var(--tip);color:var(--tipf);font-size:12px;padding:5px 9px;border-radius:7px;opacity:0;pointer-events:none;transition:opacity .15s,translate .15s}
+.aba.hv{width:30px}.aba.hv .dica,.aba:hover .dica{opacity:1;translate:0 -50%}.aba:hover .dica{opacity:1;translate:0 -50%}
+.m.sem-dot .dot{display:none}
+.m.aberto .aba{width:30px}.m.aberto .aba svg{transform:rotate(180deg)}.m.aberto .aba .dica{opacity:0}
+.m.pulsa .aba{animation:pulso 1.6s ease-in-out 2}
+@keyframes pulso{0%,100%{box-shadow:-2px 4px 12px rgba(11,92,173,.4)}50%{box-shadow:0 0 0 9px rgba(11,92,173,.18),-2px 4px 12px rgba(11,92,173,.5)}}
+.painel{pointer-events:none;position:absolute;right:0;bottom:12px;width:268px;max-height:calc(100% - 24px);overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:16px 0 0 16px;box-shadow:var(--sh);padding:12px;transform:translateX(105%);opacity:0;visibility:hidden;transition:transform .34s cubic-bezier(.2,.9,.3,1),opacity .2s,visibility 0s .34s}
+.m.aberto .painel{pointer-events:auto;transform:none;opacity:1;visibility:visible;transition:transform .34s cubic-bezier(.2,.9,.3,1),opacity .2s,visibility 0s}
+.m.aberto .aba{right:268px;transition:right .34s cubic-bezier(.2,.9,.3,1),width .22s}
+.painel h4{margin:0 0 2px;font-size:15px}.painel .h{margin:0 0 8px;color:var(--mut);font-size:12px}
+.it{width:100%;display:flex;align-items:center;gap:10px;padding:7px 8px;margin:0 0 4px;border:1px solid transparent;border-radius:12px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;opacity:0;transform:translateX(14px);transition:background .15s,border-color .15s,transform .3s,opacity .3s}
+.m.aberto .it{opacity:1;transform:none;transition-delay:calc(var(--i)*45ms + 120ms)}
+.m.aberto .it:hover,.it:focus-visible{background:var(--soft);border-color:var(--p);transition-delay:0s}.it:focus-visible{outline:3px solid #f6b900;outline-offset:1px}
+.c{flex:0 0 34px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:700;box-shadow:0 3px 8px rgba(0,0,0,.2)}
+.c.b{background:var(--p)}.c.g{background:var(--g)}.c.o{background:var(--o)}.c.x{background:var(--off);box-shadow:none}
+.it b{display:block;font-size:13.5px}.it small{display:block;color:var(--mut);font-size:11.5px;line-height:1.3}
+.it[data-fora="1"]{opacity:.55!important}.it[data-fora="1"]:hover{opacity:.8!important}
+.it .n{margin-left:auto;font-size:11px;background:var(--bar);padding:1px 8px;border-radius:99px}
+.sub2{overflow:hidden;max-height:0;opacity:0;transition:max-height .3s ease,opacity .25s;margin:0 0 0 22px;border-left:2px solid var(--line);padding-left:6px}
+.sub2.on{max-height:260px;opacity:1}
+.it .sv{margin-left:auto;width:14px;height:14px;stroke:var(--mut);fill:none;stroke-width:2;transition:transform .25s}.it.exp .sv{transform:rotate(90deg)}
+.st{margin:6px 2px 0;padding:7px 9px;border-radius:9px;background:var(--soft);font-size:12px;min-height:0}.st:empty{display:none}
+.st.sp::before{content:"";display:inline-block;width:10px;height:10px;margin-right:6px;border:2px solid var(--p);border-right-color:transparent;border-radius:50%;animation:g .7s linear infinite;vertical-align:-1px}
+@keyframes g{to{transform:rotate(360deg)}}
+.dim{position:absolute;inset:0;background:rgba(10,20,35,.0);pointer-events:none;transition:background .3s}.m.aberto~.dim{}
+.cursor{position:absolute;width:16px;height:16px;border-radius:50%;border:2px solid #f6b900;background:#f6b90033;pointer-events:none;z-index:9;transition:left .8s ease,top .8s ease,opacity .3s;opacity:0}
+/* lateral explicativa */
+.box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:0 0 12px}
+.box h2{margin:0 0 8px;font-size:15px}.box ol,.box ul{margin:0;padding-left:20px}.box li{margin:0 0 6px}
+.box li.cur{color:var(--p);font-weight:600}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;background:var(--soft);font-size:11.5px;color:var(--mut);margin-right:4px}
+kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;font-size:12px;background:var(--bg)}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;transition-delay:0s!important;animation-duration:.01ms!important}}
+</style>
+<div class="wrapall">
+<h1>Menu em aba lateral — como funciona</h1>
+<p class="sub">Tudo aqui é clicável. O botão azul (VLibras) e o balão cinza de chat mostram os vizinhos que não são cobertos.</p>
+<div class="ctrl" role="group" aria-label="Demonstrações">
+<button id="bPlay" class="on">▶ Ver o passo a passo</button><button id="bReset">↺ Voltar ao início</button><button id="bNarrow">Tela estreita</button><button id="bNoDot">Sem pendências</button>
+</div>
+<div class="cols">
+<div>
+<div class="pg" id="pg">
+<div class="nav">Moodle · Segurança em Redes<i><b></b><b></b><b></b></i></div><div class="side"></div>
+<div class="cont"><h3>Cronograma de Atividades</h3><u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u></div>
+<div class="rail"></div><div class="vl">VL</div><div class="legl">VLibras (fica livre)</div><div class="chat"></div>
+<div class="m pulsa" id="m">
+ <button class="aba" id="aba" aria-expanded="false" aria-controls="painel" aria-label="Abrir Unidigit@l Assist">
+  <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><span class="dot" id="dot">3</span><span class="dica">Unidigit@l Assist</span></button>
+ <section class="painel" id="painel" aria-label="Unidigit@l Assist">
+  <h4>Unidigit@l Assist</h4><p class="h">Nada roda sozinho: só quando você clica.</p>
+  <button class="it" style="--i:0"><span class="c b">⏱</span><span><b>Pendências</b><small>Quem ainda não entregou</small></span><span class="n">3</span></button>
+  <button class="it" style="--i:1"><span class="c b">✎</span><span><b>Correção</b><small>Importar notas na atividade</small></span></button>
+  <button class="it" style="--i:2"><span class="c g">☺</span><span><b>Alunos e notas</b><small>Risco, acessos, resumo do dia</small></span></button>
+  <button class="it" style="--i:3"><span class="c g">▥</span><span><b>Relatório da turma</b><small>Excel de várias UCs</small></span></button>
+  <button class="it" style="--i:4" data-fora="1" title="Não serve para esta página"><span class="c x">▤</span><span><b>Mensagem em lote</b><small>Abra a lista de alunos</small></span></button>
+  <button class="it" id="ferr" style="--i:5" aria-expanded="false"><span class="c o">⚒</span><span><b>Ferramentas</b><small>Datas, cronograma, Kahoot…</small></span><svg class="sv" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+  <div class="sub2" id="sub2">
+   <button class="it" style="--i:0;opacity:1;transform:none"><span class="c o">▦</span><span><b>Conferir datas</b><small>Cronograma × atividades</small></span></button>
+   <button class="it" style="--i:1;opacity:1;transform:none"><span class="c o">☷</span><span><b>Cronograma da turma</b><small>Datas pelo JSON</small></span></button>
+   <button class="it" style="--i:2;opacity:1;transform:none"><span class="c o">?</span><span><b>Kahoot</b><small>Importar perguntas</small></span></button>
+  </div>
+  <div class="st" id="st" role="status" aria-live="polite"></div>
+ </section>
+</div>
+<div class="cursor" id="cur"></div>
+</div>
+</div>
+<div>
+<div class="box"><h2>O que acontece, em ordem</h2><ol id="steps">
+<li data-s="0"><b>Fechado:</b> só uma lingueta de 18 px colada na borda <b>direita</b>, abaixo do VLibras e acima do chat, com o selo de pendências. Pulsa 2× quando a página abre, para você achar.</li>
+<li data-s="1"><b>Mouse em cima:</b> a lingueta alarga para 30 px e mostra a dica “Unidigit@l Assist”.</li>
+<li data-s="2"><b>Clique:</b> o painel desliza da borda (0,34 s); a lingueta vai junto e a seta vira ›; os itens entram em sequência (45 ms cada).</li>
+<li data-s="3"><b>Passar o mouse num item:</b> fundo azul claro e contorno; item que não serve para a página fica esmaecido, com a dica do motivo.</li>
+<li data-s="4"><b>Ferramentas:</b> abre uma lista dentro do próprio painel (sem outra janela), seta gira 90°.</li>
+<li data-s="5"><b>Clicar numa ferramenta:</b> aparece “Abrindo…” com o círculo girando e o painel se fecha sozinho quando a ferramenta abre.</li>
+<li data-s="6"><b>Fechar:</b> clicar na lingueta, <kbd>Esc</kbd> ou clicar fora. O painel volta para a borda direita.</li>
+</ol></div>
+<div class="box"><h2>O que NÃO atrapalha</h2><ul>
+<li>Fica numa faixa livre da borda direita: abaixo do VLibras e acima do balão de chat; a barra de rolagem não é tocada.</li>
+<li>Fechado ocupa 18×64 px; a página inteira recebe cliques normalmente.</li>
+<li>Sem tela escurecida: o painel só cobre a margem direita enquanto está aberto.</li>
+<li>Teclado: <kbd>Tab</kbd> chega na lingueta, <kbd>Enter</kbd> abre, setas ↑↓ andam, <kbd>Esc</kbd> fecha.</li>
+<li>Quem prefere menos movimento (configuração do sistema) vê tudo sem animação.</li>
+</ul></div>
+<div class="box"><h2>Detalhes que cuidam do Moodle</h2>
+<span class="tag">posição salva</span><span class="tag">entre VLibras e chat</span><span class="tag">tela estreita: painel por cima</span>
+<p style="margin:8px 0 0;color:var(--mut);font-size:13px">Se em alguma página a lingueta ficar sobre outro botão, dá para subir ou descer a altura dela (e a extensão lembra). Em tela estreita o painel ocupa a largura toda para facilitar o toque.</p></div>
+</div>
+</div>
+</div>
+<script>
+const $=s=>document.querySelector(s),m=$('#m'),aba=$('#aba'),pg=$('#pg'),st=$('#st'),cur=$('#cur'),ferr=$('#ferr'),sub2=$('#sub2');
+let timers=[],demo=false;
+const T=(f,ms)=>timers.push(setTimeout(f,ms));
+const setOpen=v=>{m.classList.toggle('aberto',v);m.classList.remove('pulsa');aba.setAttribute('aria-expanded',v);aba.setAttribute('aria-label',v?'Fechar Unidigit@l Assist':'Abrir Unidigit@l Assist');if(!v){sub2.classList.remove('on');ferr.classList.remove('exp');st.textContent='';st.className='st'}};
+const toggleF=()=>{const v=!sub2.classList.contains('on');sub2.classList.toggle('on',v);ferr.classList.toggle('exp',v);ferr.setAttribute('aria-expanded',v)};
+aba.onclick=()=>{stop();setOpen(!m.classList.contains('aberto'))};
+ferr.onclick=()=>{stop();toggleF()};
+document.querySelectorAll('.it:not(#ferr)').forEach(b=>b.addEventListener('click',()=>{stop();abrindo(b)}));
+function abrindo(b){const nome=b.querySelector('b').textContent;if(b.dataset.fora){st.className='st';st.textContent='“'+nome+'” não se aplica a esta página. Abra a lista de alunos.';return}
+ st.className='st sp';st.textContent='Abrindo '+nome+'…';T(()=>{setOpen(false)},900)}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false)});
+pg.addEventListener('click',e=>{if(m.classList.contains('aberto')&&!e.target.closest('.m'))setOpen(false)});
+function hl(n){document.querySelectorAll('#steps li').forEach(li=>li.classList.toggle('cur',+li.dataset.s===n))}
+function stop(){timers.forEach(clearTimeout);timers=[];demo=false;cur.style.opacity=0;aba.classList.remove('hv');hl(-1)}
+function at(el,dx=0,dy=0){const a=pg.getBoundingClientRect(),b=el.getBoundingClientRect();cur.style.left=(b.left-a.left+b.width/2-8+dx)+'px';cur.style.top=(b.top-a.top+b.height/2-8+dy)+'px'}
+function play(){stop();demo=true;reset(true);cur.style.opacity=1;let t=0;const s=(ms,f)=>{t+=ms;T(f,t)};
+ s(100,()=>{hl(0);m.classList.add('pulsa');at(pg,200,-100)});
+ s(2200,()=>{hl(1);at(aba);aba.matches(':hover')||aba.classList.add('hv')});
+ s(1400,()=>{hl(2);setOpen(true);at(aba,0,0)});
+ s(1600,()=>{hl(3);at(document.querySelectorAll('.it')[2])});
+ s(1100,()=>at(document.querySelectorAll('.it')[4]));
+ s(1300,()=>{hl(4);at(ferr);toggleF()});
+ s(1400,()=>at(document.querySelectorAll('.sub2 .it')[0]));
+ s(1000,()=>{hl(5);abrindo(document.querySelectorAll('.sub2 .it')[0])});
+ s(1800,()=>{hl(6);at(pg,200,-100)});
+ s(1500,()=>{stop();cur.style.opacity=0});}
+function reset(keep){if(!keep)stop();setOpen(false);m.classList.add('pulsa')}
+$('#bPlay').onclick=play;$('#bReset').onclick=()=>{reset();m.classList.remove('sem-dot');$('#bNoDot').textContent='Sem pendências'};
+$('#bNarrow').onclick=e=>{const n=pg.style.width==='320px';pg.style.width=n?'':'320px';e.target.textContent=n?'Tela estreita':'Tela larga';e.target.classList.toggle('on',!n);$('#painel').style.width=n?'':'250px'};
+$('#bNoDot').onclick=e=>{const v=m.classList.toggle('sem-dot');e.target.textContent=v?'Com pendências':'Sem pendências'};
+</script>
