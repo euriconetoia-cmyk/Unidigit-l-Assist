@@ -169,3 +169,6 @@ Aplicado em `src/launcher/launcher.js` conforme `docs/mockups/guia-design-menu.h
 
 ## Decisão (01/11/2026): cor única nos ícones
 Usuário aprovou um padrão único baseado na identidade SENAI. Aplicada a opção C do mockup `docs/mockups/cores-unicas.png`: círculos azul `#1a4b9f` (escuro `#3a69c0`), detalhe laranja `#ef5e31` na lingueta, selo `#c2410c`, cinza `#657587` só para “não se aplica”. O azul exato do SENAI não foi confirmado (manual do Sistema Indústria lista `#1a4b9f` e `#0091d6`); trocar é só mudar `--p`/`--c-ico`. Usuário pediu para subir: push em main e release v0.16.0.
+
+## Release (01/11/2026): 0.17.0
+Menu em aba + cor única + Meus dados com cronograma/aba. A v0.16.0 já existia no GitHub com o ZIP antigo; usuário escolheu publicar como **0.17.0** (tag v0.17.0 dispara o workflow Release).

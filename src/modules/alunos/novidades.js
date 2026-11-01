@@ -2,6 +2,7 @@
 (function (root) {
   'use strict';
   root.ALN.novidades = [
+    { versao: '0.17.0', itens: ['Menu em aba na borda direita (não cobre mais o VLibras), com atalho Alt+U e setas', 'Ícone próprio por ferramenta, cor única (azul SENAI) e aviso “não se aplica aqui”', 'Mover aba: ajusta a altura e lembra', 'Meus dados inclui o cronograma importado e a altura da aba'] },
     { versao: '0.16.0', itens: ['Resumo do dia: primeira tela do Alunos e notas (risco, sem acesso, a corrigir, retornos, piorou)', 'Ajustes por UC (nota mínima, recuperação, dias sem acesso, pausa, validade das leituras) com padrão para todas', 'Régua de nota na Correção, com prévia Antes/Depois', 'Relatório da turma: campo de busca para achar só os cursos que você quer', 'Relatório da turma: com leitura incompleta não baixa sozinho; botão “Tentar só as não verificadas”'] },
     { versao: '0.15.0', itens: ['Modelos de mensagem com campos ({nome}, {uc}, {nota}…), na mensagem individual e na fila', 'Retornos agendados: “Ver de novo em…” e o painel Retornos de hoje', 'Comparativo desde a leitura anterior (só números guardados)'] },
     { versao: '0.14.0', itens: ['Menu com a gaveta “Ferramentas” (Kahoot, modelo de perguntas, Compatibilidade, Meus dados e Sobre)', 'Kahoot: importar perguntas de um CSV no editor, com conferência, progresso e cancelar', 'Permissão do Kahoot opcional, só quando você pede'] },
