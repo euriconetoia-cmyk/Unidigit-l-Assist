@@ -142,3 +142,6 @@ Mockup `docs/mockups/ajustar-datas.png` aprovado. Nome **Conferir datas**; escop
 - O curso do Moodle é **a turma inteira, com as UCs dentro**; UC casada **pelo nome**.
 - A **OS não interessa**; vale o **código do Moodle / nº do evento** (prefixo do nome do curso).
 - Cronograma-WP **pode exportar** o código do curso (pedido em `docs/projeto/exportacao-cronograma-wp.md`). Mockup atualizado. Falta aprovação do mockup para implementar fases 1–2. Suposição: UCs aparecem como seções da página do curso.
+
+## Pedido (01/11/2026): atualizar também os textos (rótulos) do curso
+Além das atividades, atualizar as datas no **cabeçalho** ("Período de Realização") e no **"Cronograma completo da UC"** (Período, atividades, webaulas, encontros). Spike com os HTMLs reais: só as datas mudam, resto idêntico. Aplicação: copiar HTML atualizado e colar no Código-fonte do editor (editor do Moodle refaz o campo). Pendente: regra das linhas Fórum/SAP/Avaliação (término = 2 dias antes do 1º encontro?) e aprovação do mockup (Tela 3).

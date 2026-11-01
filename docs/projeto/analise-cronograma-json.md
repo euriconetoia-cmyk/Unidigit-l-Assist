@@ -65,3 +65,10 @@ Base: `cronograma_Teste_oyotrmh_v1_validado.json` (formato `cronograma-ead-turma
 
 ## 8. Próximo passo proposto
 Mockup da **Fase A + B** (importar JSON → painel da turma → ligar cada UC ao curso do Moodle), para validar antes de codar.
+
+## 9. Textos do curso (rótulos) — pedido de 01/11/2026
+Além das datas das atividades, as datas escritas nos **rótulos** do curso também devem ser atualizadas: o **cabeçalho** ("Período de Realização") e o **"Cronograma completo da UC"** (Período, tabela de atividades, "Datas das Webaulas", "Encontros Presenciais"). Teste com os dois HTMLs reais: dá para trocar **só as datas** e o restante do HTML (cores, textos, pontos) fica idêntico.
+- **Vêm direto do JSON:** Período (UC `inicio`–`termino`), data das Webaulas (`webconferencia.data`), data dos Encontros (`momentos[].data`), linha "Momento Presencial" (1º e último encontro).
+- **Dependem de regra:** linhas Fórum/SAP/Avaliação Final (início/término). No exemplo, 16/10→29/10 com o 1º encontro em 31/10 sugere "término = 2 dias antes do 1º encontro" — confirmar com o usuário.
+- **Não mudam:** hora das webaulas (JSON só tem o início), "Horário Limite", "Valor", orientações.
+- **Limite técnico:** o editor do Moodle refaz o texto ao salvar; por isso a aplicação é "copiar HTML atualizado → colar em Código-fonte → Salvar", com conferência depois (ou apenas mostrar antes/depois).
