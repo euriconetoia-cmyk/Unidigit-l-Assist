@@ -1,0 +1,85 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Mockup — Ajustar datas</title>
+<style>
+:root{--p:#0b5cad;--m:#5b6b7c;--bd:#dbe3ec;--bg:#eef2f7;--ok:#13795b;--okbg:#e3f5ec;--wn:#9a6200;--wnbg:#fff1d6;--er:#b42318;--erbg:#fde8e6;--tag:#6d3bd2}
+*{box-sizing:border-box}body{margin:0;padding:24px;background:var(--bg);font:14px/1.4 Inter,"Segoe UI",system-ui,sans-serif;color:#14202e;width:1500px}
+h1{font-size:22px;margin:0 0 4px}.lead{color:var(--m);margin:0 0 18px}
+h2{font-size:15px;color:var(--tag);margin:22px 0 10px}
+.grid{display:grid;grid-template-columns:1.55fr 1fr;gap:16px}
+.card{background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.tagc{display:inline-block;background:var(--tag);color:#fff;font-size:11px;letter-spacing:.06em;padding:3px 9px;border-radius:6px;margin-bottom:8px}
+.card h3{margin:0 0 2px;font-size:17px}.sub{color:var(--m);font-size:12.5px;margin:0 0 10px}
+table{width:100%;border-collapse:collapse;font-size:13px}th{background:#eaf0f7;text-align:left;padding:7px 8px;font-size:12px}td{padding:7px 8px;border-bottom:1px solid var(--bd);vertical-align:middle}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;white-space:nowrap}.ok{background:var(--okbg);color:var(--ok)}.dif{background:var(--wnbg);color:var(--wn)}.sem{background:var(--erbg);color:var(--er)}.nd{background:#e6ebf1;color:var(--m)}
+.old{color:var(--m);text-decoration:line-through}.new{font-weight:700;color:var(--p)}
+.inp{border:1px solid var(--bd);border-radius:7px;padding:4px 8px;background:#fff;font:inherit;display:inline-block;min-width:96px}.inp.ed{border-color:var(--p);box-shadow:0 0 0 2px #0b5cad22}
+.sel{border:1px solid var(--bd);border-radius:7px;padding:4px 8px;background:#fff;display:inline-block}
+.btn{display:inline-block;border:1px solid var(--bd);border-radius:8px;padding:8px 14px;background:#fff;margin-right:6px}.btn.pri{background:var(--p);color:#fff;border-color:var(--p)}
+.note{background:#f3f6fa;border-radius:8px;padding:9px 11px;color:var(--m);font-size:12.5px;margin-top:10px}
+.bar{display:flex;gap:8px;align-items:center;margin:8px 0 10px;color:var(--m);font-size:12.5px}
+.mood{border:1px solid var(--bd);border-radius:10px;overflow:hidden}.mood .top{background:#0f4c81;color:#fff;padding:8px 12px;font-size:13px}.mood .body{padding:12px}
+.row{display:grid;grid-template-columns:150px 1fr;gap:8px;align-items:center;margin:7px 0;font-size:13px}.chg{outline:2px solid #f0a500;outline-offset:2px;border-radius:7px}
+.ban{background:var(--wnbg);color:var(--wn);border-radius:8px;padding:8px 10px;margin:8px 0;font-size:12.5px}
+.steps{display:flex;gap:10px;margin-bottom:6px}.st{flex:1;background:#fff;border-radius:10px;padding:10px 12px;font-size:12.5px}.st b{display:block;color:var(--p);margin-bottom:2px}
+</style>
+<body>
+<h1>Unidigit@l Assist — mockup: Ajustar datas pelo cronograma</h1>
+<p class="lead">Dados fictícios, baseados no seu curso de exemplo. Nada é gravado sem você conferir e clicar em Salvar no próprio Moodle.</p>
+
+<div class="steps">
+<div class="st"><b>1 · Ler</b>Lê a tabela “Cronograma de Atividades” da página e as datas de cada atividade (só leitura).</div>
+<div class="st"><b>2 · Comparar</b>Mostra igual / diferente / sem par. Você confirma o par e edita a data sugerida.</div>
+<div class="st"><b>3 · Aplicar</b>Abre a edição da atividade já preenchida. Você confere e salva no Moodle.</div>
+<div class="st"><b>4 · Conferir</b>Relê e confirma se o Moodle ficou igual ao cronograma.</div>
+</div>
+
+<h2>Tela principal — comparação entre o cronograma e o Moodle</h2>
+<div class="grid">
+<div class="card"><span class="tagc">AJUSTAR DATAS</span><h3>Sistemas Operacionais Desktop e Aplicativos</h3>
+<p class="sub">Cronograma lido na página do curso · 6 atividades lidas · leitura de agora há pouco</p>
+<div class="bar"><span class="pill dif">3 diferentes</span><span class="pill ok">2 iguais</span><span class="pill sem">1 sem par</span></div>
+<table><thead><tr><th>Atividade no Moodle</th><th>Par no cronograma</th><th>Entrega no Moodle</th><th>Cronograma → sugestão (editável)</th><th>Situação</th><th></th></tr></thead><tbody>
+<tr><td><b>Questionário 1</b><br><small style="color:var(--m)">quiz</small></td><td><span class="sel">Questionário 1 ▾</span></td><td><span class="old">22/10/2026 21:52</span></td><td><span class="inp ed">29/10/2026</span> <span class="inp ed" style="min-width:60px">23:59</span></td><td><span class="pill dif">diferente</span></td><td><input type="checkbox" checked></td></tr>
+<tr><td><b>Questionário 2</b><br><small style="color:var(--m)">quiz</small></td><td><span class="sel">Questionário 2 ▾</span></td><td><span class="old">—</span> sem data</td><td><span class="inp ed">29/10/2026</span> <span class="inp ed" style="min-width:60px">23:59</span></td><td><span class="pill dif">diferente</span></td><td><input type="checkbox" checked></td></tr>
+<tr><td><b>Envio da SAP 01</b><br><small style="color:var(--m)">tarefa</small></td><td><span class="sel">SAP 01 ▾</span></td><td>31/10/2026 21:52</td><td><span class="inp">31/10/2026</span> <span class="inp" style="min-width:60px">21:52</span></td><td><span class="pill ok">igual</span></td><td><input type="checkbox"></td></tr>
+<tr><td><b>Envio da SAP 02</b><br><small style="color:var(--m)">tarefa</small></td><td><span class="sel">SAP 02 ▾</span></td><td><span class="old">05/11/2026 23:59</span></td><td><span class="inp ed">12/11/2026</span> <span class="inp ed" style="min-width:60px">23:59</span></td><td><span class="pill dif">diferente</span></td><td><input type="checkbox" checked></td></tr>
+<tr><td><b>Web Aula 1</b><br><small style="color:var(--m)">sem data de entrega</small></td><td><span class="sel">Web Aula 1 ▾</span></td><td>—</td><td>16/10/2026 19:00 <small style="color:var(--m)">(só informativa)</small></td><td><span class="pill ok">igual</span></td><td><input type="checkbox"></td></tr>
+<tr><td><b>RECUPERAÇÃO</b><br><small style="color:var(--m)">quiz</small></td><td><span class="sel" style="color:var(--er);border-color:var(--er)">escolher… ▾</span></td><td>—</td><td><span class="pill nd">A definir</span></td><td><span class="pill sem">sem par</span></td><td><input type="checkbox" disabled></td></tr>
+</tbody></table>
+<div class="bar" style="margin-top:12px"><span class="btn pri">Aplicar nos 3 marcados</span><span class="btn">Marcar só os diferentes</span><span class="btn">Baixar comparação (CSV)</span></div>
+<div class="note">“A definir” e atividade sem par nunca são alteradas. Aplicar abre uma atividade por vez; a extensão não salva sozinha.</div></div>
+
+<div class="card"><span class="tagc">QUAL DATA VAI EM QUAL CAMPO</span><h3>Regras (você escolhe uma vez)</h3>
+<p class="sub">Valem para este curso e podem virar padrão nos Ajustes.</p>
+<table><thead><tr><th>Cronograma</th><th>Campo do Moodle</th></tr></thead><tbody>
+<tr><td>Início</td><td><span class="sel">Permite envios a partir de ▾</span></td></tr>
+<tr><td>Término + horário limite</td><td><span class="sel">Data de entrega ▾</span></td></tr>
+<tr><td>Término + horário limite</td><td><span class="sel">Data limite ▾</span> <small style="color:var(--m)">(opcional)</small></td></tr>
+<tr><td>Término + 7 dias</td><td><span class="sel">Lembre-me de avaliar ▾</span> <small style="color:var(--m)">(opcional)</small></td></tr>
+</tbody></table>
+<div class="note">Quiz usa “Abrir / Fechar o questionário”; fórum usa “Data de entrega / Data limite”. Cada tipo ganha sua própria linha de regras.</div>
+<h3 style="margin-top:16px">Atenção</h3>
+<div class="ban">1 data sugerida cai num <b>domingo</b> (25/10/2026). Confira antes de aplicar.</div>
+<div class="ban" style="background:var(--okbg);color:var(--ok)">Nenhum término anterior ao início.</div></div>
+</div>
+
+<h2>Ao aplicar — a edição da atividade abre com os campos já preenchidos</h2>
+<div class="grid" style="grid-template-columns:1.2fr 1fr">
+<div class="card"><span class="tagc">NA PÁGINA DO MOODLE</span><h3>Editando: Envio da SAP 02</h3>
+<p class="sub">A extensão marca “Habilitar” e escolhe os seletores. Os campos alterados ficam destacados. Você clica em Salvar do Moodle.</p>
+<div class="mood"><div class="top">Disponibilidade</div><div class="body">
+<div class="ban" style="margin-top:0">Unidigit@l Assist preencheu 1 data. Confira e clique em <b>Salvar e voltar ao curso</b>.</div>
+<div class="row"><span>Permite envios a partir de</span><span><input type="checkbox"> Habilitar &nbsp; <span class="sel">31</span> <span class="sel">outubro</span> <span class="sel">2026</span> <span class="sel">21</span> <span class="sel">52</span></span></div>
+<div class="row"><span>Data de entrega</span><span class="chg"><input type="checkbox" checked> Habilitar &nbsp; <span class="sel">12</span> <span class="sel">novembro</span> <span class="sel">2026</span> <span class="sel">23</span> <span class="sel">59</span></span></div>
+<div class="row"><span>Data limite</span><span><input type="checkbox"> Habilitar &nbsp; <span class="sel">31</span> <span class="sel">outubro</span> <span class="sel">2026</span> <span class="sel">21</span> <span class="sel">52</span></span></div>
+<div class="row"><span>Lembre-me de avaliar por</span><span><input type="checkbox"> Habilitar &nbsp; <span class="sel">31</span> <span class="sel">outubro</span> <span class="sel">2026</span> <span class="sel">21</span> <span class="sel">52</span></span></div>
+</div></div></div>
+<div class="card"><span class="tagc">DEPOIS DE SALVAR</span><h3>Conferência</h3>
+<p class="sub">A extensão relê a atividade e compara com o cronograma.</p>
+<table><thead><tr><th>Atividade</th><th>Esperado</th><th>No Moodle</th><th></th></tr></thead><tbody>
+<tr><td>Questionário 1</td><td>29/10 23:59</td><td>29/10 23:59</td><td><span class="pill ok">conferido</span></td></tr>
+<tr><td>Envio da SAP 02</td><td>12/11 23:59</td><td>12/11 23:59</td><td><span class="pill ok">conferido</span></td></tr>
+<tr><td>Questionário 2</td><td>29/10 23:59</td><td>—</td><td><span class="pill sem">não salvou</span></td></tr></tbody></table>
+<div class="bar" style="margin-top:12px"><span class="btn pri">Abrir a próxima (1 pendente)</span><span class="btn">Parar</span></div>
+<div class="note">Quem não salvou fica como pendente; nada é dado como feito sem a releitura.</div></div>
+</div>
+</body></html>
