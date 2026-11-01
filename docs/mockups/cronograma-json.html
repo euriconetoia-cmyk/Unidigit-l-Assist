@@ -27,23 +27,23 @@ table{width:100%;border-collapse:collapse;font-size:13px}th{background:#eaf0f7;t
 <div class="steps">
 <div class="st"><b>1 · Importar</b>Você escolhe o .json. Fica só neste navegador. Só versão “Validado” vira fonte.</div>
 <div class="st"><b>2 · Conferir o arquivo</b>Avisos antes de usar (datas fora da UC, feriado duplicado…).</div>
-<div class="st"><b>3 · Ligar ao Moodle</b>Casa a turma pelo nome do curso: <i>código · curso · nº/ano</i>.</div>
+<div class="st"><b>3 · Ligar ao Moodle</b>Casa a turma pelo <i>código do Moodle / nº do evento</i> que abre o nome do curso.</div>
 <div class="st"><b>4 · Aplicar (próxima fase)</b>Datas do curso e das atividades, pelo mesmo fluxo do Conferir datas.</div>
 </div>
 
 <h2>Tela 1 — Cronograma da turma (depois de importar)</h2>
 <div class="grid">
 <div class="card"><span class="tagc">CRONOGRAMA DA TURMA</span><h3>Técnico em Informática para Internet · 00001/2026</h3>
-<p class="sub">Código/OS 1037240 · SENAI Luziânia · início 10/11/2026 · fim do AVA 22/09/2028</p>
+<p class="sub">Código do Moodle / nº do evento 1037240 · SENAI Luziânia · início 10/11/2026 · fim do AVA 22/09/2028</p>
 <div class="bar"><span class="pill ok">Validado · versão 1</span><span class="pill">12 UCs · 14 recuperações</span><span class="pill dif">1 aviso no arquivo</span><span class="btn" style="margin-left:auto">Trocar arquivo…</span></div>
 <div class="ban">⚠ <b>Assessoria e Consultoria em SST</b>: o 1º encontro presencial (13/05/2028) é <b>anterior</b> ao início da UC (15/05/2028). Confira no sistema de cronogramas antes de aplicar.</div>
-<table><thead><tr><th>Unidade curricular</th><th>Janela</th><th>Fim do AVA</th><th>Encontros</th><th>Notas até</th><th>Curso no Moodle</th></tr></thead><tbody>
-<tr><td><b>Comunicação e Informação</b></td><td>18/11/2026 → 25/01/2027</td><td>07/06/2027</td><td>2 presenciais · 2 web</td><td>27/01/2027</td><td><span class="pill ok">ligado</span></td></tr>
-<tr><td>Recuperação UC 01</td><td>26/01/2027 → 02/02/2027</td><td>07/06/2027</td><td>—</td><td>—</td><td><span class="pill ok">ligado</span></td></tr>
-<tr><td><b>Ciências Aplicadas</b></td><td>26/01/2027 → 04/03/2027</td><td>07/06/2027</td><td>3 presenciais · 3 web</td><td>17/02/2027</td><td><span class="pill ok">ligado</span></td></tr>
-<tr><td><b>Gestão de Pessoas</b></td><td>05/03/2027 → 30/03/2027</td><td>07/06/2027</td><td>2 presenciais · 2 web</td><td>31/03/2027</td><td><span class="pill sem">sem curso</span></td></tr>
+<table><thead><tr><th>Unidade curricular</th><th>Janela</th><th>Fim do AVA</th><th>Encontros</th><th>Notas até</th><th>UC dentro do curso (pelo nome)</th></tr></thead><tbody>
+<tr><td><b>Comunicação e Informação</b></td><td>18/11/2026 → 25/01/2027</td><td>07/06/2027</td><td>2 presenciais · 2 web</td><td>27/01/2027</td><td><span class="pill ok">achei a UC</span></td></tr>
+<tr><td>Recuperação UC 01</td><td>26/01/2027 → 02/02/2027</td><td>07/06/2027</td><td>—</td><td>—</td><td><span class="pill ok">achei a UC</span></td></tr>
+<tr><td><b>Ciências Aplicadas</b></td><td>26/01/2027 → 04/03/2027</td><td>07/06/2027</td><td>3 presenciais · 3 web</td><td>17/02/2027</td><td><span class="pill ok">achei a UC</span></td></tr>
+<tr><td><b>Gestão de Pessoas</b></td><td>05/03/2027 → 30/03/2027</td><td>07/06/2027</td><td>2 presenciais · 2 web</td><td>31/03/2027</td><td><span class="pill sem">não achei</span></td></tr>
 <tr><td colspan="6" style="color:var(--m)">… mais 8 UCs e as recuperações</td></tr></tbody></table>
-<div class="note">Cada data vem do JSON; a extensão não calcula datas novas.</div>
+<div class="note">A turma inteira é <b>um curso</b> do Moodle; as UCs ficam dentro dele. A extensão procura cada UC pelo nome (ignorando acentos e maiúsculas) e você corrige o par quando não achar. Cada data vem do JSON; a extensão não calcula datas novas.</div>
 </div>
 <div class="card"><span class="tagc">1 · IMPORTAR</span><h3>Escolher o arquivo do cronograma</h3>
 <p class="sub">cronograma_1037240_v1_validado.json</p>
@@ -57,9 +57,9 @@ table{width:100%;border-collapse:collapse;font-size:13px}th{background:#eaf0f7;t
 <div class="card"><span class="tagc">3 · LIGAR AO MOODLE</span><h3>Qual curso do Moodle é esta turma?</h3>
 <p class="sub">Lido da página “Meus cursos”. O nome é separado em <b>código · curso · turma/ano</b> e comparado com o JSON.</p>
 <table><thead><tr><th>Curso no Moodle</th><th>Código</th><th>Curso</th><th>Turma/ano</th><th>Combina?</th><th></th></tr></thead><tbody>
-<tr><td>1037240 - Técnico em Informática para Internet - 00001/2026</td><td><span class="pill ok">1037240 = OS</span></td><td><span class="pill ok">igual</span></td><td><span class="pill ok">00001/2026</span></td><td><span class="pill ok">alta</span></td><td><span class="inp ed">☑ ligar</span></td></tr>
+<tr><td>1037240 - Técnico em Informática para Internet - 00001/2026</td><td><span class="pill ok">1037240 = evento</span></td><td><span class="pill ok">igual</span></td><td><span class="pill ok">00001/2026</span></td><td><span class="pill ok">alta</span></td><td><span class="inp ed">☑ ligar</span></td></tr>
 <tr><td>TEC.2026.2.184 - Técnico em Redes de Computadores - 00001/2026</td><td><span class="pill sem">outro código</span></td><td><span class="pill sem">outro curso</span></td><td><span class="pill ok">00001/2026</span></td><td><span class="pill sem">não</span></td><td><span class="inp">☐</span></td></tr></tbody></table>
-<div class="note">Sem OS no JSON? A extensão usa curso + turma/ano e mostra “média” em vez de “alta”. Você sempre confirma. A ligação fica guardada (equivale ao <code>idMoodle</code>).</div>
+<div class="note">Sem o código no JSON? A extensão usa o nome do curso + nº/ano e mostra “média” em vez de “alta”. Você sempre confirma. A ligação fica guardada (o código do Moodle que o Cronograma-WP vai exportar).</div>
 <p><span class="btn pri">Confirmar ligação</span><span class="btn">Escolher outro curso…</span></p></div>
 <div class="card"><span class="tagc">PRÓXIMA FASE</span><h3>Datas do curso no Moodle</h3>
 <p class="sub">Configurações do curso → Datas</p>
