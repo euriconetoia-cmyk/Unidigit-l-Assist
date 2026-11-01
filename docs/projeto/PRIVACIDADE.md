@@ -19,4 +19,7 @@ Os **Ajustes** (nota mínima, recuperação, dias sem acesso, pausa entre mensag
 Lê o cronograma da página do curso e a tela de edição de cada tarefa/questionário (somente leitura, no próprio Moodle). Guarda apenas, na aba (`sessionStorage`, 30 minutos), a fila de atividades a ajustar; nada vai para fora do navegador e nada é gravado no Moodle sem você clicar em Salvar.
 
 ## Cronograma da turma
-O arquivo JSON escolhido e os ajustes por UC ficam só neste navegador (`chrome.storage.local`, chave `crn.v1`) até você clicar em “Esquecer este cronograma”. Nada é enviado para fora e nada é gravado no Moodle. (Pendente: incluir a chave em “Meus dados”.)
+O arquivo JSON escolhido e os ajustes por UC ficam só neste navegador (`chrome.storage.local`, chave `crn.v1`) até você clicar em “Esquecer este cronograma”. Nada é enviado para fora e nada é gravado no Moodle. A chave `crn.v1` já aparece em **Meus dados** (medir, backup e apagar).
+
+## Menu em aba (0.16.0)
+A altura da aba (só um número) fica em `chrome.storage.local` (`uas.aba`), neste navegador, e aparece em **Meus dados**. O atalho **Alt+U** só abre ou fecha o menu; nada é lido ou enviado.

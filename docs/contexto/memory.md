@@ -163,3 +163,6 @@ Mockup `docs/mockups/fab-launcher.png` aprovado (“mais no canto e mais em baix
 
 ## Decisão (01/11/2026): menu em aba na borda DIREITA (substitui o FAB redondo)
 O FAB cobriu o botão de Libras (VLibras) do Moodle. Entre 6 opções (`docs/mockups/launcher-opcoes.png`) o usuário escolheu a opção 3 (aba fina) e pediu que fique **à direita**. Posição: abaixo do VLibras e acima do chat, 24 px (32 px no hover, área de toque 44 px); painel de 280 px desliza da direita. Revisão de design (`docs/mockups/guia-design-menu.html`): anel de foco duplo (amarelo sozinho dá 1,77:1), “não se aplica” sem opacidade, cinza #657587, verde #0f6b4f, laranja #a14d08, um ícone por ferramenta (conjunto B). Falta aprovação do usuário para implementar; versão segue 0.16.0.
+
+## Implementado (01/11/2026): menu em aba à direita
+Aplicado em `src/launcher/launcher.js` conforme `docs/mockups/guia-design-menu.html` (ícones B, tokens com contraste, anel de foco duplo, chip “não se aplica aqui”, Alt+U, setas, Mover aba → `uas.aba`). “Ferramentas” virou lista dentro do painel (sem botão voltar). **Não feito de propósito:** selo de pendências (o launcher não lê nada; precisa decisão) e aviso persistente de 1ª vez (a aba pulsa 2× ao carregar). Homologação em Moodle real continua pendente.

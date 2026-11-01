@@ -94,15 +94,17 @@ try {
   await pg.screenshot({ path: path.join(SHOTS, '1-botao-fechado.png') });
 
   await pg.click('#hub-ead-launcher .tab');
-  const names = await pg.locator('#hub-ead-launcher [data-view="main"] .app b').allTextContents();
+  const names = await pg.locator('#hub-ead-launcher [data-view="main"] > .items > .app b').allTextContents();
   check('o menu principal lista 6 ferramentas + Ferramentas (gaveta)', JSON.stringify(names) === JSON.stringify(['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Ferramentas']), JSON.stringify(names));
   await sleep(900);
   await pg.screenshot({ path: path.join(SHOTS, '2-menu-aberto.png') });
 
   await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
+  await sleep(500);
+  await pg.screenshot({ path: path.join(SHOTS, '2b-gaveta-aberta.png') });
   await pg.click('#hub-ead-launcher .app[data-app="blocos"]', { force: true });
   check('ferramenta "em breve" explica e não faz nada', /ainda não está disponível/.test(await pg.locator('#hub-ead-launcher .status').textContent()) && await pg.locator('.imn-bar').count() === 0);
-  await pg.click('#hub-ead-launcher .voltar');
+  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
 
   await pg.click('#hub-ead-launcher .app[data-app="pendencias"]');
   await pg.waitForSelector('.imn-bar', { timeout: 15000 });

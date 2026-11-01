@@ -35,7 +35,7 @@ test('o menu principal tem 6 ferramentas + "Ferramentas"; as indisponíveis fica
   ui.tab.click();
   assert.equal(ui.isOpen(), true);
   assert.equal(ui.items.length, APPS.length + 1); // + o botão da gaveta
-  const main = [...ui.shadow.querySelectorAll('[data-view="main"] .app b')].map(b => b.textContent);
+  const main = [...ui.shadow.querySelectorAll('[data-view="main"] > .items > .app b')].map(b => b.textContent);
   assert.deepEqual(main, ['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Ferramentas']);
   const gav = [...ui.shadow.querySelectorAll('[data-view="gaveta"] .app b')].map(b => b.textContent);
   assert.deepEqual(gav, ['Kahoot — importar perguntas', 'Modelo de perguntas (CSV)', 'Conferir datas', 'Cronograma da turma', 'Automação por blocos', 'Compatibilidade', 'Meus dados', 'Sobre']);
@@ -50,14 +50,59 @@ test('a gaveta Ferramentas abre com voltar, e fechar o menu volta ao principal',
   const view = n => ui.shadow.querySelector(`[data-view="${n}"]`);
   assert.equal(view('gaveta').hidden, true);
   ui.shadow.querySelector('[data-app="ferramentas"]').click();
-  assert.equal(view('main').hidden, false); assert.equal(view('gaveta').hidden, false); // o FAB continua visível; a gaveta abre ao lado
+  assert.equal(view('main').hidden, false); assert.equal(view('gaveta').hidden, false); // a lista continua visível; a gaveta abre logo abaixo de Ferramentas
   assert.equal(ui.shadow.querySelector('[data-app="ferramentas"]').getAttribute('aria-expanded'), 'true');
-  assert.equal(ui.shadow.querySelector('.voltar').getAttribute('aria-label'), 'Voltar ao menu');
-  ui.shadow.querySelector('.voltar').click();
+  ui.shadow.querySelector('[data-app="ferramentas"]').click(); // clicar de novo recolhe
   assert.equal(view('main').hidden, false); assert.equal(view('gaveta').hidden, true);
   ui.shadow.querySelector('[data-app="ferramentas"]').click();
   ui.tab.click(); ui.tab.click(); // fecha e reabre: a gaveta volta fechada
   assert.equal(view('main').hidden, false); assert.equal(view('gaveta').hidden, true);
+});
+
+test('Alt+U abre e fecha o menu; a lingueta anuncia o atalho', () => {
+  const { ui, dom } = mount();
+  const doc = dom.window.document;
+  assert.equal(ui.tab.getAttribute('aria-keyshortcuts'), 'Alt+U');
+  doc.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'u', altKey: true, bubbles: true }));
+  assert.equal(ui.isOpen(), true);
+  doc.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'U', altKey: true, bubbles: true }));
+  assert.equal(ui.isOpen(), false);
+  doc.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'u', bubbles: true })); // sem Alt: nada
+  assert.equal(ui.isOpen(), false);
+});
+
+test('Mover aba sobe e desce 48 px, sem passar dos limites', () => {
+  const { ui } = mount();
+  const wrap = ui.shadow.querySelector('.wrap');
+  const [sobe, desce] = ui.shadow.querySelectorAll('.mover');
+  sobe.click(); assert.equal(wrap.style.getPropertyValue('--bt'), '144px');
+  desce.click(); desce.click(); desce.click(); desce.click(); desce.click();
+  assert.equal(wrap.style.getPropertyValue('--bt'), '24px');
+});
+
+test('setas ↑ ↓ andam entre as ferramentas visíveis (a gaveta fechada não entra)', () => {
+  const { ui, dom } = mount();
+  ui.open();
+  const key = k => ui.shadow.querySelector('.panel').dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
+  assert.equal(ui.shadow.activeElement.getAttribute('data-app'), 'pendencias');
+  key('ArrowDown'); assert.equal(ui.shadow.activeElement.getAttribute('data-app'), 'correcao');
+  key('ArrowUp'); key('ArrowUp'); assert.equal(ui.shadow.activeElement.getAttribute('data-app'), 'ferramentas');
+});
+
+test('cada ferramenta tem ícone próprio (exceto as que repetem de propósito) e todos existem', () => {
+  const nomes = APPS.map(a => a.icone);
+  for (const grupo of [['pendencias', 'correcao', 'alunos-notas', 'relatorio-uc', 'conferir-datas', 'cronograma-turma']]) {
+    const ic = grupo.map(id => APPS.find(a => a.id === id).icone);
+    assert.equal(new Set(ic).size, ic.length);
+  }
+  assert.ok(nomes.every(Boolean));
+});
+
+test('ferramenta que não serve para a página mostra o chip "não se aplica aqui" e a dica, sem esmaecer o texto', () => {
+  const { ui } = mountAt('https://ead.senai.br/mod/assign/view.php?id=55');
+  const pend = ui.shadow.querySelector('[data-app="pendencias"]');
+  assert.match(pend.querySelector('.tag').textContent, /não se aplica aqui/);
+  assert.ok(pend.querySelector('small').textContent.length > 5);
 });
 
 test('Kahoot na gaveta pede a página da extensão; o modelo CSV baixa sem enviar nada', async () => {
@@ -149,7 +194,7 @@ test('menu em cards: seções, painel inerte quando fechado e rótulo do botão 
   const { ui } = mount();
   assert.equal(ui.panel.hasAttribute('inert'), true);
   const secoes = [...ui.shadow.querySelectorAll('.sec')].map(n => n.textContent);
-  assert.deepEqual(secoes, ['Ferramentas', 'Ajuda e dados']);
+  assert.deepEqual(secoes, ['Correção', 'Alunos', 'Mais', 'Ferramentas', 'Ajuda e dados']);
   ui.tab.click();
   assert.equal(ui.panel.hasAttribute('inert'), false);
   assert.equal(ui.tab.getAttribute('aria-expanded'), 'true');

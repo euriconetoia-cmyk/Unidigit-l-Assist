@@ -59,3 +59,12 @@ Trabalhar uma por vez, na ordem. Decisões importantes vão para `memory.md`.
 - [ ] 1.0.0 Homologação real + política de privacidade pública (loja do Edge: adiada por decisão do usuário em 31/10/2026)
 
 - [x] R1. Cronograma da turma (JSON → textos do curso): importar, validar, ligar, atualizar datas dos textos e webaulas, conferir. Versão de teste 0.16.0; falta: datas das atividades/curso a partir do JSON, incluir `crn.v1` em Meus dados, homologar em Moodle real.
+
+## Menu em aba (01/11/2026)
+- [x] N1. Menu em aba na borda direita, ícones B, foco duplo, “não se aplica aqui”, Alt+U, setas, Mover aba (0.16.0).
+- [x] N2. `crn.v1` e `uas.aba` em Meus dados.
+- [x] N3. Rascunho da política de privacidade pública (`docs/projeto/politica-de-privacidade-publica.md`).
+- [ ] N4. Homologar a aba em Moodle real (SENAI e FIEG): conferir posição frente ao VLibras e ao chat.
+- [ ] N5. Cronograma da turma: datas do curso e das atividades pelo JSON (depende do `modeloCronograma` da Aprendizagem e da regra das linhas Fórum/SAP/Avaliação Final).
+- [ ] N6. Selo de pendências na aba só com a última leitura guardada (decidir: o launcher hoje não lê nada).
+- [ ] N7. Publicar a política de privacidade em página pública (1.0.0).
