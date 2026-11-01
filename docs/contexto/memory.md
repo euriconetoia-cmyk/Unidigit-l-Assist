@@ -137,3 +137,8 @@ Mockup `docs/mockups/ajustar-datas.png` aprovado. Nome **Conferir datas**; escop
 - Datas das atividades derivam **das datas do cronograma** (JSON); `terminoAva` **vira o fim do curso** no Moodle (sim).
 - Pergunta ainda em aberto: Cronograma-WP exportar código da UC e `idMoodle` (usuário não respondeu).
 - Mockup `docs/mockups/cronograma-json.png` (fases 1–2: importar JSON, conferir arquivo, ligar ao curso). Análise em `docs/projeto/analise-cronograma-json.md`. Nada implementado.
+
+## Decisões do usuário (01/11/2026, 2ª rodada): JSON → Moodle
+- O curso do Moodle é **a turma inteira, com as UCs dentro**; UC casada **pelo nome**.
+- A **OS não interessa**; vale o **código do Moodle / nº do evento** (prefixo do nome do curso).
+- Cronograma-WP **pode exportar** o código do curso (pedido em `docs/projeto/exportacao-cronograma-wp.md`). Mockup atualizado. Falta aprovação do mockup para implementar fases 1–2. Suposição: UCs aparecem como seções da página do curso.
