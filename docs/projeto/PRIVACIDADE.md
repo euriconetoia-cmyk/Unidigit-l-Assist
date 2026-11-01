@@ -14,3 +14,6 @@ O acesso a `create.kahoot.it` é uma **permissão opcional**, pedida uma vez, s�
 
 ## Ajustes por UC (0.16.0)
 Os **Ajustes** (nota mínima, recuperação, dias sem acesso, pausa entre mensagens e validade das leituras) ficam em `chrome.storage.local`, só neste navegador, junto com o identificador da UC. Não contêm nome, e-mail nem nota de aluno. Entram no backup e no “Apagar tudo” de **Meus dados**. A **régua de nota** não guarda nada: só muda o valor sugerido na prévia da Correção, e nada é gravado no Moodle sem a sua confirmação.
+
+## Conferir datas
+Lê o cronograma da página do curso e a tela de edição de cada tarefa/questionário (somente leitura, no próprio Moodle). Guarda apenas, na aba (`sessionStorage`, 30 minutos), a fila de atividades a ajustar; nada vai para fora do navegador e nada é gravado no Moodle sem você clicar em Salvar.

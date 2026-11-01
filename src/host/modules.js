@@ -2,6 +2,7 @@
 export const MODULE_PATHS = {
   'importar-notas': { global: 'HUB_IMN', base: 'modules/importar-notas/', prefix: 'modules/importar-notas/vendor/', bridge: 'modules/importar-notas/bridge.js', extras: ['modules/importar-notas/regua.js'], manifest: 'modules/importar-notas/vendor/files.json' },
   alunos: { global: 'HUB_ALN', base: 'modules/alunos/', prefix: 'modules/alunos/', bridge: 'modules/alunos/bridge.js', manifest: 'modules/alunos/files.json' },
+  datas: { global: 'HUB_DTS', base: 'modules/datas/', prefix: 'modules/datas/', bridge: 'modules/datas/bridge.js', manifest: 'modules/datas/files.json' },
   kahoot: { global: 'HUB_KHT', base: 'modules/kahoot/', prefix: 'modules/kahoot/', bridge: 'modules/kahoot/bridge.js', manifest: 'modules/kahoot/files.json' }
 };
 

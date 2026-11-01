@@ -38,9 +38,9 @@ test('o menu principal tem 6 ferramentas + "Ferramentas"; as indisponíveis fica
   const main = [...ui.shadow.querySelectorAll('[data-view="main"] .app b')].map(b => b.textContent);
   assert.deepEqual(main, ['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Ferramentas']);
   const gav = [...ui.shadow.querySelectorAll('[data-view="gaveta"] .app b')].map(b => b.textContent);
-  assert.deepEqual(gav, ['Kahoot — importar perguntas', 'Modelo de perguntas (CSV)', 'Ajustar datas do Moodle', 'Automação por blocos', 'Compatibilidade', 'Meus dados', 'Sobre']);
+  assert.deepEqual(gav, ['Kahoot — importar perguntas', 'Modelo de perguntas (CSV)', 'Conferir datas', 'Automação por blocos', 'Compatibilidade', 'Meus dados', 'Sobre']);
   const tag = n => ui.shadow.querySelector(`[data-app="${n}"]`).getAttribute('aria-disabled');
-  assert.deepEqual(['kahoot', 'modelo-kahoot', 'ajustar-datas', 'blocos'].map(tag), ['false', 'false', 'true', 'true']);
+  assert.deepEqual(['kahoot', 'modelo-kahoot', 'conferir-datas', 'blocos'].map(tag), ['false', 'false', 'false', 'true']);
   assert.match(ui.shadow.querySelector('[data-app="blocos"]').textContent, /em breve/);
 });
 

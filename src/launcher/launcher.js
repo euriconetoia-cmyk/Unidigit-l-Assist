@@ -144,7 +144,7 @@ export function mountLauncher(doc = document, send = message => chrome.runtime.s
   }
   async function run(app, button, motivo) {
     if (!app.disponivel) { setStatus(`${app.nome} ainda não está disponível.`); return; }
-    if (!aplicaNaPagina(app, tipo)) { setStatus(`${app.nome} não se aplica a esta página. ${app.dicaPagina || ''}.`.replace('..', '.')); return; }
+    if (!aplicaNaPagina(app, tipo) && motivo !== 'retomar') { setStatus(`${app.nome} não se aplica a esta página. ${app.dicaPagina || ''}.`.replace('..', '.')); return; }
     if (app.local === 'modelo-kahoot') { baixarModelo(); setStatus('Modelo baixado: preencha e use em Kahoot — importar perguntas.'); return; }
     if (busy) return;
     busy = true; button.setAttribute('aria-busy', 'true'); setStatus('Abrindo…');
@@ -161,7 +161,10 @@ export function mountLauncher(doc = document, send = message => chrome.runtime.s
   // (2) conferência do que foi salvo (o Moodle recarrega a página ao salvar). Só vale por poucos minutos e só uma vez.
   function continuarPedido() {
     let store = null; try { store = (doc.defaultView || globalThis).sessionStorage; } catch (_) { return; }
-    if (!store || tipo !== 'atividade') return;
+    if (!store) return;
+    // Conferir datas: há uma fila guardada nesta aba (a pessoa clicou em Aplicar): preenche a edição ou confere o que foi salvo.
+    try { if (store.getItem('hub.datas.v1')) { const d = APPS.find(a => a.id === 'conferir-datas'); run(d, items.find(i => i.getAttribute('data-app') === 'conferir-datas'), 'retomar'); } } catch (_) { /* sem continuação */ }
+    if (tipo !== 'atividade') return;
     const app = APPS.find(a => a.id === 'correcao');
     try {
       const raw = store.getItem('hub.continuar.v1');

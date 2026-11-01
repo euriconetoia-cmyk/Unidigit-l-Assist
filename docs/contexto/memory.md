@@ -128,3 +128,6 @@ Decisões: (1) campo sem dado **não** é trocado por vazio/zero: fica `{campo}`
 
 ## Decisão (31/10/2026): loja do Edge adiada
 Usuário: "por enquanto não vamos fazer a parte do Edge". A 1.0.0 fica sem o pacote do Edge Add-ons (sem gerar versão sem `key`, sem cadastro na loja). A distribuição continua por ZIP/GitHub Releases e instalação "Carregar sem compactação". A `key` fixa do manifest permanece. Retomar só quando o usuário pedir. Também: 0.13–0.16 foram enviadas ao GitHub (main) a pedido do usuário; a release v0.16.0 ainda não foi criada.
+
+## Decisão (01/11/2026): Conferir datas
+Mockup `docs/mockups/ajustar-datas.png` aprovado. Nome **Conferir datas**; escopo completo (ler, comparar, aplicar, conferir) para tarefa e questionário. Módulo `src/modules/datas` (sem permissão nova; GET same-origin em `/course/modedit.php?update=ID`). A extensão **nunca clica em Salvar**: preenche a edição e, na volta, relê e confere; fila em `sessionStorage` (`hub.datas.v1`, 30 min). Início = só data; término = data + horário limite (padrão 23:59). Versão segue 0.16.0 por pedido do usuário. Suposições não verificadas: marcação real das telas de edição e nomes reais no cronograma.

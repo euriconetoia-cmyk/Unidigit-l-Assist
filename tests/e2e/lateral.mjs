@@ -572,7 +572,7 @@ try {
   await pg.click('#hub-ead-launcher .tab');
   await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
   await pg.screenshot({ path: path.join(SHOTS, '50-gaveta.png') });
-  check('gaveta Ferramentas: Kahoot e Modelo disponíveis; Ajustar datas e Automação "em breve"', await pg.evaluate(() => { const r = document.querySelector('#hub-ead-launcher').shadowRoot; const d = id => r.querySelector(`[data-app="${id}"]`).getAttribute('aria-disabled'); return d('kahoot') === 'false' && d('modelo-kahoot') === 'false' && d('ajustar-datas') === 'true' && d('blocos') === 'true'; }));
+  check('gaveta Ferramentas: Kahoot e Modelo disponíveis; Conferir datas disponível; Automação "em breve"', await pg.evaluate(() => { const r = document.querySelector('#hub-ead-launcher').shadowRoot; const d = id => r.querySelector(`[data-app="${id}"]`).getAttribute('aria-disabled'); return d('kahoot') === 'false' && d('modelo-kahoot') === 'false' && d('conferir-datas') === 'false' && d('blocos') === 'true'; }));
   const [dlM] = await Promise.all([pg.waitForEvent('download', { timeout: 15000 }), pg.click('#hub-ead-launcher .app[data-app="modelo-kahoot"]')]);
   const mPath = path.join(SHOTS, 'modelo.csv'); await dlM.saveAs(mPath);
   check('Modelo de perguntas: baixa o CSV com o cabeçalho esperado, sem consultar nada', dlM.suggestedFilename() === 'modelo-perguntas-kahoot.csv' && /^﻿pergunta;opcao1;opcao2;opcao3;opcao4;correta/.test(fs.readFileSync(mPath, 'utf8')) && kahootHits.length === 0);

@@ -1,0 +1,4 @@
+{
+  "scripts": ["namespace.js", "core.js", "reader.js", "fila.js", "fluxo.js", "ui.js"],
+  "css": []
+}

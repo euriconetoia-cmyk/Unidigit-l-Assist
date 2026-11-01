@@ -46,7 +46,7 @@ Trabalhar uma por vez, na ordem. Decisões importantes vão para `memory.md`.
 ## Versão 0.10.0
 - [x] Q1. Fila de envio de mensagens com revisão, parada e "Tentar de novo" só nas falhas (mockup `docs/mockups/fila-mensagens.html` aprovado).
 - [ ] Q2. Nome e ícone Unidigit@l Assist na barra do Importar Notas dentro do hub.
-- [ ] Q3. N3: "Ajustar datas Moodle" (aguardando ZIP).
+- [x] Q3. N3: "Ajustar datas" virou **Conferir datas** (módulo `datas`, 0.16.0, commit local; falta homologar em Moodle real).
 - [ ] Q4. Homologar em Moodle real.
 
 ## Plano 0.11 → 1.0 (detalhes em `plano.md`)
