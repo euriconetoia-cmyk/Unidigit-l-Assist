@@ -27,16 +27,18 @@ const ICONS = {
 const CSS = `
 :host { all: initial; }
 * { box-sizing: border-box; }
-.wrap { position: fixed; right: 16px; bottom: 96px; z-index: 2147483000; pointer-events: none; display: flex; align-items: flex-end; gap: 14px; font: 14px/1.4 Inter, -apple-system, "Segoe UI", system-ui, sans-serif; color: #14202e; --p: #0b5cad; --p2: #0a3f78; --m: #5b6b7c; --line: #dbe3ec; --surf: rgba(255,255,255,.93); --card: #f8fafd; --hover: #eef5fc; --hb: #b9d3ee; --focus: #f6b900; }
-@media (prefers-color-scheme: dark) { .wrap { color: #e6ecf5; --m: #9aa8bd; --line: #2b3646; --surf: rgba(26,33,44,.94); --card: #212a37; --hover: #263446; --hb: #3b5877; } }
+.wrap { position: fixed; right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 2147483000; pointer-events: none; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; font: 14px/1.4 Inter, -apple-system, "Segoe UI", system-ui, sans-serif; color: #14202e; --p: #0b5cad; --p2: #0a3f78; --m: #5b6b7c; --line: #dbe3ec; --surf: rgba(255,255,255,.95); --card: #f8fafd; --hover: #eef5fc; --hb: #b9d3ee; --focus: #f6b900; --c-corr: #0b5cad; --c-alun: #13795b; --c-mais: #b4580a; --c-off: #8d9bab; --tipbg: #14202e; --tipfg: #fff; }
+@media (prefers-color-scheme: dark) { .wrap { color: #e6ecf5; --m: #9aa8bd; --line: #2b3646; --surf: rgba(26,33,44,.96); --card: #212a37; --hover: #263446; --hb: #3b5877; --c-corr: #2f7fd1; --c-alun: #2f9c76; --c-mais: #d9772a; --tipbg: #e6ecf5; --tipfg: #14202e; } }
 svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.tab { pointer-events: auto; width: 56px; height: 56px; display: grid; place-items: center; flex-shrink: 0; padding: 0; border: 0; border-radius: 18px; background: linear-gradient(135deg, var(--p), var(--p2)); color: #fff; cursor: pointer; box-shadow: 0 10px 26px rgba(11,92,173,.35); transition: transform .25s, box-shadow .25s; }
-.tab:hover { transform: scale(1.07); box-shadow: 0 14px 32px rgba(11,92,173,.45); }
-.tab svg { width: 26px; height: 26px; }
-.tab .x { display: none; } .wrap.open .tab .x { display: block; } .wrap.open .tab .cap { display: none; }
-.panel { width: min(348px, calc(100vw - 100px)); max-height: calc(100vh - 112px); overflow-y: auto; padding: 16px; border: 1px solid rgba(255,255,255,.6); border-radius: 14px; background: var(--surf); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); box-shadow: 0 20px 60px rgba(29,42,74,.3); opacity: 0; visibility: hidden; transform: translateX(24px) scale(.96); transform-origin: right bottom; pointer-events: none; transition: opacity .3s ease, transform .3s ease, visibility .3s; }
-@media (prefers-color-scheme: dark) { .panel { border-color: rgba(255,255,255,.1); } }
-.wrap.open .panel { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
+.tab { pointer-events: auto; position: relative; width: 60px; height: 60px; display: grid; place-items: center; flex-shrink: 0; padding: 0; border: 0; border-radius: 50%; background: linear-gradient(135deg, var(--p), var(--p2)); color: #fff; cursor: pointer; box-shadow: 0 1px 2px rgba(10,30,60,.3), 0 8px 22px rgba(11,92,173,.38); transition: transform .2s, box-shadow .2s; }
+.tab:hover { transform: scale(1.07); box-shadow: 0 2px 4px rgba(10,30,60,.3), 0 14px 30px rgba(11,92,173,.5); }
+.tab:active { transform: scale(.96); }
+.tab svg { position: absolute; width: 28px; height: 28px; transition: transform .3s cubic-bezier(.3,1.4,.5,1), opacity .2s; }
+.tab .x { opacity: 0; transform: rotate(-90deg); } .wrap.open .tab .x { opacity: 1; transform: none; } .wrap.open .tab .cap { opacity: 0; transform: rotate(90deg); }
+.panel { max-height: calc(100vh - 100px); display: flex; flex-direction: column; align-items: flex-end; gap: 10px; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0s linear .4s, visibility 0s linear .4s; }
+.wrap.open .panel { opacity: 1; visibility: visible; pointer-events: auto; transition: none; }
+.cols { display: flex; flex-direction: row-reverse; align-items: flex-end; gap: 14px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 h2 { margin: 0 0 2px; font-size: 18px; }
 .hint { margin: 0 0 6px; color: var(--m); font-size: 13px; }
 .sec { margin: 10px 4px 5px; color: var(--m); font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; }
@@ -51,16 +53,32 @@ h2 { margin: 0 0 2px; font-size: 18px; }
 @media (prefers-color-scheme: dark) { .g-correcao .sym { background: #17324f; color: #7db8f0; } .g-alunos .sym { background: #143a2b; color: #6fd0a0; } .g-em-breve .sym, .g-ferramentas .sym, .g-mais .sym { background: #2a2250; color: #b4a1f2; } .g-ajuda-e-dados .sym { background: #263040; color: #a9b7cc; } }
 .txt b { display: block; font-size: 14px; } .txt small { display: block; margin-top: 2px; color: var(--m); font-size: 12px; line-height: 1.3; }
 .tag { margin-left: auto; padding: 1px 8px; border-radius: 8px; font-size: 11px; white-space: nowrap; background: var(--line); color: var(--m); }
-.status { min-height: 0; margin: 8px 0 0; color: var(--m); font-size: 12.5px; }
+/* botões circulares do menu principal (FAB): cada ferramenta é um círculo colorido; o nome vira dica */
+.stack { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+.stack .app { position: relative; width: 46px; height: 46px; padding: 0; gap: 0; border: 0; border-radius: 50%; background: transparent; justify-content: center; opacity: 0; transform: scale(0); transform-origin: 50% 100%; transition: transform .22s cubic-bezier(.3,1.5,.5,1), opacity .18s, box-shadow .2s; transition-delay: calc(var(--k) * 30ms); }
+.wrap.open .stack .app { opacity: 1; transform: scale(1); transition-delay: calc((6 - var(--k)) * 0ms + var(--k) * 55ms); }
+.wrap.open .stack .app:hover:not([aria-disabled="true"]), .wrap.open .stack .app:focus-visible { transform: scale(1.1) translateY(-2px); background: transparent; border-color: transparent; transition-delay: 0s; }
+.stack .sym { flex: none; width: 46px; height: 46px; border-radius: 50%; color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25), 0 5px 12px rgba(0,0,0,.22); }
+.stack .app:hover .sym, .stack .app:focus-visible .sym { box-shadow: 0 2px 4px rgba(0,0,0,.25), 0 10px 20px rgba(0,0,0,.3); }
+.stack .g-correcao .sym { background: var(--c-corr); color: #fff; } .stack .g-alunos .sym { background: var(--c-alun); color: #fff; } .stack .g-mais .sym { background: var(--c-mais); color: #fff; }
+.stack .app[data-fora='true'], .wrap.open .stack .app[data-fora='true'] { opacity: 1; } .stack .app[data-fora='true'] .sym { background: var(--c-off); box-shadow: none; }
+.stack .txt { position: absolute; right: 58px; top: 50%; translate: 6px -50%; max-width: 260px; padding: 7px 10px; border-radius: 8px; background: var(--tipbg); color: var(--tipfg); text-align: left; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .15s, translate .15s; }
+.stack .txt b { font-size: 13px; font-weight: 600; } .stack .txt small { color: inherit; opacity: .8; font-size: 11.5px; white-space: normal; }
+.stack .app:hover .txt, .stack .app:focus-visible .txt { opacity: 1; translate: 0 -50%; } .stack .app[aria-expanded="true"] .txt { opacity: 0; }
+.stack .count { position: absolute; top: -3px; left: -3px; margin: 0; min-width: 20px; padding: 0 5px; line-height: 20px; font-size: 11px; background: #14202e; color: #fff; border: 2px solid #fff; border-radius: 99px; } .stack .seta { display: none; }
+.drawer { width: min(300px, calc(100vw - 100px)); max-height: calc(100vh - 120px); overflow-y: auto; padding: 14px; border: 1px solid rgba(255,255,255,.6); border-radius: 14px; background: var(--surf); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); box-shadow: 0 20px 60px rgba(29,42,74,.3); }
+@media (prefers-color-scheme: dark) { .drawer { border-color: rgba(255,255,255,.1); } }
+.status { min-height: 0; margin: 0; max-width: 300px; color: var(--m); font-size: 12.5px; } .status:empty { display: none; }
+.status:not(:empty) { padding: 8px 10px; border-radius: 10px; background: var(--surf); border: 1px solid var(--line); box-shadow: 0 6px 18px rgba(29,42,74,.18); }
 .status.err { padding: 8px 10px; border-radius: 8px; background: #fde8e5; color: #8e1b1b; font-weight: 600; }
 [hidden] { display: none !important; }
 .head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; } .head h2 { margin: 0; font-size: 16px; }
 .voltar { width: 34px; height: 34px; flex: 0 0 34px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: inherit; cursor: pointer; } .voltar svg { width: 18px; height: 18px; }
 .count { margin-left: auto; min-width: 22px; padding: 1px 8px; border-radius: 999px; font-size: 12px; text-align: center; background: #5b3fb5; color: #fff; } .app .seta { width: 16px; height: 16px; color: var(--m); flex: 0 0 16px; }
 a:focus-visible, button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
-@media (max-width: 540px) { .wrap { right: 12px; bottom: 80px; } .tab { width: 52px; height: 52px; } .panel { padding: 14px; } }
+@media (max-width: 540px) { .wrap { right: calc(10px + env(safe-area-inset-right, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); } .tab { width: 56px; height: 56px; } .stack { gap: 9px; } .stack .app, .stack .sym { width: 42px; height: 42px; } .stack .txt { right: 54px; } .drawer { padding: 12px; } }
 @media print { .wrap { display: none; } }
-@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; transition-delay: 0s !important; animation-duration: .01ms !important; } }
 `;
 
 function icon(doc, name, cls) {
@@ -93,7 +111,7 @@ export function mountLauncher(doc = document, send = message => chrome.runtime.s
   const makeButton = (app, extra = {}) => {
     const button = el(doc, 'button', { type: 'button', class: 'app', 'data-app': app.id, style: `--i:${items.length + 1}`, 'aria-disabled': app.disponivel ? 'false' : 'true', 'data-fora': app.disponivel && !aplicaNaPagina(app, tipo) ? 'true' : null },
       el(doc, 'span', { class: 'sym' }, icon(doc, app.icone)),
-      el(doc, 'span', { class: 'txt' }, el(doc, 'b', {}, app.nome), el(doc, 'small', {}, app.descricao)),
+      el(doc, 'span', { class: 'txt' }, el(doc, 'b', {}, app.nome), el(doc, 'small', {}, app.disponivel && !aplicaNaPagina(app, tipo) && app.dicaPagina ? `${app.descricao} · ${app.dicaPagina}` : app.descricao)),
       app.disponivel ? null : el(doc, 'span', { class: 'tag' }, 'em breve'), ...(extra.filhos || []));
     button.addEventListener('click', extra.onClick || (() => run(app, button)));
     items.push(button);
@@ -105,19 +123,21 @@ export function mountLauncher(doc = document, send = message => chrome.runtime.s
   });
   const principais = APPS.filter(a => !a.gaveta);
   const daGaveta = APPS.filter(a => a.gaveta);
-  const mainSections = secoes(principais, [...new Set(principais.map(a => a.grupo))]);
   const ferrApp = { id: 'ferramentas', nome: 'Ferramentas', descricao: 'Kahoot, modelo de perguntas, ajuda e dados', icone: 'ferr2', disponivel: true };
-  const ferrBtn = makeButton(ferrApp, { onClick: () => showView('gaveta'), filhos: [el(doc, 'span', { class: 'count' }, String(daGaveta.filter(a => a.disponivel).length)), icon(doc, 'seta', 'seta')] });
-  mainSections.push(el(doc, 'div', { class: 'sec' }, 'Mais'), el(doc, 'div', { class: 'items g-mais' }, ferrBtn));
-  const mainView = el(doc, 'div', { class: 'view', 'data-view': 'main' },
-    el(doc, 'h2', {}, 'Unidigit@l Assist'),
-    el(doc, 'p', { class: 'hint' }, 'Nada roda sozinho: cada ferramenta só age quando você clica.'), ...mainSections);
+  const botoes = principais.map(a => makeButton(a));
+  const ferrBtn = makeButton(ferrApp, { onClick: () => (drawerView.hidden ? showView('gaveta') : showView('main')), filhos: [el(doc, 'span', { class: 'count' }, String(daGaveta.filter(a => a.disponivel).length)), icon(doc, 'seta', 'seta')] });
+  ferrBtn.setAttribute('aria-expanded', 'false');
+  const grupoClasse = a => `g-${slug(a.grupo)}`;
+  [...botoes, ferrBtn].forEach((b, i, todos) => { b.style.setProperty('--k', String(todos.length - 1 - i)); const app = [...principais, ferrApp][i]; b.classList.add(app === ferrApp ? 'g-mais' : grupoClasse(app)); });
+  const mainView = el(doc, 'div', { class: 'view stack', 'data-view': 'main' },
+    el(doc, 'h2', { class: 'sr' }, 'Unidigit@l Assist'),
+    el(doc, 'p', { class: 'sr' }, 'Nada roda sozinho: cada ferramenta só age quando você clica.'), ...botoes, ferrBtn);
   const voltarBtn = el(doc, 'button', { type: 'button', class: 'voltar', 'aria-label': 'Voltar ao menu', title: 'Voltar' }, icon(doc, 'voltar'));
   voltarBtn.addEventListener('click', () => showView('main'));
-  const drawerView = el(doc, 'div', { class: 'view', 'data-view': 'gaveta', hidden: true },
+  const drawerView = el(doc, 'div', { class: 'view drawer', 'data-view': 'gaveta', hidden: true },
     el(doc, 'div', { class: 'head' }, voltarBtn, el(doc, 'h2', {}, 'Ferramentas')),
     el(doc, 'p', { class: 'hint' }, 'As que não se aplicam a esta página aparecem esmaecidas.'), ...secoes(daGaveta, ['Ferramentas', 'Ajuda e dados']));
-  const panel = el(doc, 'section', { class: 'panel', id: 'hub-panel', 'aria-label': 'Unidigit@l Assist', inert: true }, mainView, drawerView, status);
+  const panel = el(doc, 'section', { class: 'panel', id: 'hub-panel', 'aria-label': 'Unidigit@l Assist', inert: true }, el(doc, 'div', { class: 'cols' }, mainView, drawerView), status);
   const tab = el(doc, 'button', { type: 'button', class: 'tab', 'aria-label': 'Abrir Unidigit@l Assist', 'aria-expanded': 'false', 'aria-controls': 'hub-panel', title: 'Unidigit@l Assist' }, icon(doc, 'ferr', 'cap'), icon(doc, 'close', 'x'));
   const wrap = el(doc, 'nav', { class: 'wrap', 'aria-label': 'Unidigit@l Assist' }, panel, tab);
   shadow.append(style, wrap);
@@ -132,11 +152,11 @@ export function mountLauncher(doc = document, send = message => chrome.runtime.s
     tab.setAttribute('aria-label', value ? 'Fechar Unidigit@l Assist' : 'Abrir Unidigit@l Assist');
   };
   function showView(name) {
-    mainView.hidden = name !== 'main'; drawerView.hidden = name !== 'gaveta'; setStatus('');
-    (name === 'gaveta' ? voltarBtn : (items.find(i => i.getAttribute('aria-disabled') !== 'true') || tab)).focus();
+    drawerView.hidden = name !== 'gaveta'; ferrBtn.setAttribute('aria-expanded', String(name === 'gaveta')); setStatus('');
+    (name === 'gaveta' ? voltarBtn : (name === 'main' && isOpen() ? ferrBtn : (items.find(i => i.getAttribute('aria-disabled') !== 'true') || tab))).focus();
   }
-  const open = () => { showView('main'); setOpen(true); };
-  const close = () => { setOpen(false); mainView.hidden = false; drawerView.hidden = true; tab.focus(); };
+  const open = () => { showView('main'); setOpen(true); (items.find(i => i.getAttribute('aria-disabled') !== 'true') || tab).focus(); };
+  const close = () => { setOpen(false); drawerView.hidden = true; ferrBtn.setAttribute('aria-expanded', 'false'); tab.focus(); };
 
   function baixarModelo() {
     const a = el(doc, 'a', { href: URL.createObjectURL(new Blob(['\uFEFF' + MODELO_KAHOOT], { type: 'text/csv;charset=utf-8' })), download: 'modelo-perguntas-kahoot.csv' });

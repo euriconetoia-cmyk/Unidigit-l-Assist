@@ -157,3 +157,6 @@ Usuário confirmou a regra (JSON quando tem datas; gerador por dia/horário quan
 
 ## Implementado (01/11/2026): Cronograma da turma (teste)
 Módulo `src/modules/cronograma`. Suposições: UC achada pelo nome nos próprios textos (cabeçalho com “UC n – Nome”; cronograma com `<h2>` do nome); texto lido do campo `introeditor[text]` da edição; regra das linhas de atividade = início da UC e término 2 dias antes do 1º encontro (marcada “regra a confirmar”); Aprendizagem detectada por `modeloCronograma`/`categoria` contendo “aprend”. Não faz: datas do curso (`course/edit.php`) nem das atividades a partir do JSON; `crn.v1` ainda fora de “Meus dados”.
+
+## Decisão (01/11/2026): menu inicial em formato FAB
+Mockup `docs/mockups/fab-launcher.png` aprovado (“mais no canto e mais em baixo”): botão circular 60px a 12px das bordas (+ safe-area), ícone antigo (capelo) no lugar do “+”, vira “×”; ferramentas principais como círculos coloridos (Correção azul, Alunos verde, Ferramentas laranja, apagado cinza) com tooltip; gaveta Ferramentas vira card ao lado sem esconder o FAB. Classes/atributos dos testes mantidos. Extras sugeridos (anel de estado, selo do dia, próximo passo, arrastar) não escolhidos. Versão segue 0.16.0.

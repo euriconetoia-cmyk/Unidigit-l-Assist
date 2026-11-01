@@ -50,13 +50,14 @@ test('a gaveta Ferramentas abre com voltar, e fechar o menu volta ao principal',
   const view = n => ui.shadow.querySelector(`[data-view="${n}"]`);
   assert.equal(view('gaveta').hidden, true);
   ui.shadow.querySelector('[data-app="ferramentas"]').click();
-  assert.equal(view('main').hidden, true); assert.equal(view('gaveta').hidden, false);
+  assert.equal(view('main').hidden, false); assert.equal(view('gaveta').hidden, false); // o FAB continua visível; a gaveta abre ao lado
+  assert.equal(ui.shadow.querySelector('[data-app="ferramentas"]').getAttribute('aria-expanded'), 'true');
   assert.equal(ui.shadow.querySelector('.voltar').getAttribute('aria-label'), 'Voltar ao menu');
   ui.shadow.querySelector('.voltar').click();
   assert.equal(view('main').hidden, false); assert.equal(view('gaveta').hidden, true);
   ui.shadow.querySelector('[data-app="ferramentas"]').click();
-  ui.tab.click(); ui.tab.click(); // fecha e reabre
-  assert.equal(view('main').hidden, false);
+  ui.tab.click(); ui.tab.click(); // fecha e reabre: a gaveta volta fechada
+  assert.equal(view('main').hidden, false); assert.equal(view('gaveta').hidden, true);
 });
 
 test('Kahoot na gaveta pede a página da extensão; o modelo CSV baixa sem enviar nada', async () => {
@@ -148,7 +149,7 @@ test('menu em cards: seções, painel inerte quando fechado e rótulo do botão 
   const { ui } = mount();
   assert.equal(ui.panel.hasAttribute('inert'), true);
   const secoes = [...ui.shadow.querySelectorAll('.sec')].map(n => n.textContent);
-  assert.deepEqual(secoes, ['Correção', 'Alunos', 'Mais', 'Ferramentas', 'Ajuda e dados']);
+  assert.deepEqual(secoes, ['Ferramentas', 'Ajuda e dados']);
   ui.tab.click();
   assert.equal(ui.panel.hasAttribute('inert'), false);
   assert.equal(ui.tab.getAttribute('aria-expanded'), 'true');
