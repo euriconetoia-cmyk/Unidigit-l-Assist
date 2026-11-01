@@ -34,6 +34,7 @@
     "test:e2e": "node tests/e2e/lateral.mjs",
     "build:blocos": "node scripts/build.mjs --with-blocos",
     "test:e2e:datas": "node tests/e2e/datas.mjs",
+    "test:e2e:cronograma": "node tests/e2e/cronograma.mjs",
     "test:e2e:blocos": "node tests/e2e/blocos.mjs"
   },
   "devDependencies": {

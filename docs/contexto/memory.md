@@ -154,3 +154,6 @@ Usuário: aulas geralmente 1x por semana, exceto Aprendizagem (datas já no cron
 
 ## Confirmação (01/11/2026): webaulas
 Usuário confirmou a regra (JSON quando tem datas; gerador por dia/horário quando não tem; Aprendizagem sempre do cronograma) e que **geralmente é uma vez por semana** → frequência padrão do gerador = toda semana. Dúvida dele: como lançar (automático ou arquivo)? Resposta: a extensão preenche e a pessoa salva no Moodle (regra do projeto); arquivo só como relatório opcional.
+
+## Implementado (01/11/2026): Cronograma da turma (teste)
+Módulo `src/modules/cronograma`. Suposições: UC achada pelo nome nos próprios textos (cabeçalho com “UC n – Nome”; cronograma com `<h2>` do nome); texto lido do campo `introeditor[text]` da edição; regra das linhas de atividade = início da UC e término 2 dias antes do 1º encontro (marcada “regra a confirmar”); Aprendizagem detectada por `modeloCronograma`/`categoria` contendo “aprend”. Não faz: datas do curso (`course/edit.php`) nem das atividades a partir do JSON; `crn.v1` ainda fora de “Meus dados”.

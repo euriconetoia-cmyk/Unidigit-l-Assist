@@ -55,6 +55,8 @@ if ((read('modules/importar-notas/vendor/src/ui/panel.js').match(/HUB-PATCH regu
 
 const alunos = JSON.parse(read('modules/alunos/files.json'));
 const datas = JSON.parse(read('modules/datas/files.json'));
+const crono = JSON.parse(read('modules/cronograma/files.json'));
+for (const f of [...crono.scripts, 'bridge.js']) if (!fs.existsSync(path.join(ext, 'modules/cronograma', f))) fail(`arquivo do módulo cronograma ausente: ${f}`);
 for (const f of [...datas.scripts, 'bridge.js']) if (!fs.existsSync(path.join(ext, 'modules/datas', f))) fail(`arquivo do módulo datas ausente: ${f}`);
 for (const f of [...alunos.scripts, 'bridge.js']) if (!fs.existsSync(path.join(ext, 'modules/alunos', f))) fail(`arquivo do módulo alunos ausente: ${f}`);
 if (fs.existsSync(path.join(ext, 'modules/alunos/vendor/origem.json'))) {
@@ -73,7 +75,7 @@ if (!new RegExp(`versao: '${manifest.version.replace(/\./g, '\\.')}'`).test(nov)
 const BANNED = [[/\beval\s*\(/, 'eval('], [/new\s+Function\s*\(/, 'new Function('], [/document\.write\s*\(/, 'document.write('], [/\bsetTimeout\s*\(\s*['"`]/, 'setTimeout(string)'], [/\balert\s*\(|\bconfirm\s*\(|\bprompt\s*\(/, 'alert/confirm/prompt'], [/https?:\/\/(?!ead\.senai\.br|ead\.fieg\.com\.br|www\.w3\.org|github\.com\/google\/blockly)[^"'\s)]+\.js/, 'script remoto']];
 const NO_NETWORK = /\bfetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon/;
 if (NO_NETWORK.test(read('launcher.js'))) fail('launcher.js não pode consultar nada (só desenha o botão)');
-for (const file of ['launcher.js', 'background.js', 'modules/importar-notas/bridge.js', ...files.scripts.map(f => `modules/importar-notas/vendor/${f}`), 'modules/alunos/bridge.js', ...alunos.scripts.map(f => `modules/alunos/${f}`), 'modules/datas/bridge.js', ...datas.scripts.map(f => `modules/datas/${f}`), 'modules/kahoot/bridge.js', ...kahoot.scripts.map(f => `modules/kahoot/${f}`), 'kahoot.js']) {
+for (const file of ['launcher.js', 'background.js', 'modules/importar-notas/bridge.js', ...files.scripts.map(f => `modules/importar-notas/vendor/${f}`), 'modules/alunos/bridge.js', ...alunos.scripts.map(f => `modules/alunos/${f}`), 'modules/datas/bridge.js', 'modules/cronograma/bridge.js', ...crono.scripts.map(f => `modules/cronograma/${f}`), ...datas.scripts.map(f => `modules/datas/${f}`), 'modules/kahoot/bridge.js', ...kahoot.scripts.map(f => `modules/kahoot/${f}`), 'kahoot.js']) {
   const text = read(file);
   for (const [re, label] of BANNED) if (re.test(text)) fail(`${file}: padrão proibido ${label}`);
 }

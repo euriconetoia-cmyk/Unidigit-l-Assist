@@ -1,0 +1,2074 @@
+{
+ "formato": "cronograma-ead-turma",
+ "versaoFormato": 1,
+ "versaoSistema": "2.24.0-rc1",
+ "geradoEm": "2026-11-01T11:24:22.180Z",
+ "turma": {
+  "id": "t_xhhxzo",
+  "nome": "Turma de teste",
+  "os": null,
+  "situacao": "Validado",
+  "versao": 1,
+  "validacao": "Validado em 15/10/2026 (versão 1)",
+  "inicio": "2026-11-10",
+  "terminoPrevisto": "2028-09-22",
+  "unidade": {
+   "id": "u_luz",
+   "nome": "SENAI Luziânia"
+  },
+  "moodle": {
+   "codigo": "1037240",
+   "numeroTurma": "00001/2026"
+  }
+ },
+ "curso": {
+  "id": "c_tst",
+  "nome": "Técnico em Informática para Internet",
+  "cargaHoraria": 1200,
+  "categoria": "Técnico de Nível Médio",
+  "modalidade": null,
+  "modeloCronograma": "tecnico"
+ },
+ "resumo": {
+  "unidadesCurriculares": 12,
+  "cargaHorariaUcs": 1200,
+  "momentos": 34
+ },
+ "modulos": [
+  {
+   "nome": "Curso introdutório",
+   "itens": [
+    {
+     "id": "i3",
+     "tipo": "intro",
+     "nome": "Curso Técnicas de Estudo EaD",
+     "cargaHoraria": 20,
+     "cargaPresencial": 0,
+     "cargaDistancia": 20,
+     "diasEstudoEad": 5,
+     "inicio": "2026-11-10",
+     "termino": "2026-11-17",
+     "terminoAva": "2026-11-17",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    }
+   ]
+  },
+  {
+   "nome": "Básico",
+   "itens": [
+    {
+     "id": "i4",
+     "tipo": "uc",
+     "nome": "Comunicação e Informação",
+     "cargaHoraria": 80,
+     "cargaPresencial": 16,
+     "cargaDistancia": 64,
+     "diasEstudoEad": 22,
+     "inicio": "2026-11-18",
+     "termino": "2027-01-25",
+     "terminoAva": "2027-06-07",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null,
+      "coordenador": null,
+      "professor": null,
+      "ambiente": null
+     },
+     "momentos": [
+      {
+       "tipo": "presencial",
+       "data": "2026-12-05",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2026-11-25",
+        "hora": "15h"
+       },
+       "postagemNotas": "2026-12-09"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2026-12-19",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2026-12-09",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-01-27"
+      }
+     ],
+     "diaRecuperacao": null,
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i6",
+     "tipo": "rec",
+     "nome": "Recuperação UC 01",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 5,
+     "inicio": "2027-01-26",
+     "termino": "2027-02-02",
+     "terminoAva": "2027-06-07",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i7",
+     "tipo": "uc",
+     "nome": "Ciências Aplicadas",
+     "cargaHoraria": 90,
+     "cargaPresencial": 18,
+     "cargaDistancia": 72,
+     "diasEstudoEad": 24,
+     "inicio": "2027-01-26",
+     "termino": "2027-03-04",
+     "terminoAva": "2027-06-07",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null,
+      "coordenador": null,
+      "professor": null,
+      "ambiente": null
+     },
+     "momentos": [
+      {
+       "tipo": "presencial",
+       "data": "2027-01-30",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-01-20",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-02-03"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2027-02-13",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-02-03",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-02-17"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2027-02-27",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-02-17",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-03-03"
+      }
+     ],
+     "diaRecuperacao": null,
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i10",
+     "tipo": "rec",
+     "nome": "Recuperação UC 02",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 5,
+     "inicio": "2027-03-05",
+     "termino": "2027-03-12",
+     "terminoAva": "2027-06-07",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i11",
+     "tipo": "uc",
+     "nome": "Gestão de Pessoas",
+     "cargaHoraria": 60,
+     "cargaPresencial": 12,
+     "cargaDistancia": 48,
+     "diasEstudoEad": 16,
+     "inicio": "2027-03-05",
+     "termino": "2027-03-30",
+     "terminoAva": "2027-06-07",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null,
+      "coordenador": null,
+      "professor": null,
+      "ambiente": null
+     },
+     "momentos": [
+      {
+       "tipo": "presencial",
+       "data": "2027-03-06",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-02-24",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-03-10"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2027-03-27",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-03-17",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-03-31"
+      }
+     ],
+     "diaRecuperacao": null,
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i13",
+     "tipo": "rec",
+     "nome": "Recuperação UC 03",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 5,
+     "inicio": "2027-03-31",
+     "termino": "2027-04-07",
+     "terminoAva": "2027-06-07",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i14",
+     "tipo": "uc",
+     "nome": "Fundamentos de Segurança e Saúde no Trabalho",
+     "cargaHoraria": 130,
+     "cargaPresencial": 26,
+     "cargaDistancia": 104,
+     "diasEstudoEad": 35,
+     "inicio": "2027-03-31",
+     "termino": "2027-05-20",
+     "terminoAva": "2027-06-07",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null,
+      "coordenador": null,
+      "professor": null,
+      "ambiente": null
+     },
+     "momentos": [
+      {
+       "tipo": "presencial",
+       "data": "2027-04-03",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-03-24",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-04-07"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2027-04-17",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-04-07",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-04-22"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2027-04-24",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-04-14",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-04-28"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2027-05-15",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-05-05",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-05-19"
+      }
+     ],
+     "diaRecuperacao": null,
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i18",
+     "tipo": "rec",
+     "nome": "Recuperação UC 04",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 2,
+     "inicio": "2027-05-21",
+     "termino": "2027-05-26",
+     "terminoAva": "2027-06-07",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i19",
+     "tipo": "mat",
+     "nome": "Matrícula",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 5,
+     "inicio": "2027-05-31",
+     "termino": "2027-06-07",
+     "terminoAva": "2027-06-07",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    }
+   ]
+  },
+  {
+   "nome": "Específico I",
+   "itens": [
+    {
+     "id": "i20",
+     "tipo": "uc",
+     "nome": "Rotinas de Segurança e Saúde do Trabalho",
+     "cargaHoraria": 150,
+     "cargaPresencial": 30,
+     "cargaDistancia": 120,
+     "diasEstudoEad": 40,
+     "inicio": "2027-06-08",
+     "termino": "2027-08-26",
+     "terminoAva": "2027-10-27",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null,
+      "coordenador": null,
+      "professor": null,
+      "ambiente": null
+     },
+     "momentos": [
+      {
+       "tipo": "presencial",
+       "data": "2027-06-12",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-06-02",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-06-16"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2027-06-26",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-06-16",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-06-30"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2027-08-07",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-07-28",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-08-11"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2027-08-21",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-08-11",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-08-25"
+      }
+     ],
+     "diaRecuperacao": null,
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i24",
+     "tipo": "rec",
+     "nome": "Recuperação UC 05",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 5,
+     "inicio": "2027-08-27",
+     "termino": "2027-09-03",
+     "terminoAva": "2027-10-27",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i25",
+     "tipo": "uc",
+     "nome": "Higiene Ocupacional",
+     "cargaHoraria": 120,
+     "cargaPresencial": 24,
+     "cargaDistancia": 96,
+     "diasEstudoEad": 32,
+     "inicio": "2027-08-27",
+     "termino": "2027-10-14",
+     "terminoAva": "2027-10-27",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null,
+      "coordenador": null,
+      "professor": null,
+      "ambiente": null
+     },
+     "momentos": [
+      {
+       "tipo": "presencial",
+       "data": "2027-08-28",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-08-18",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-09-01"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2027-09-18",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-09-08",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-09-22"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2027-10-09",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-09-29",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-10-14"
+      }
+     ],
+     "diaRecuperacao": null,
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i28",
+     "tipo": "rec",
+     "nome": "Recuperação UC 06",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 2,
+     "inicio": "2027-10-15",
+     "termino": "2027-10-19",
+     "terminoAva": "2027-10-27",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i29",
+     "tipo": "mat",
+     "nome": "Matrícula",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 5,
+     "inicio": "2027-10-20",
+     "termino": "2027-10-27",
+     "terminoAva": "2027-10-27",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    }
+   ]
+  },
+  {
+   "nome": "Específico II",
+   "itens": [
+    {
+     "id": "i30",
+     "tipo": "uc",
+     "nome": "Planejamento e Execução de Ações Educativas",
+     "cargaHoraria": 100,
+     "cargaPresencial": 20,
+     "cargaDistancia": 80,
+     "diasEstudoEad": 27,
+     "inicio": "2027-10-28",
+     "termino": "2027-12-08",
+     "terminoAva": "2028-05-12",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null,
+      "coordenador": null,
+      "professor": null,
+      "ambiente": null
+     },
+     "momentos": [
+      {
+       "tipo": "presencial",
+       "data": "2027-10-30",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-10-20",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-11-04"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2027-11-13",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-11-03",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-11-18"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2027-12-04",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-11-24",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-12-08"
+      }
+     ],
+     "diaRecuperacao": null,
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i33",
+     "tipo": "rec",
+     "nome": "Recuperação UC 10",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 5,
+     "inicio": "2027-12-09",
+     "termino": "2027-12-16",
+     "terminoAva": "2028-05-12",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i34",
+     "tipo": "uc",
+     "nome": "Coordenação e Procedimentos de Saúde e Segurança do Trabalho",
+     "cargaHoraria": 220,
+     "cargaPresencial": 44,
+     "cargaDistancia": 176,
+     "diasEstudoEad": 59,
+     "inicio": "2027-12-09",
+     "termino": "2028-04-10",
+     "terminoAva": "2028-05-12",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null,
+      "coordenador": null,
+      "professor": null,
+      "ambiente": null
+     },
+     "momentos": [
+      {
+       "tipo": "presencial",
+       "data": "2027-12-11",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2027-12-01",
+        "hora": "15h"
+       },
+       "postagemNotas": "2027-12-15"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2028-01-29",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2028-01-19",
+        "hora": "15h"
+       },
+       "postagemNotas": "2028-02-02"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2028-02-12",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2028-02-02",
+        "hora": "15h"
+       },
+       "postagemNotas": "2028-02-16"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2028-03-04",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2028-02-23",
+        "hora": "15h"
+       },
+       "postagemNotas": "2028-03-08"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2028-03-18",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2028-03-08",
+        "hora": "15h"
+       },
+       "postagemNotas": "2028-03-22"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2028-04-01",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2028-03-22",
+        "hora": "15h"
+       },
+       "postagemNotas": "2028-04-05"
+      }
+     ],
+     "diaRecuperacao": null,
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i40",
+     "tipo": "rec",
+     "nome": "Recuperação UC 11",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 5,
+     "inicio": "2028-04-11",
+     "termino": "2028-04-19",
+     "terminoAva": "2028-05-12",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i41",
+     "tipo": "uc",
+     "nome": "Metodologia de Projetos",
+     "cargaHoraria": 40,
+     "cargaPresencial": 8,
+     "cargaDistancia": 32,
+     "diasEstudoEad": 11,
+     "inicio": "2028-04-11",
+     "termino": "2028-04-28",
+     "terminoAva": "2028-05-12",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null,
+      "coordenador": null,
+      "professor": null,
+      "ambiente": null
+     },
+     "momentos": [
+      {
+       "tipo": "presencial",
+       "data": "2028-04-15",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2028-04-05",
+        "hora": "15h"
+       },
+       "postagemNotas": "2028-04-19"
+      }
+     ],
+     "diaRecuperacao": null,
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i42",
+     "tipo": "rec",
+     "nome": "Recuperação UC 12",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 2,
+     "inicio": "2028-05-02",
+     "termino": "2028-05-04",
+     "terminoAva": "2028-05-12",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i43",
+     "tipo": "mat",
+     "nome": "Matrícula",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 5,
+     "inicio": "2028-05-05",
+     "termino": "2028-05-12",
+     "terminoAva": "2028-05-12",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    }
+   ]
+  },
+  {
+   "nome": "Específico III",
+   "itens": [
+    {
+     "id": "i44",
+     "tipo": "uc",
+     "nome": "Assessoria e Consultoria em Saúde, segurança e Meio Ambiente do Trabalho",
+     "cargaHoraria": 70,
+     "cargaPresencial": 14,
+     "cargaDistancia": 56,
+     "diasEstudoEad": 19,
+     "inicio": "2028-05-15",
+     "termino": "2028-06-12",
+     "terminoAva": "2028-06-27",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null,
+      "coordenador": null,
+      "professor": null,
+      "ambiente": null
+     },
+     "momentos": [
+      {
+       "tipo": "presencial",
+       "data": "2028-05-13",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2028-05-03",
+        "hora": "15h"
+       },
+       "postagemNotas": "2028-05-17"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2028-06-03",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2028-05-24",
+        "hora": "15h"
+       },
+       "postagemNotas": "2028-06-07"
+      }
+     ],
+     "diaRecuperacao": null,
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i46",
+     "tipo": "rec",
+     "nome": "Recuperação UC 15",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 2,
+     "inicio": "2028-06-13",
+     "termino": "2028-06-19",
+     "terminoAva": "2028-06-27",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i47",
+     "tipo": "mat",
+     "nome": "Matrícula",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 5,
+     "inicio": "2028-06-20",
+     "termino": "2028-06-27",
+     "terminoAva": "2028-06-27",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    }
+   ]
+  },
+  {
+   "nome": "Específico IV",
+   "itens": [
+    {
+     "id": "i48",
+     "tipo": "uc",
+     "nome": "Gestão de Auditorias em Saúde e Segurança do Trabalho",
+     "cargaHoraria": 70,
+     "cargaPresencial": 14,
+     "cargaDistancia": 56,
+     "diasEstudoEad": 19,
+     "inicio": "2028-06-28",
+     "termino": "2028-08-15",
+     "terminoAva": "2028-09-22",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null,
+      "coordenador": null,
+      "professor": null,
+      "ambiente": null
+     },
+     "momentos": [
+      {
+       "tipo": "presencial",
+       "data": "2028-07-01",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2028-06-21",
+        "hora": "15h"
+       },
+       "postagemNotas": "2028-07-26"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2028-08-12",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2028-08-02",
+        "hora": "15h"
+       },
+       "postagemNotas": "2028-08-16"
+      }
+     ],
+     "diaRecuperacao": null,
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i50",
+     "tipo": "rec",
+     "nome": "Recuperação UC 13",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 5,
+     "inicio": "2028-08-16",
+     "termino": "2028-08-23",
+     "terminoAva": "2028-09-22",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i51",
+     "tipo": "uc",
+     "nome": "Monitoramento dos Programas e Documentos de Saúde e Segurança do Trabalho",
+     "cargaHoraria": 70,
+     "cargaPresencial": 14,
+     "cargaDistancia": 56,
+     "diasEstudoEad": 19,
+     "inicio": "2028-08-16",
+     "termino": "2028-09-14",
+     "terminoAva": "2028-09-22",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null,
+      "coordenador": null,
+      "professor": null,
+      "ambiente": null
+     },
+     "momentos": [
+      {
+       "tipo": "presencial",
+       "data": "2028-08-19",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2028-08-09",
+        "hora": "15h"
+       },
+       "postagemNotas": "2028-08-23"
+      },
+      {
+       "tipo": "presencial",
+       "data": "2028-09-09",
+       "horario": "08:00h às 17:00h",
+       "webconferencia": {
+        "data": "2028-08-30",
+        "hora": "15h"
+       },
+       "postagemNotas": "2028-09-13"
+      }
+     ],
+     "diaRecuperacao": null,
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    },
+    {
+     "id": "i53",
+     "tipo": "rec",
+     "nome": "Recuperação UC 14",
+     "cargaHoraria": 15,
+     "cargaPresencial": 0,
+     "cargaDistancia": 15,
+     "diasEstudoEad": 5,
+     "inicio": "2028-09-15",
+     "termino": "2028-09-22",
+     "terminoAva": "2028-09-22",
+     "evento": null,
+     "equipe": {
+      "monitor": null,
+      "tutor": null
+     },
+     "momentos": [],
+     "suporte": {
+      "scorm": null,
+      "apostila": null,
+      "avaliacao": null,
+      "pesquisa": null,
+      "mediaScorm": null,
+      "idMoodle": null
+     }
+    }
+   ]
+  }
+ ],
+ "contrato": null,
+ "feriados": [
+  {
+   "data": "2026-11-15",
+   "nome": "Proclamação da República"
+  },
+  {
+   "data": "2026-11-20",
+   "nome": "Dia da consciência negra"
+  },
+  {
+   "data": "2026-12-21",
+   "nome": "férias"
+  },
+  {
+   "data": "2026-12-22",
+   "nome": "férias"
+  },
+  {
+   "data": "2026-12-23",
+   "nome": "férias"
+  },
+  {
+   "data": "2026-12-24",
+   "nome": "férias"
+  },
+  {
+   "data": "2026-12-25",
+   "nome": "Natal"
+  },
+  {
+   "data": "2026-12-26",
+   "nome": "férias"
+  },
+  {
+   "data": "2026-12-27",
+   "nome": "férias"
+  },
+  {
+   "data": "2026-12-28",
+   "nome": "férias"
+  },
+  {
+   "data": "2026-12-29",
+   "nome": "férias"
+  },
+  {
+   "data": "2026-12-30",
+   "nome": "férias"
+  },
+  {
+   "data": "2026-12-31",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-01",
+   "nome": "Ano novo"
+  },
+  {
+   "data": "2027-01-02",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-03",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-04",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-05",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-06",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-07",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-08",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-09",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-10",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-11",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-12",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-13",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-14",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-15",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-16",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-17",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-18",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-19",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-20",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-21",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-22",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-23",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-01-24",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-02-08",
+   "nome": "Feriado de Carnaval"
+  },
+  {
+   "data": "2027-02-09",
+   "nome": "Feriado de Carnaval"
+  },
+  {
+   "data": "2027-02-10",
+   "nome": "Feriado de Carnaval"
+  },
+  {
+   "data": "2027-03-26",
+   "nome": "Sexta feira Santa"
+  },
+  {
+   "data": "2027-03-28",
+   "nome": "Páscoa"
+  },
+  {
+   "data": "2027-04-21",
+   "nome": "Tiradentes"
+  },
+  {
+   "data": "2027-05-01",
+   "nome": "Dia do Trabalho"
+  },
+  {
+   "data": "2027-05-24",
+   "nome": "Padroeira de Goiânia"
+  },
+  {
+   "data": "2027-05-27",
+   "nome": "Corpus Christi"
+  },
+  {
+   "data": "2027-05-28",
+   "nome": "Facultativo"
+  },
+  {
+   "data": "2027-07-01",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-02",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-03",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-04",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-05",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-06",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-07",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-07",
+   "nome": "Independência do Brasil"
+  },
+  {
+   "data": "2027-07-08",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-09",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-10",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-11",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-12",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-13",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-14",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-15",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-16",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-17",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-18",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-19",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-20",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-21",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-22",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-23",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-24",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-07-25",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-09-07",
+   "nome": "Independência do Brasil"
+  },
+  {
+   "data": "2027-10-12",
+   "nome": "Nossa Senhora Aparecida"
+  },
+  {
+   "data": "2027-10-12",
+   "nome": "Nossa Senhora Aparecida"
+  },
+  {
+   "data": "2027-10-24",
+   "nome": "Aniversário de Goiânia"
+  },
+  {
+   "data": "2027-11-02",
+   "nome": "Finados"
+  },
+  {
+   "data": "2027-11-15",
+   "nome": "Proclamação da Republica"
+  },
+  {
+   "data": "2027-11-20",
+   "nome": "Consciência Negra"
+  },
+  {
+   "data": "2027-12-20",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-12-21",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-12-22",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-12-23",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-12-24",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-12-25",
+   "nome": "Natal"
+  },
+  {
+   "data": "2027-12-26",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-12-27",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-12-28",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-12-29",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-12-30",
+   "nome": "férias"
+  },
+  {
+   "data": "2027-12-31",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-01",
+   "nome": "Ano novo"
+  },
+  {
+   "data": "2028-01-02",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-03",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-04",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-05",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-06",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-07",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-08",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-09",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-10",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-11",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-12",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-13",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-14",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-15",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-16",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-17",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-18",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-19",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-20",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-21",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-22",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-01-23",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-02-28",
+   "nome": "Carnaval"
+  },
+  {
+   "data": "2028-02-29",
+   "nome": "Carnaval"
+  },
+  {
+   "data": "2028-03-01",
+   "nome": "Carnaval"
+  },
+  {
+   "data": "2028-04-14",
+   "nome": "Sexta feira santa"
+  },
+  {
+   "data": "2028-04-21",
+   "nome": "Tiradentes"
+  },
+  {
+   "data": "2028-05-01",
+   "nome": "Dia do trabalho"
+  },
+  {
+   "data": "2028-05-24",
+   "nome": "Padroeira de Goiânia"
+  },
+  {
+   "data": "2028-06-15",
+   "nome": "Corpus christi"
+  },
+  {
+   "data": "2028-06-16",
+   "nome": "Ponto Facultativo"
+  },
+  {
+   "data": "2028-07-03",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-04",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-05",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-06",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-07",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-08",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-09",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-10",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-11",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-12",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-13",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-14",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-15",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-16",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-17",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-18",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-19",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-20",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-21",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-22",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-23",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-29",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-07-30",
+   "nome": "férias"
+  },
+  {
+   "data": "2028-09-07",
+   "nome": "Independência do Brasil"
+  },
+  {
+   "data": "2028-09-08",
+   "nome": "Ponto Facultativo"
+  }
+ ],
+ "entrada": {
+  "id": "t_xhhxzo",
+  "cursoId": "c_tst",
+  "nome": "Teste oyotrmh",
+  "inicio": "2026-11-10",
+  "evento": "",
+  "monitorId": "",
+  "tutorId": "",
+  "coordId": "",
+  "profId": "",
+  "ambiente": "",
+  "obs": "",
+  "personalizarCronograma": true,
+  "configuracaoCronograma": {
+   "sincrono": {
+    "diasPermitidos": [
+     5
+    ]
+   }
+  },
+  "itens": {
+   "i4": {
+    "enc": [
+     {
+      "d": "2026-12-05",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2026-12-19",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     }
+    ]
+   },
+   "i7": {
+    "enc": [
+     {
+      "d": "2027-01-30",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2027-02-13",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2027-02-27",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     }
+    ]
+   },
+   "i11": {
+    "enc": [
+     {
+      "d": "2027-03-06",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2027-03-27",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     }
+    ]
+   },
+   "i14": {
+    "enc": [
+     {
+      "d": "2027-04-03",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2027-04-17",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2027-04-24",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2027-05-15",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     }
+    ]
+   },
+   "i20": {
+    "enc": [
+     {
+      "d": "2027-06-12",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2027-06-26",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2027-08-07",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2027-08-21",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     }
+    ]
+   },
+   "i25": {
+    "enc": [
+     {
+      "d": "2027-08-28",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2027-09-18",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2027-10-09",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     }
+    ]
+   },
+   "i30": {
+    "enc": [
+     {
+      "d": "2027-10-30",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2027-11-13",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2027-12-04",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     }
+    ]
+   },
+   "i34": {
+    "enc": [
+     {
+      "d": "2027-12-11",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2028-01-29",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2028-02-12",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2028-03-04",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2028-03-18",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2028-04-01",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     }
+    ]
+   },
+   "i41": {
+    "enc": [
+     {
+      "d": "2028-04-15",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     }
+    ]
+   },
+   "i44": {
+    "enc": [
+     {
+      "d": "2028-05-13",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2028-06-03",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     }
+    ]
+   },
+   "i48": {
+    "enc": [
+     {
+      "d": "2028-07-01",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2028-08-12",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     }
+    ]
+   },
+   "i51": {
+    "enc": [
+     {
+      "d": "2028-08-19",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     },
+     {
+      "d": "2028-09-09",
+      "h": "08:00h às 17:00h",
+      "w": "15h"
+     }
+    ]
+   }
+  },
+  "unidadeId": "u_luz",
+  "status": "validado",
+  "versao": 1,
+  "rev": 10,
+  "prazo": "",
+  "vigente": {
+   "versao": 1,
+   "por": "unidade",
+   "em": "2026-10-16 00:41:50",
+   "ressalva": ""
+  }
+ }
+}
