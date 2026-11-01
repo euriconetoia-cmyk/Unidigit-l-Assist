@@ -73,6 +73,12 @@ try {
   const linhas = await q('tbody tr').allTextContents();
   check('compara: SAP 01 e Questionário 1 diferentes, SAP 02 igual', /SAP 01.*diferente/.test(linhas.join('|')) && /Questionário 1.*diferente/.test(linhas.join('|')) && /SAP 02.*igual/.test(linhas.join('|')), linhas.join(' | ').slice(0, 400));
   await pg.screenshot({ path: path.join(SHOTS, 'd2-comparacao.png') });
+  // data editável: muda o término da SAP 02 (que estava igual) para outra data e vira "diferente"
+  const campoTerm = q('tbody tr').nth(1).locator('input.d').nth(1);
+  await campoTerm.fill('30/10/2026'); await campoTerm.dispatchEvent('change');
+  check('editar a data à mão recalcula a situação (SAP 02 igual → diferente) e libera marcar', /diferente/.test(await q('tbody tr').nth(1).textContent()) && await q('tbody tr').nth(1).locator('input[type=checkbox]').isEnabled());
+  await pg.screenshot({ path: path.join(SHOTS, 'd2b-editando.png') });
+  await campoTerm.fill('29/10/2026'); await campoTerm.dispatchEvent('change');
   // aplicar só a SAP 01
   await pg.evaluate(() => { const r = document.querySelector('#hub-dts-host').shadowRoot; r.querySelectorAll('tbody tr').forEach(tr => { const c = tr.querySelector('input[type=checkbox]'); if (c && !/SAP 01/.test(tr.textContent) && c.checked) c.click(); }); });
   await q('button.pri').click();

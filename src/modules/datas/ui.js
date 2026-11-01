@@ -57,9 +57,9 @@ input.d{width:104px}input.h{width:64px}input.bad{border-color:var(--er)}select{m
     function recalcular(l) {
       l.erroCampo = ''; l.alvo = null; l.dif = []; l.avisos = [];
       if (l.erro) { l.estado = 'erro'; return; }
-      if (l.par < 0) { l.estado = 'sem-par'; return; }
-      const e = cron.entradas[l.par];
-      if (e.semData) { l.estado = 'sem-data'; return; }
+      const e = l.par >= 0 ? cron.entradas[l.par] : null;
+      const manual = Boolean(l.ed.inicio || l.ed.termino || l.ed.hora); // a pessoa digitou datas à mão
+      if (!manual) { l.estado = !e ? 'sem-par' : 'sem-data'; return; }
       const ini = C.parseData(l.ed.inicio), ter = C.parseData(l.ed.termino);
       const hora = l.ed.hora ? C.parseHora(l.ed.hora) : null;
       if (!ini || !ter || (l.ed.hora && !hora)) { l.estado = 'invalido'; l.erroCampo = 'Use dd/mm/aaaa e hh:mm.'; return; }
@@ -98,7 +98,7 @@ input.d{width:104px}input.h{width:64px}input.bad{border-color:var(--er)}select{m
       const [cls, txt] = PILL[l.estado];
       const sel = h('select', { 'aria-label': `Par de ${l.nome} no cronograma`, onchange: e => { l.par = Number(e.target.value); preencherEd(l); recalcular(l); l.sel = l.estado === 'diferente'; draw(); } },
         h('option', { value: '-1', selected: l.par < 0 }, 'sem par…'), ...cron.entradas.map((e, j) => h('option', { value: String(j), selected: j === l.par }, e.nome)));
-      const campo = (k, cl) => h('input', { type: 'text', class: `${cl}${l.estado === 'invalido' ? ' bad' : ''}`, value: l.ed[k], 'aria-label': `${k === 'inicio' ? 'Início' : k === 'termino' ? 'Término' : 'Hora limite'} de ${l.nome}`, disabled: l.par < 0 || (cron.entradas[l.par] && cron.entradas[l.par].semData) || l.erro, onchange: e => { l.ed[k] = e.target.value; recalcular(l); l.sel = l.estado === 'diferente'; draw(); } });
+      const campo = (k, cl) => h('input', { type: 'text', class: `${cl}${l.estado === 'invalido' ? ' bad' : ''}`, value: l.ed[k], 'aria-label': `${k === 'inicio' ? 'Início' : k === 'termino' ? 'Término' : 'Hora limite'} de ${l.nome}`, disabled: Boolean(l.erro), placeholder: k === 'hora' ? 'hh:mm' : 'dd/mm/aaaa', title: 'Pode editar: digite a data que deseja aplicar', onchange: e => { l.ed[k] = e.target.value; recalcular(l); l.sel = l.estado === 'diferente'; draw(); } });
       const at = l.atual; const noMoodle = l.erro ? h('span', { class: 'old' }, l.erro) : [CAMPOS_TXT(at, 'inicio'), ' → ', CAMPOS_TXT(at, 'termino')];
       const chk = h('input', { type: 'checkbox', checked: l.sel, disabled: l.estado !== 'diferente', 'aria-label': `Aplicar em ${l.nome}`, onchange: e => { l.sel = e.target.checked; draw(); } });
       return h('tr', {}, h('td', {}, h('b', {}, l.nome), h('div', { class: 'tipo' }, C.TIPOS[l.tipo])), h('td', {}, sel), h('td', {}, noMoodle),
@@ -122,10 +122,10 @@ input.d{width:104px}input.h{width:64px}input.bad{border-color:var(--er)}select{m
       const nSel = st.linhas.filter(l => l.sel && l.estado === 'diferente').length;
       box.append(h('div', { class: 'bar' }, h('span', { class: 'pill dif' }, `${cont.diferente} diferente(s)`), h('span', { class: 'pill ok' }, `${cont.igual} igual(is)`), h('span', { class: 'pill er' }, `${cont['sem-par']} sem par`), cont.erro ? h('span', { class: 'pill er' }, `${cont.erro} não lida(s)`) : null, cont['sem-data'] ? h('span', { class: 'pill' }, `${cont['sem-data']} a definir`) : null));
       if (st.erro) box.append(h('div', { class: 'msg err', role: 'alert' }, st.erro));
-      box.append(h('div', { class: 'wrap' }, h('table', {}, h('thead', {}, h('tr', {}, ['Atividade', 'Par no cronograma', 'No Moodle (início → entrega)', 'Cronograma (início, término, hora) — editável', 'Situação', ''].map(t => h('th', { scope: 'col' }, t)))), h('tbody', {}, st.linhas.map(linhaTr)))));
+      box.append(h('div', { class: 'wrap' }, h('table', {}, h('thead', {}, h('tr', {}, ['Atividade', 'Par no cronograma', 'No Moodle (início → entrega)', 'Datas a aplicar (início, término, hora) — editáveis', 'Situação', ''].map(t => h('th', { scope: 'col' }, t)))), h('tbody', {}, st.linhas.map(linhaTr)))));
       const regra = (k, txt, extra) => h('label', {}, h('input', { type: 'checkbox', checked: st.regras[k], onchange: e => { st.regras[k] = e.target.checked; st.linhas.forEach(l => { const antes = l.sel; recalcular(l); l.sel = antes && l.estado === 'diferente'; if (l.estado === 'diferente' && !antes && st.regras[k]) l.sel = true; }); draw(); } }), txt, extra);
       box.append(h('div', { class: 'opts' }, h('span', { class: 'sub', style: 'margin:0' }, 'Regras:'), h('span', {}, 'Início → abre/permite envios · Término + hora limite → entrega/fecha'), regra('limite', 'Também ajustar “Data limite” (tarefas)'), regra('lembrete', 'Lembrete de avaliação = término + 7 dias (tarefas)')));
-      box.append(h('div', { class: 'msg' }, '“A definir” e atividade sem par nunca são alteradas. Aplicar abre uma atividade por vez com os campos já preenchidos; quem salva é você, no Moodle. Depois a extensão confere.'));
+      box.append(h('div', { class: 'msg' }, '“A definir” e atividade sem par só mudam se você digitar as datas à mão. Aplicar abre uma atividade por vez com os campos já preenchidos; quem salva é você, no Moodle. Depois a extensão confere.'));
       box.append(h('div', { class: 'row2' }, h('button', { type: 'button', onclick: close }, 'Fechar'), h('button', { type: 'button', onclick: () => { st.linhas.forEach(l => { l.sel = l.estado === 'diferente'; }); draw(); } }, 'Marcar só os diferentes'), h('button', { type: 'button', onclick: baixar }, 'Baixar comparação (CSV)'), h('button', { type: 'button', class: 'pri', disabled: !nSel, onclick: aplicar }, `Aplicar nos ${nSel} marcado(s)`)));
     }
     const fechar = () => h('div', { class: 'row2' }, h('button', { type: 'button', onclick: close }, 'Fechar'));
