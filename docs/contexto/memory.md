@@ -131,3 +131,9 @@ Usuário: "por enquanto não vamos fazer a parte do Edge". A 1.0.0 fica sem o pa
 
 ## Decisão (01/11/2026): Conferir datas
 Mockup `docs/mockups/ajustar-datas.png` aprovado. Nome **Conferir datas**; escopo completo (ler, comparar, aplicar, conferir) para tarefa e questionário. Módulo `src/modules/datas` (sem permissão nova; GET same-origin em `/course/modedit.php?update=ID`). A extensão **nunca clica em Salvar**: preenche a edição e, na volta, relê e confere; fila em `sessionStorage` (`hub.datas.v1`, 30 min). Início = só data; término = data + horário limite (padrão 23:59). Versão segue 0.16.0 por pedido do usuário. Suposições não verificadas: marcação real das telas de edição e nomes reais no cronograma.
+
+## Decisões do usuário (01/11/2026): JSON do Cronograma → Moodle
+- Nome do curso no Moodle segue **"código - Curso - nº/ano"**, ex.: `1037240 - Técnico em Informática para Internet - 00001/2026` e `TEC.2026.2.184 - Técnico em Redes de Computadores - 00001/2026`. O código (OS) é numérico ou `TEC.ano.sem.n`. Ligação turma↔curso: código = `turma.os` do JSON, curso e nº/ano como reforço.
+- Datas das atividades derivam **das datas do cronograma** (JSON); `terminoAva` **vira o fim do curso** no Moodle (sim).
+- Pergunta ainda em aberto: Cronograma-WP exportar código da UC e `idMoodle` (usuário não respondeu).
+- Mockup `docs/mockups/cronograma-json.png` (fases 1–2: importar JSON, conferir arquivo, ligar ao curso). Análise em `docs/projeto/analise-cronograma-json.md`. Nada implementado.

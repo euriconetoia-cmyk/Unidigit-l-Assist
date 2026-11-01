@@ -51,7 +51,12 @@ Base: `cronograma_Teste_oyotrmh_v1_validado.json` (formato `cronograma-ead-turma
 | E | Datas do curso (`course/edit.php`) e gerar a tabela HTML | médio |
 | F | Agenda (webconf., presencial, notas) no Resumo do dia | baixo |
 
-## 7. Decisões que dependem de você
+## 7. Respostas do usuário (01/11/2026) e o que ainda falta
+- Nome do curso no Moodle: `1037240 - Técnico em Informática para Internet - 00001/2026` e `TEC.2026.2.184 - Técnico em Redes de Computadores - 00001/2026` (código/OS · curso · nº/ano). O código casa com `turma.os`.
+- Datas das atividades: conforme o cronograma. `terminoAva` = fim do curso no Moodle: **sim**.
+- Em aberto: exportar código da UC e `idMoodle`; se o curso do Moodle é por turma (com as UCs dentro) ou por UC; vários JSONs.
+
+### Perguntas originais
 1. Há **um curso Moodle por UC por turma**? Como é o nome (código + turma)?
 2. Como as datas das atividades derivam da UC (ex.: Questionário 1 abre no início e fecha em N dias; SAP no fim)? Posso levantar isso das tabelas reais que você já me mostrou.
 3. `terminoAva` deve virar o **fim do curso** no Moodle?

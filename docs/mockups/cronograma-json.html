@@ -1,0 +1,71 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Mockup — Ajustar datas</title>
+<style>
+:root{--p:#0b5cad;--m:#5b6b7c;--bd:#dbe3ec;--bg:#eef2f7;--ok:#13795b;--okbg:#e3f5ec;--wn:#9a6200;--wnbg:#fff1d6;--er:#b42318;--erbg:#fde8e6;--tag:#6d3bd2}
+*{box-sizing:border-box}body{margin:0;padding:24px;background:var(--bg);font:14px/1.4 Inter,"Segoe UI",system-ui,sans-serif;color:#14202e;width:1500px}
+h1{font-size:22px;margin:0 0 4px}.lead{color:var(--m);margin:0 0 18px}
+h2{font-size:15px;color:var(--tag);margin:22px 0 10px}
+.grid{display:grid;grid-template-columns:1.55fr 1fr;gap:16px}
+.card{background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.tagc{display:inline-block;background:var(--tag);color:#fff;font-size:11px;letter-spacing:.06em;padding:3px 9px;border-radius:6px;margin-bottom:8px}
+.card h3{margin:0 0 2px;font-size:17px}.sub{color:var(--m);font-size:12.5px;margin:0 0 10px}
+table{width:100%;border-collapse:collapse;font-size:13px}th{background:#eaf0f7;text-align:left;padding:7px 8px;font-size:12px}td{padding:7px 8px;border-bottom:1px solid var(--bd);vertical-align:middle}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;white-space:nowrap}.ok{background:var(--okbg);color:var(--ok)}.dif{background:var(--wnbg);color:var(--wn)}.sem{background:var(--erbg);color:var(--er)}.nd{background:#e6ebf1;color:var(--m)}
+.old{color:var(--m);text-decoration:line-through}.new{font-weight:700;color:var(--p)}
+.inp{border:1px solid var(--bd);border-radius:7px;padding:4px 8px;background:#fff;font:inherit;display:inline-block;min-width:96px}.inp.ed{border-color:var(--p);box-shadow:0 0 0 2px #0b5cad22}
+.sel{border:1px solid var(--bd);border-radius:7px;padding:4px 8px;background:#fff;display:inline-block}
+.btn{display:inline-block;border:1px solid var(--bd);border-radius:8px;padding:8px 14px;background:#fff;margin-right:6px}.btn.pri{background:var(--p);color:#fff;border-color:var(--p)}
+.note{background:#f3f6fa;border-radius:8px;padding:9px 11px;color:var(--m);font-size:12.5px;margin-top:10px}
+.bar{display:flex;gap:8px;align-items:center;margin:8px 0 10px;color:var(--m);font-size:12.5px}
+.mood{border:1px solid var(--bd);border-radius:10px;overflow:hidden}.mood .top{background:#0f4c81;color:#fff;padding:8px 12px;font-size:13px}.mood .body{padding:12px}
+.row{display:grid;grid-template-columns:150px 1fr;gap:8px;align-items:center;margin:7px 0;font-size:13px}.chg{outline:2px solid #f0a500;outline-offset:2px;border-radius:7px}
+.ban{background:var(--wnbg);color:var(--wn);border-radius:8px;padding:8px 10px;margin:8px 0;font-size:12.5px}
+.steps{display:flex;gap:10px;margin-bottom:6px}.st{flex:1;background:#fff;border-radius:10px;padding:10px 12px;font-size:12.5px}.st b{display:block;color:var(--p);margin-bottom:2px}
+</style>
+<body>
+<h1>Unidigit@l Assist — mockup: Cronograma da turma (JSON) → Moodle</h1>
+<p class="lead">Fases 1 e 2: importar o JSON, conferir o arquivo e ligar a turma ao curso do Moodle. Dados fictícios, no formato do seu arquivo. Nada é gravado no Moodle sem você conferir e clicar em Salvar.</p>
+<div class="steps">
+<div class="st"><b>1 · Importar</b>Você escolhe o .json. Fica só neste navegador. Só versão “Validado” vira fonte.</div>
+<div class="st"><b>2 · Conferir o arquivo</b>Avisos antes de usar (datas fora da UC, feriado duplicado…).</div>
+<div class="st"><b>3 · Ligar ao Moodle</b>Casa a turma pelo nome do curso: <i>código · curso · nº/ano</i>.</div>
+<div class="st"><b>4 · Aplicar (próxima fase)</b>Datas do curso e das atividades, pelo mesmo fluxo do Conferir datas.</div>
+</div>
+
+<h2>Tela 1 — Cronograma da turma (depois de importar)</h2>
+<div class="grid">
+<div class="card"><span class="tagc">CRONOGRAMA DA TURMA</span><h3>Técnico em Informática para Internet · 00001/2026</h3>
+<p class="sub">Código/OS 1037240 · SENAI Luziânia · início 10/11/2026 · fim do AVA 22/09/2028</p>
+<div class="bar"><span class="pill ok">Validado · versão 1</span><span class="pill">12 UCs · 14 recuperações</span><span class="pill dif">1 aviso no arquivo</span><span class="btn" style="margin-left:auto">Trocar arquivo…</span></div>
+<div class="ban">⚠ <b>Assessoria e Consultoria em SST</b>: o 1º encontro presencial (13/05/2028) é <b>anterior</b> ao início da UC (15/05/2028). Confira no sistema de cronogramas antes de aplicar.</div>
+<table><thead><tr><th>Unidade curricular</th><th>Janela</th><th>Fim do AVA</th><th>Encontros</th><th>Notas até</th><th>Curso no Moodle</th></tr></thead><tbody>
+<tr><td><b>Comunicação e Informação</b></td><td>18/11/2026 → 25/01/2027</td><td>07/06/2027</td><td>2 presenciais · 2 web</td><td>27/01/2027</td><td><span class="pill ok">ligado</span></td></tr>
+<tr><td>Recuperação UC 01</td><td>26/01/2027 → 02/02/2027</td><td>07/06/2027</td><td>—</td><td>—</td><td><span class="pill ok">ligado</span></td></tr>
+<tr><td><b>Ciências Aplicadas</b></td><td>26/01/2027 → 04/03/2027</td><td>07/06/2027</td><td>3 presenciais · 3 web</td><td>17/02/2027</td><td><span class="pill ok">ligado</span></td></tr>
+<tr><td><b>Gestão de Pessoas</b></td><td>05/03/2027 → 30/03/2027</td><td>07/06/2027</td><td>2 presenciais · 2 web</td><td>31/03/2027</td><td><span class="pill sem">sem curso</span></td></tr>
+<tr><td colspan="6" style="color:var(--m)">… mais 8 UCs e as recuperações</td></tr></tbody></table>
+<div class="note">Cada data vem do JSON; a extensão não calcula datas novas.</div>
+</div>
+<div class="card"><span class="tagc">1 · IMPORTAR</span><h3>Escolher o arquivo do cronograma</h3>
+<p class="sub">cronograma_1037240_v1_validado.json</p>
+<table><tbody><tr><td>Formato</td><td>cronograma-ead-turma v1</td></tr><tr><td>Situação</td><td><span class="pill ok">Validado</span> por conecttleads em 15/10/2026</td></tr><tr><td>Gerado em</td><td>01/11/2026</td></tr><tr><td>Guardado</td><td>só neste navegador (apagar em “Meus dados”)</td></tr></tbody></table>
+<div class="note">Se o arquivo for “Rascunho”, a extensão pede confirmação e marca tudo como <b>não validado</b>.</div>
+<p><span class="btn pri">Escolher arquivo…</span><span class="btn">Cancelar</span></p></div>
+</div>
+
+<h2>Tela 2 — Ligar a turma ao curso do Moodle</h2>
+<div class="grid">
+<div class="card"><span class="tagc">3 · LIGAR AO MOODLE</span><h3>Qual curso do Moodle é esta turma?</h3>
+<p class="sub">Lido da página “Meus cursos”. O nome é separado em <b>código · curso · turma/ano</b> e comparado com o JSON.</p>
+<table><thead><tr><th>Curso no Moodle</th><th>Código</th><th>Curso</th><th>Turma/ano</th><th>Combina?</th><th></th></tr></thead><tbody>
+<tr><td>1037240 - Técnico em Informática para Internet - 00001/2026</td><td><span class="pill ok">1037240 = OS</span></td><td><span class="pill ok">igual</span></td><td><span class="pill ok">00001/2026</span></td><td><span class="pill ok">alta</span></td><td><span class="inp ed">☑ ligar</span></td></tr>
+<tr><td>TEC.2026.2.184 - Técnico em Redes de Computadores - 00001/2026</td><td><span class="pill sem">outro código</span></td><td><span class="pill sem">outro curso</span></td><td><span class="pill ok">00001/2026</span></td><td><span class="pill sem">não</span></td><td><span class="inp">☐</span></td></tr></tbody></table>
+<div class="note">Sem OS no JSON? A extensão usa curso + turma/ano e mostra “média” em vez de “alta”. Você sempre confirma. A ligação fica guardada (equivale ao <code>idMoodle</code>).</div>
+<p><span class="btn pri">Confirmar ligação</span><span class="btn">Escolher outro curso…</span></p></div>
+<div class="card"><span class="tagc">PRÓXIMA FASE</span><h3>Datas do curso no Moodle</h3>
+<p class="sub">Configurações do curso → Datas</p>
+<div class="mood"><div class="top">Editar configurações do curso</div><div class="body">
+<div class="row"><span>Data de início</span><span class="inp chg">10/11/2026 00:00</span></div>
+<div class="row"><span>Data de término</span><span class="inp chg">22/09/2028 23:59</span></div>
+<div class="ban">Preenchido pela extensão com o <b>fim do AVA</b> do JSON (confirmado por você). Confira e clique em <b>Salvar</b>.</div></div></div></div>
+</div>
+</body></html>
