@@ -215,5 +215,14 @@
     return { gradebook: gb, warnings, complete: g.done && !gb.meta.limitedByGroup && !gb.meta.collapsedCategoriesDetected && Boolean(gb.courseTotalItem) };
   }
 
-  ALN.reader = { readCourse, readGradebookFor, cached, nextPageUrl, canResume, diagnostics, fetchDoc, sleep, SETTINGS };
+  // Lê SÓ a lista de participantes de outra UC (Relatório da turma: matriculados). Mais leve que o livro de notas.
+  async function readParticipantsFor(course, { onProgress = () => {}, settings = SETTINGS, signal } = {}) {
+    const adapter = root.MAT.adapters.createAdapter();
+    const p = { rows: [], next: '', visited: new Set(), pages: 0, error: '', warn: [], started: false, done: false };
+    await readParticipants(adapter, course, settings, p, onProgress, signal);
+    const rows = p.rows.map(r => ({ key: r.key, name: r.name, role: r.role, status: r.status, lastAccessDays: r.lastAccessDays }));
+    return { rows, warnings: [...p.warn], complete: p.done && rows.length > 0, error: p.error };
+  }
+
+  ALN.reader = { readCourse, readGradebookFor, readParticipantsFor, cached, nextPageUrl, canResume, diagnostics, fetchDoc, sleep, SETTINGS };
 })(globalThis);

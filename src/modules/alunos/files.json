@@ -16,6 +16,7 @@
     "core/resumo.js",
     "core/xlsx.js",
     "core/turma.js",
+    "core/turma-html.js",
     "core/diagnostico.js",
     "core/report-html.js",
     "messenger.js",

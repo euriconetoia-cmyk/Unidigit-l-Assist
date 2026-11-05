@@ -1,4 +1,4 @@
-// Painel do Relatório da turma (página "Meus cursos"): escolher UCs, ler o livro de notas de cada uma (com cancelar) e baixar o Excel.
+// Painel do Relatório da turma (página "Meus cursos"): escolher UCs, ler matriculados (e, se pedido, notas) de cada uma (com cancelar) e gerar HTML e/ou Excel.
 // Nada é lido antes de "Gerar relatório". Somente leitura. Todo texto do Moodle entra no DOM por textContent.
 (function (root) {
   'use strict';
@@ -21,6 +21,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
 .st{font-size:12px;padding:2px 9px;border-radius:8px;white-space:nowrap;background:var(--bd);color:var(--m)}.st.ok{background:var(--okbg);color:var(--ok)}.st.go{background:var(--wnbg);color:var(--wn)}.st.er{background:var(--erbg);color:var(--er)}
 .prog{height:10px;border-radius:6px;background:var(--bd);overflow:hidden;margin:8px 0}.prog i{display:block;height:100%;background:var(--p);width:0;transition:width .3s}
 .msg{margin-top:10px;padding:8px 10px;border-radius:8px;font-size:13px;background:var(--c)}.msg.warn{background:var(--wnbg);color:var(--wn)}.msg.ok{background:var(--okbg);color:var(--ok)}.msg.err{background:var(--erbg);color:var(--er)}
+.opt{margin-top:10px;padding:8px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--c);display:grid;gap:4px;font-size:13px}.opt strong{font-size:12px;color:var(--m);text-transform:uppercase;letter-spacing:.05em}.opt label{display:flex;gap:8px;align-items:center;cursor:pointer;min-height:28px}.opt label.off{opacity:.55;cursor:default}.opt .hint{color:var(--m);font-size:12px;margin-left:26px}
 .row2{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}.empty{padding:14px;color:var(--m);text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}`;
 
@@ -43,7 +44,9 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
     shadow.append(h('style', {}, CSS));
     const courses = ALN.turma.detectCourses(root.document, root.location.origin);
     const sel = new Set();
-    const st = { q: '', reports: new Map(), failed: new Map(), running: false, ctl: null, status: new Map(), result: null };
+    const st = { q: '', reports: new Map(), mat: new Map(), failed: new Map(), running: false, ctl: null, status: new Map(), result: null, inc: { mat: true, notas: false }, out: { html: true, xlsx: true }, resumo: null, diff: new Map(), prev: null };
+    // Última leitura (só números) para comparar. Falha de storage nunca atrapalha o relatório.
+    try { const g = root.chrome && chrome.storage && chrome.storage.local && chrome.storage.local.get('uas.turmas'); if (g && g.then) g.then(o => { st.prev = (o || {})['uas.turmas'] || null; }).catch(() => {}); } catch (e) { /* sem comparação */ }
     const box = h('div', { class: 'box', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Relatório da turma' });
     const back = h('div', { class: 'back', onclick: e => { if (e.target === back && !st.running) close(); } }, box);
     shadow.append(back);
@@ -54,7 +57,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
     const countOn = () => courses.filter(c => sel.has(c.id)).length;
     function draw() {
       box.replaceChildren(h('h2', {}, 'Relatório da turma'),
-        h('p', { class: 'sub' }, 'Escolha as unidades curriculares. Lê só o “Total do curso” de cada uma, em ordem e com pausa, e gera um Excel com uma aba por turma. Nada é gravado no Moodle.'));
+        h('p', { class: 'sub' }, 'Escolha as unidades curriculares. Lê a lista de participantes de cada uma (uma por vez, com pausa) e mostra as turmas com o número de matriculados. Nada é gravado no Moodle.'));
       if (!courses.length) { box.append(h('div', { class: 'empty' }, 'Não encontrei cursos nesta página. Role a página até os cursos aparecerem (ou use o filtro “Em andamento” do Moodle) e abra de novo.'), h('div', { class: 'row2' }, h('button', { type: 'button', onclick: close }, 'Fechar'))); return; }
       const fold = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
       const visible = () => { const q = fold(st.q).trim(); return q ? courses.filter(c => fold(`${c.name} ${c.category || ''}`).includes(q)) : courses; };
@@ -73,60 +76,115 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
       searchIn.addEventListener('input', () => { st.q = searchIn.value; refresh(); });
       box.append(searchIn, barEl, listEl);
       refresh();
+      const chk2 = (obj, key, label, hint, dis) => h('label', { class: dis ? 'off' : '' }, h('input', { type: 'checkbox', checked: obj[key], disabled: st.running || dis, onchange: e => { obj[key] = e.target.checked; draw(); } }), label);
+      box.append(h('div', { class: 'opt' }, h('strong', {}, 'O que ler'),
+        chk2(st.inc, 'mat', 'Matrículas por turma (leve)'),
+        chk2(st.inc, 'notas', 'Notas e situação por UC (mais pesado)'), h('span', { class: 'hint' }, 'Lê também o livro de notas de cada UC.')),
+        h('div', { class: 'opt' }, h('strong', {}, 'Saída'),
+          chk2(st.out, 'html', 'Página HTML', '', !st.inc.mat), chk2(st.out, 'xlsx', 'Excel', '')));
       if (st.running) box.append(h('div', { class: 'prog', role: 'progressbar', 'aria-label': 'Progresso' }, h('i', { style: `width:${st.pct || 0}%` })), h('div', { class: 'msg', role: 'status', 'aria-live': 'polite' }, st.msg || 'Lendo…'));
       if (st.result) box.append(h('div', { class: `msg ${st.result.tone}`, role: 'status' }, st.result.text));
-      const pend = st.running ? [] : pendentes(); const lidas = courses.filter(c => sel.has(c.id) && st.reports.has(c.id)).length;
+      const pend = st.running ? [] : pendentes(); const lidas = courses.filter(c => sel.has(c.id) && lido(c.id)).length;
       box.append(h('div', { class: 'row2' }, st.running ? h('button', { type: 'button', onclick: cancel }, 'Cancelar') : h('button', { type: 'button', onclick: close }, 'Fechar'),
         !st.running && pend.length ? h('button', { type: 'button', class: 'pri', onclick: () => generate(pend.map(c => c.id)) }, `Tentar só as não verificadas (${pend.length})`) : null,
-        !st.running && pend.length && lidas ? h('button', { type: 'button', onclick: baixar }, 'Baixar Excel assim mesmo') : null,
-        st.running || pend.length ? null : h('button', { class: 'pri', type: 'button', disabled: !countOn(), onclick: () => generate() }, st.reports.size ? 'Ler de novo' : 'Gerar relatório')));
+        !st.running && pend.length && lidas ? h('button', { type: 'button', onclick: entregar }, 'Gerar assim mesmo') : null,
+        !st.running && st.resumo ? h('button', { type: 'button', onclick: copiar }, 'Copiar resumo') : null,
+        st.running || pend.length ? null : h('button', { class: 'pri', type: 'button', disabled: !countOn() || !(st.inc.mat || st.inc.notas) || !(st.out.html || st.out.xlsx), onclick: () => generate() }, st.reports.size || st.mat.size ? 'Ler de novo' : 'Gerar relatório')));
     }
 
-    // Leituras já feitas nesta janela: id → { id, name, category, students, complete, reason }. Quem não leu fica em st.failed.
-    const pendentes = () => courses.filter(c => sel.has(c.id) && (st.failed.has(c.id) || (st.reports.has(c.id) && !st.reports.get(c.id).complete)));
-    function baixar() {
-      const picked = courses.filter(c => sel.has(c.id));
-      const reports = picked.filter(c => st.reports.has(c.id)).map(c => { const r = st.reports.get(c.id); return { id: r.id, name: r.name, category: r.category, students: r.students }; });
-      if (!reports.length) return;
-      const failures = picked.filter(c => st.failed.has(c.id) || (st.reports.has(c.id) && !st.reports.get(c.id).complete)).map(c => ({ name: c.name, category: c.category, reason: (st.failed.get(c.id) || st.reports.get(c.id)).reason }));
-      const groups = ALN.turma.groupByTurma(reports); const day = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-      saveXlsx(`relatorio-turma-${day}${groups.length === 1 ? `-${slug(groups[0].turma)}` : ''}.xlsx`, ALN.turma.buildSheets(reports, failures));
-      st.result = failures.length ? { tone: 'warn', text: `Excel gerado com ${reports.length} unidade(s) em ${groups.length} turma(s). Atenção: ${failures.length} unidade(s) sem leitura completa — veja a aba “Avisos”.` } : { tone: 'ok', text: `Excel gerado com ${reports.length} unidade(s) em ${groups.length} turma(s).` };
+    // Leituras já feitas nesta janela. notas: st.reports (id → {students, complete, reason}); matrículas: st.mat (id → {alunos, complete, reason}).
+    // Quem falhou fica em st.failed. Uma UC só está “lida” quando tudo o que foi pedido veio completo.
+    const lido = id => (!st.inc.mat || st.mat.has(id)) && (!st.inc.notas || st.reports.has(id)) && (st.inc.mat || st.inc.notas);
+    const incompleta = id => st.failed.has(id) || (st.inc.mat && st.mat.has(id) && !st.mat.get(id).complete) || (st.inc.notas && st.reports.has(id) && !st.reports.get(id).complete);
+    const motivo = id => (st.failed.get(id) || (st.mat.get(id) && !st.mat.get(id).complete ? st.mat.get(id) : st.reports.get(id)) || {}).reason || 'parcial';
+    const pendentes = () => courses.filter(c => sel.has(c.id) && (incompleta(c.id) || !lido(c.id)) && (st.failed.has(c.id) || st.mat.has(c.id) || st.reports.has(c.id)));
+    function baixarArquivo(name, blob) {
+      const a = h('a', { href: URL.createObjectURL(blob), download: name });
+      root.document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    }
+    function entregar() {
+      const picked = courses.filter(c => sel.has(c.id) && lido(c.id));
+      if (!picked.length) return;
+      const falhas = courses.filter(c => sel.has(c.id) && (!picked.includes(c) || incompleta(c.id))).map(c => ({ name: c.name, category: c.category, reason: motivo(c.id) }));
+      const day = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const feitos = [];
+      let resumo = null;
+      if (st.inc.mat) {
+        const reps = picked.filter(c => st.mat.has(c.id)).map(c => ({ id: c.id, name: c.name, category: c.category, alunos: st.mat.get(c.id).alunos }));
+        const avisos = [...new Set(picked.flatMap(c => (st.mat.get(c.id) || {}).avisos || []))];
+        resumo = ALN.turma.resumoMatriculas(reps, falhas);
+        st.diff = ALN.turma.diffTurmas(st.prev, resumo); st.resumo = resumo; st.avisosLeitura = avisos;
+        if (st.out.html) { baixarArquivo(`turmas-matriculados-${day}.html`, new Blob([ALN.turmaHtml.build(resumo, { diff: st.diff, avisos })], { type: 'text/html;charset=utf-8' })); feitos.push('HTML'); }
+      }
+      if (st.out.xlsx) {
+        let sheets = resumo ? ALN.turma.buildSheetsMatriculas(resumo) : [];
+        if (st.inc.notas) {
+          const nr = picked.filter(c => st.reports.has(c.id)).map(c => { const r = st.reports.get(c.id); return { id: r.id, name: r.name, category: r.category, students: r.students }; });
+          const fx = falhas.map(f => ({ ...f }));
+          sheets = sheets.concat(ALN.turma.buildSheets(nr, fx).filter(x => !(resumo && x.name === 'Avisos')));
+        }
+        if (sheets.length) { const um = resumo && resumo.turmas.length === 1 ? `-${slug(resumo.turmas[0].turma)}` : ''; saveXlsx(`relatorio-turma-${day}${um}.xlsx`, sheets); feitos.push('Excel'); }
+      }
+      // Foto só de números para a próxima comparação — só quando a leitura veio completa.
+      if (resumo && !falhas.length) { try { const snap = ALN.turma.snapshot(resumo, Date.now()); const w = root.chrome && chrome.storage && chrome.storage.local && chrome.storage.local.set({ 'uas.turmas': snap }); if (w && w.catch) w.catch(() => {}); st.prev = snap; } catch (e) { /* sem comparação */ } }
+      const n = resumo ? `${resumo.totais.matriculados} matriculados em ${resumo.turmas.length} turma(s)` : `${picked.length} unidade(s)`;
+      st.result = falhas.length ? { tone: 'warn', text: `Gerado: ${feitos.join(' e ')} — ${n}. Atenção: ${falhas.length} unidade(s) sem leitura completa — veja os avisos.` } : { tone: 'ok', text: `Gerado: ${feitos.join(' e ')} — ${n}.${st.diff.size ? ' Comparado com a leitura anterior.' : ''}` };
       draw();
     }
+    function copiar() {
+      if (!st.resumo) return;
+      const txt = ALN.turma.resumoTexto(st.resumo, st.diff, new Date().toLocaleDateString('pt-BR'));
+      const ok = () => { st.result = { tone: 'ok', text: 'Resumo copiado.' }; draw(); };
+      const fail = () => { st.result = { tone: 'warn', text: 'Não consegui copiar automaticamente. Selecione e copie o texto abaixo.\n' + txt }; draw(); };
+      try { navigator.clipboard.writeText(txt).then(ok, fail); } catch (e) { fail(); }
+    }
 
-    // only: lista de ids a (re)ler; vazio = todas as marcadas. O Excel só sai sozinho se tudo foi lido por completo.
+    // only: lista de ids a (re)ler; vazio = todas as marcadas. O arquivo só sai sozinho se tudo foi lido por completo.
     async function generate(only) {
       const picked = courses.filter(c => sel.has(c.id) && (!only || only.includes(c.id)));
       if (!picked.length || st.running) return;
       st.running = true; st.ctl = new AbortController(); st.result = null;
-      if (!only) { st.reports = new Map(); st.failed = new Map(); st.status = new Map(); }
+      if (!only) { st.reports = new Map(); st.mat = new Map(); st.failed = new Map(); st.status = new Map(); st.resumo = null; }
       draw();
       try {
         for (let i = 0; i < picked.length; i++) {
           const c = picked[i];
           if (st.ctl.signal.aborted) throw new Error('Leitura cancelada.');
           st.status.set(c.id, { tone: 'go', text: 'lendo…' }); st.pct = Math.round((i / picked.length) * 100); st.msg = `Lendo ${i + 1} de ${picked.length} — ${c.name}`; draw();
+          const onProgress = p => { st.msg = `Lendo ${i + 1} de ${picked.length} — ${c.name}: ${p.text || ''}`; const m = box.querySelector('.msg'); if (m) m.textContent = st.msg; };
           try {
-            const r = await ALN.reader.readGradebookFor({ id: c.id, name: c.name }, { signal: st.ctl.signal, onProgress: p => { st.msg = `Lendo ${i + 1} de ${picked.length} — ${c.name}: ${p.text || ''}`; const m = box.querySelector('.msg'); if (m) m.textContent = st.msg; } });
-            const students = ALN.buildStudents({ gradebook: r.gradebook, participants: [] }, ALN.DEFAULTS);
-            st.failed.delete(c.id);
-            st.reports.set(c.id, { id: c.id, name: c.name, category: c.category, students, complete: Boolean(r.complete), reason: r.complete ? '' : `Leitura parcial: ${r.warnings.join(' ') || 'conferir no Moodle'}` });
-            st.status.set(c.id, { tone: r.complete ? 'ok' : 'go', text: r.complete ? `${students.length} alunos` : `${students.length} alunos (parcial)` });
+            st.failed.delete(c.id); st.mat.delete(c.id); st.reports.delete(c.id);
+            const partes = [];
+            if (st.inc.mat) {
+              const r = await ALN.reader.readParticipantsFor({ id: c.id, name: c.name }, { signal: st.ctl.signal, onProgress });
+              const m = ALN.turma.matriculas(r.rows);
+              const aviso = [...r.warnings, ...m.avisos];
+              st.mat.set(c.id, { alunos: m.alunos, avisos: aviso, complete: Boolean(r.complete) && !m.avisos.length, reason: r.complete ? aviso.join(' ') : `Leitura parcial: ${[r.error, ...aviso].filter(Boolean).join(' ') || 'conferir no Moodle'}` });
+              partes.push(`${m.alunos.length} matriculados`);
+            }
+            if (st.inc.notas) {
+              if (st.inc.mat) await ALN.reader.sleep(ALN.reader.SETTINGS.requestDelayMs);
+              const r = await ALN.reader.readGradebookFor({ id: c.id, name: c.name }, { signal: st.ctl.signal, onProgress });
+              const students = ALN.buildStudents({ gradebook: r.gradebook, participants: [] }, ALN.DEFAULTS);
+              st.reports.set(c.id, { id: c.id, name: c.name, category: c.category, students, complete: Boolean(r.complete), reason: r.complete ? '' : `Leitura parcial: ${r.warnings.join(' ') || 'conferir no Moodle'}` });
+              partes.push(`${students.length} com notas`);
+            }
+            const parcial = incompleta(c.id);
+            st.status.set(c.id, { tone: parcial ? 'go' : 'ok', text: `${partes.join(' · ')}${parcial ? ' (parcial)' : ''}` });
           } catch (e) {
             if (st.ctl.signal.aborted) throw e;
-            st.reports.delete(c.id);
+            st.mat.delete(c.id); st.reports.delete(c.id);
             st.failed.set(c.id, { reason: e && e.message ? e.message : String(e) });
             st.status.set(c.id, { tone: 'er', text: 'não verificada' });
           }
           if (i < picked.length - 1) await ALN.reader.sleep(ALN.reader.SETTINGS.requestDelayMs);
         }
         const pend = pendentes();
-        if (!pend.length) { st.running = false; baixar(); return; }
-        const lidas = courses.filter(c => sel.has(c.id) && st.reports.has(c.id)).length;
+        if (!pend.length) { st.running = false; entregar(); return; }
+        const lidas = courses.filter(c => sel.has(c.id) && lido(c.id) && !incompleta(c.id)).length;
         st.result = lidas
-          ? { tone: 'warn', text: `Leitura incompleta: ${pend.length} unidade(s) não verificada(s) ou parcial(is). O Excel NÃO foi gerado. Tente só as não verificadas, ou baixe assim mesmo (as pendências vão para a aba “Avisos”).` }
-          : { tone: 'err', text: `Nenhuma unidade pôde ser lida. ${pend.map(c => `${c.name}: ${(st.failed.get(c.id) || {}).reason || 'parcial'}`).join(' | ')}` };
+          ? { tone: 'warn', text: `Leitura incompleta: ${pend.length} unidade(s) não verificada(s) ou parcial(is). Nada foi gerado. Tente só as não verificadas, ou gere assim mesmo (as pendências vão para os avisos).` }
+          : { tone: 'err', text: `Nenhuma unidade pôde ser lida por completo. ${pend.map(c => `${c.name}: ${motivo(c.id)}`).join(' | ')}` };
       } catch (e) {
         st.result = { tone: 'warn', text: /cancel/i.test(String(e && e.message)) ? 'Leitura cancelada. Nenhum arquivo foi gerado; o que já foi lido continua aqui.' : `Não foi possível gerar o relatório: ${e && e.message ? e.message : e}` };
       } finally { st.running = false; st.ctl = null; draw(); }

@@ -68,3 +68,5 @@ Trabalhar uma por vez, na ordem. Decisões importantes vão para `memory.md`.
 - [ ] N5. Cronograma da turma: datas do curso e das atividades pelo JSON (depende do `modeloCronograma` da Aprendizagem e da regra das linhas Fórum/SAP/Avaliação Final).
 - [ ] N6. Selo de pendências na aba só com a última leitura guardada (decidir: o launcher hoje não lê nada).
 - [ ] N7. Publicar a política de privacidade em página pública (1.0.0).
+
+- [x] N8 Relatório da turma com matriculados (HTML/Excel, comparação, copiar resumo) — testar no Moodle real (SENAI e FIEG).

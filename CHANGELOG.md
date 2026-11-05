@@ -3,6 +3,7 @@
 ## 0.17.0 — 2026-11-01
 
 ### Novo
+- **Relatório da turma com matriculados**: lista as turmas e quantos alunos estão matriculados em cada uma (só alunos; o aluno em várias UCs conta uma vez), com ativos, suspensos e sem acesso há 7+ dias. Lê só a lista de participantes de cada UC (uma por vez, com pausa e botão Cancelar). Saída em **página HTML** (arquivo único, abre offline) e/ou **Excel** (abas Turmas, Por UC, Atenção, Avisos). Compara com a leitura anterior (só números, `uas.turmas`) e tem **Copiar resumo**. “Notas e situação por UC” continua disponível como opção.
 - **Menu em aba na borda direita** (substitui o botão redondo, que cobria o VLibras): lingueta de 24 px (32 no hover, área de toque de 44 px) com o capelo, abaixo do VLibras e acima do chat; ao clicar, o painel desliza da direita. Atalho **Alt+U**; setas ↑ ↓ andam entre as ferramentas; **Esc** ou clique fora fecha. “Ferramentas” abre uma lista dentro do painel. Ícone próprio por ferramenta. Ferramenta que não serve para a página mostra “não se aplica aqui” e o motivo, com o texto legível. Anel de foco duplo (visível nos dois temas). **Cor única nos ícones** (azul `#1a4b9f` do manual do Sistema Indústria, com o laranja `#ef5e31` como detalhe na lingueta); o cinza só marca “não se aplica aqui”. **Mover aba** (↑ ↓ no rodapé do painel) ajusta a altura e a extensão lembra.
 - **Meus dados** agora inclui o cronograma importado (`crn.v1`) e a altura da aba (`uas.aba`): aparecem na medição, entram no backup e saem em “Apagar tudo”.
 

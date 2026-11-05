@@ -10,7 +10,7 @@
   const QUOTA = 10 * 1024 * 1024; // chrome.storage.local sem "unlimitedStorage"
   const AVISO = 0.7;
   // Tudo que a extensão guarda. Chave nova só entra aqui (e o backup/apagar/medir passam a enxergá-la).
-  const K_CONTATOS = 'hub.contatos.v1', K_MODELOS = 'uas.modelos', K_RETORNOS = 'uas.retornos', K_LEITURAS = 'uas.leituras', K_AJUSTES = 'uas.ajustes', K_CRONOGRAMA = 'crn.v1', K_ABA = 'uas.aba';
+  const K_CONTATOS = 'hub.contatos.v1', K_MODELOS = 'uas.modelos', K_RETORNOS = 'uas.retornos', K_LEITURAS = 'uas.leituras', K_AJUSTES = 'uas.ajustes', K_CRONOGRAMA = 'crn.v1', K_ABA = 'uas.aba', K_TURMAS = 'uas.turmas';
   const KEYS = [
     { key: K_CONTATOS, categoria: 'Contatos', rotulo: 'Registro de mensagens enviadas' },
     { key: K_MODELOS, categoria: 'Modelos', rotulo: 'Modelos de mensagem' },
@@ -18,7 +18,8 @@
     { key: K_LEITURAS, categoria: 'Leituras', rotulo: 'Instantâneos para o comparativo' },
     { key: K_AJUSTES, categoria: 'Ajustes', rotulo: 'Ajustes por UC' },
     { key: K_CRONOGRAMA, categoria: 'Cronograma', rotulo: 'Cronograma da turma (JSON importado e ligações)' },
-    { key: K_ABA, categoria: 'Ajustes', rotulo: 'Altura da aba do menu' }
+    { key: K_ABA, categoria: 'Ajustes', rotulo: 'Altura da aba do menu' },
+    { key: K_TURMAS, categoria: 'Relatório', rotulo: 'Última leitura de matriculados por turma (só números)' }
   ];
   const DEFAULT_CONFIG = { validadeContatosDias: 365, validadeLeiturasDias: 84 };
   const VALIDADES = [{ dias: 90, rotulo: '3 meses' }, { dias: 180, rotulo: '6 meses' }, { dias: 365, rotulo: '12 meses' }, { dias: 0, rotulo: 'nunca expirar' }];

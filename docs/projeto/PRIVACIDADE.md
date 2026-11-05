@@ -23,3 +23,7 @@ O arquivo JSON escolhido e os ajustes por UC ficam só neste navegador (`chrome.
 
 ## Menu em aba (0.16.0)
 A altura da aba (só um número) fica em `chrome.storage.local` (`uas.aba`), neste navegador, e aparece em **Meus dados**. O atalho **Alt+U** só abre ou fecha o menu; nada é lido ou enviado.
+
+
+## Relatório da turma: última leitura (`uas.turmas`)
+Guarda, neste navegador, só números por turma (matriculados, ativos, suspensos, sem acesso) para comparar com a próxima leitura. Sem nomes. Aparece em **Meus dados**, entra no backup e sai em “Apagar tudo”. Os nomes de quem está sem acesso só existem no arquivo gerado (aba Atenção e HTML), que fica com o usuário.

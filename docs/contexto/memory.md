@@ -172,3 +172,5 @@ Usuário aprovou um padrão único baseado na identidade SENAI. Aplicada a opç�
 
 ## Release (01/11/2026): 0.17.0
 Menu em aba + cor única + Meus dados com cronograma/aba. A v0.16.0 já existia no GitHub com o ZIP antigo; usuário escolheu publicar como **0.17.0** (tag v0.17.0 dispara o workflow Release).
+
+- 2026-11-05: Relatório da turma passa a mostrar turmas e matriculados (padrão: só participantes, leve; notas opcional). Saída HTML e/ou Excel. Aluno em várias UCs conta uma vez. Foto de números em `uas.turmas`, gravada só se a leitura veio completa. Fora desta rodada: filtro só das turmas em andamento (precisa ler vigência). Versão segue 0.17.0 até o teste no Moodle real.

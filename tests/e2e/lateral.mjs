@@ -484,16 +484,18 @@ try {
   await tshadow('button:has-text("Selecionar todas")').click();
   await pg.screenshot({ path: path.join(SHOTS, '32-turma-selecao.png') });
   let baixouSozinho = 0; const contaDl = () => { baixouSozinho += 1; }; pg.on('download', contaDl);
+  await tshadow('.opt label:has-text("Matrículas por turma") input').uncheck();
+  await tshadow('.opt label:has-text("Notas e situação") input').check();
   await tshadow('button.pri').click();
   await tshadow('button:has-text("Tentar só as não verificadas")').waitFor({ timeout: 40000 });
   await sleep(500);
   await pg.screenshot({ path: path.join(SHOTS, '33-turma-incompleta.png') });
-  check('leitura incompleta NÃO gera o Excel sozinha: avisa e oferece "Tentar só as não verificadas (1)" e "Baixar Excel assim mesmo"', baixouSozinho === 0 && /NÃO foi gerado/.test(await tshadow('.msg').last().textContent()) && /\(1\)/.test(await tshadow('button:has-text("Tentar só as não verificadas")').textContent()) && await tshadow('button:has-text("Baixar Excel assim mesmo")').count() === 1 && /não verificada/.test(await tshadow('.list').textContent()), `downloads=${baixouSozinho}`);
+  check('leitura incompleta NÃO gera o Excel sozinha: avisa e oferece "Tentar só as não verificadas (1)" e "Gerar assim mesmo"', baixouSozinho === 0 && /Nada foi gerado/.test(await tshadow('.msg').last().textContent()) && /\(1\)/.test(await tshadow('button:has-text("Tentar só as não verificadas")').textContent()) && await tshadow('button:has-text("Gerar assim mesmo")').count() === 1 && /não verificada/.test(await tshadow('.list').textContent()), `downloads=${baixouSozinho}`);
   const gh2 = state.graderHits;
   await tshadow('button:has-text("Tentar só as não verificadas")').click();
   await tshadow('button:has-text("Tentar só as não verificadas")').waitFor({ timeout: 40000 });
   check('"Tentar só as não verificadas" lê apenas a que faltava (as 2 lidas não são pedidas de novo)', state.graderHits === gh2 && baixouSozinho === 0, `${state.graderHits - gh2} consultas extras`);
-  const [dlT] = await Promise.all([pg.waitForEvent('download', { timeout: 40000 }), tshadow('button:has-text("Baixar Excel assim mesmo")').click()]);
+  const [dlT] = await Promise.all([pg.waitForEvent('download', { timeout: 40000 }), tshadow('button:has-text("Gerar assim mesmo")').click()]);
   const tPath = path.join(SHOTS, 'turma.xlsx'); await dlT.saveAs(tPath);
   const tb = fs.readFileSync(tPath);
   await tshadow('.msg').last().waitFor();
@@ -503,8 +505,34 @@ try {
   state.modoMeus = false; // o Moodle voltou: agora a tentativa só da que faltava completa tudo e baixa sozinha
   const [dlOk] = await Promise.all([pg.waitForEvent('download', { timeout: 40000 }), tshadow('button:has-text("Tentar só as não verificadas")').click()]);
   await tshadow('button:has-text("Ler de novo")').waitFor({ timeout: 20000 });
-  check('depois que a pendente é lida, o Excel completo sai sozinho e sem a lista de pendências', /^relatorio-turma-/.test(dlOk.suggestedFilename()) && state.graderHits - gh0 === 3 && /Excel gerado com 3 unidade/.test(await tshadow('.msg').last().textContent()) && await tshadow('button:has-text("Tentar só")').count() === 0, `${state.graderHits - gh0} consultas`);
+  check('depois que a pendente é lida, o Excel completo sai sozinho e sem a lista de pendências', /^relatorio-turma-/.test(dlOk.suggestedFilename()) && state.graderHits - gh0 === 3 && /Gerado: Excel — 3 unidade/.test(await tshadow('.msg').last().textContent()) && await tshadow('button:has-text("Tentar só")').count() === 0, `${state.graderHits - gh0} consultas`);
   pg.off('download', contaDl);
+  await tshadow('button:has-text("Fechar")').click();
+
+  // ---- Relatório da turma: matriculados (padrão), saída HTML + Excel, sem tocar no livro de notas ----
+  state.modoMeus = true;
+  await pg.goto(`${ORIGIN}/my/`);
+  await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
+  await pg.click('#hub-ead-launcher .tab');
+  await pg.click('#hub-ead-launcher .app[data-app="relatorio-turma"]');
+  await pg.waitForSelector('#hub-aln-turma', { state: 'attached', timeout: 15000 });
+  await tshadow('.list .it').first().waitFor();
+  check('padrão: lê só matrículas (leve) e gera HTML e Excel; notas desligadas', await tshadow('.opt label:has-text("Matrículas por turma") input').isChecked() && !(await tshadow('.opt label:has-text("Notas e situação") input').isChecked()) && await tshadow('.opt label:has-text("Página HTML") input').isChecked());
+  await tshadow('button:has-text("Selecionar todas")').click();
+  const matGh = state.graderHits; const matBaixados = [];
+  const matColeta = d => matBaixados.push(d); pg.on('download', matColeta);
+  await tshadow('button.pri').click();
+  await tshadow('button:has-text("Ler de novo")').waitFor({ timeout: 40000 });
+  await sleep(800);
+  pg.off('download', matColeta);
+  const matDlHtml = matBaixados.find(d => /\.html$/.test(d.suggestedFilename())), matDlXls = matBaixados.find(d => /\.xlsx$/.test(d.suggestedFilename()));
+  const matHtmlPath = path.join(SHOTS, 'turmas-matriculados.html'); if (matDlHtml) await matDlHtml.saveAs(matHtmlPath);
+  const matHtmlTxt = matDlHtml ? fs.readFileSync(matHtmlPath, 'utf8') : '';
+  if (matDlXls) await matDlXls.saveAs(path.join(SHOTS, 'turmas-matriculados.xlsx'));
+  const matXb = matDlXls ? fs.readFileSync(path.join(SHOTS, 'turmas-matriculados.xlsx')) : Buffer.alloc(0);
+  check('gera HTML e Excel de matriculados sem ler o livro de notas', Boolean(matDlHtml) && Boolean(matDlXls) && state.graderHits === matGh && /Turmas e matriculados/.test(matHtmlTxt) && !/<script/i.test(matHtmlTxt) && ['Turmas', 'Por UC', 'Matriculados'].every(t => matXb.includes(Buffer.from(t))), `html=${Boolean(matDlHtml)} xlsx=${Boolean(matDlXls)} grader+${state.graderHits - matGh}`);
+  check('mostra "Copiar resumo" e a mensagem de resultado', await tshadow('button:has-text("Copiar resumo")').count() === 1 && /Gerado: HTML e Excel/.test(await tshadow('.msg').last().textContent()), await tshadow('.msg').last().textContent());
+  await pg.screenshot({ path: path.join(SHOTS, '34-turma-matriculados.png') });
   await tshadow('button:has-text("Fechar")').click();
   state.modoMeus = false;
 

@@ -71,5 +71,96 @@
     return [...found.values()];
   }
 
-  ALN.turma = { groupByTurma, turmaRows, situationCounts, buildSheets, detectCourses };
+  // ---- Matriculados por turma (lista de participantes de cada UC). Só números e, para a aba "Atenção", nomes de quem está sem acesso.
+  const fold = t => clean(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const ROLE_ALUNO = /estudante|aluno|student|cursista/;
+  const isSuspenso = status => /suspens|suspend|nao atual|not current/.test(fold(status));
+  const DIAS_SEM_ACESSO = 7, NUNCA = 9999;
+
+  // rows: participantes lidos ({ key, name, role, status, lastAccessDays }). Só papel de estudante conta.
+  function matriculas(rows) {
+    const lista = Array.isArray(rows) ? rows : [];
+    const comPapel = lista.some(r => clean(r.role));
+    const alunos = lista.filter(r => (comPapel ? ROLE_ALUNO.test(fold(r.role)) : true));
+    const avisos = [];
+    if (!lista.length) avisos.push('Lista de participantes vazia ou não reconhecida.');
+    else if (!comPapel) avisos.push('A coluna de papéis não foi reconhecida: todos os participantes foram contados como alunos.');
+    else if (!alunos.length) avisos.push('Nenhum participante com papel de estudante.');
+    return { alunos: alunos.map(r => ({ key: r.key || keyOf(r.name), name: clean(r.name), suspenso: isSuspenso(r.status), dias: Number.isFinite(r.lastAccessDays) ? r.lastAccessDays : null })), avisos };
+  }
+
+  function contar(alunos, limite = DIAS_SEM_ACESSO) {
+    const c = { matriculados: alunos.length, ativos: 0, suspensos: 0, semAcesso: 0, nunca: 0 };
+    alunos.forEach(a => {
+      if (a.suspenso) { c.suspensos += 1; return; }
+      c.ativos += 1;
+      if (a.dias === NUNCA) { c.nunca += 1; c.semAcesso += 1; } else if (a.dias != null && a.dias >= limite) c.semAcesso += 1;
+    });
+    return c;
+  }
+
+  // reports: [{ id, name, category, alunos }]. Na turma, o aluno que está em várias UCs conta uma vez:
+  // fica ativo se estiver ativo em alguma UC e vale o acesso mais recente entre elas.
+  function resumoMatriculas(reports, falhas = [], limite = DIAS_SEM_ACESSO) {
+    const turmas = groupByTurma(reports).map(g => {
+      const uniao = new Map();
+      g.reports.forEach(r => r.alunos.forEach(a => {
+        const antes = uniao.get(a.key);
+        if (!antes) { uniao.set(a.key, { key: a.key, name: a.name, suspenso: a.suspenso, dias: a.dias, ucs: [r.name] }); return; }
+        antes.suspenso = antes.suspenso && a.suspenso; antes.ucs.push(r.name);
+        if (a.dias != null && (antes.dias == null || a.dias < antes.dias)) antes.dias = a.dias;
+        if (a.name.length > antes.name.length) antes.name = a.name;
+      }));
+      const alunos = [...uniao.values()];
+      const atencao = alunos.filter(a => !a.suspenso && a.dias != null && a.dias >= limite)
+        .sort((a, b) => b.dias - a.dias || a.name.localeCompare(b.name, 'pt-BR'))
+        .map(a => ({ name: a.name, ucs: a.ucs, dias: a.dias }));
+      return { turma: g.turma, ...contar(alunos, limite), ucs: g.reports.map(r => ({ name: r.name, ...contar(r.alunos, limite) })), atencao };
+    }).sort((a, b) => a.turma.localeCompare(b.turma, 'pt-BR'));
+    const totais = turmas.reduce((t, x) => { ['matriculados', 'ativos', 'suspensos', 'semAcesso', 'nunca'].forEach(k => { t[k] += x[k]; }); return t; }, { matriculados: 0, ativos: 0, suspensos: 0, semAcesso: 0, nunca: 0 });
+    return { turmas, totais, falhas: falhas.map(f => ({ name: clean(f.name), category: clean(f.category), reason: clean(f.reason) })), limite };
+  }
+
+  // Foto só de números (sem nomes) para comparar com a próxima leitura.
+  const CAMPOS = ['matriculados', 'ativos', 'suspensos', 'semAcesso'];
+  function snapshot(resumo, quando = Date.now()) {
+    const turmas = {};
+    resumo.turmas.forEach(t => { turmas[t.turma] = Object.fromEntries(CAMPOS.map(k => [k, t[k]])); });
+    return { v: 1, lidoEm: quando, turmas };
+  }
+  function diffTurmas(anterior, resumo) {
+    const out = new Map();
+    if (!anterior || anterior.v !== 1 || !anterior.turmas || typeof anterior.turmas !== 'object') return out;
+    resumo.turmas.forEach(t => {
+      const a = anterior.turmas[t.turma];
+      if (a && typeof a === 'object') out.set(t.turma, Object.fromEntries(CAMPOS.map(k => [k, t[k] - (Number.isFinite(a[k]) ? a[k] : 0)])));
+    });
+    return out;
+  }
+  const sinal = n => (n > 0 ? `+${n}` : n < 0 ? `−${Math.abs(n)}` : '0');
+
+  function resumoTexto(resumo, diff = new Map(), dataTexto = '') {
+    const t = resumo.totais;
+    const linhas = [`Resumo das turmas${dataTexto ? ` (${dataTexto})` : ''}: ${t.matriculados} matriculados em ${resumo.turmas.length} turma(s); ${t.ativos} ativos, ${t.suspensos} suspensos/inativos, ${t.semAcesso} sem acesso há ${resumo.limite}+ dias.`];
+    resumo.turmas.forEach(x => {
+      const d = diff.get(x.turma);
+      linhas.push(`• ${x.turma}: ${x.matriculados} matriculados (${x.ativos} ativos, ${x.suspensos} suspensos, ${x.semAcesso} sem acesso)${d ? ` — desde a leitura anterior: ${sinal(d.matriculados)} matriculados` : ''}`);
+    });
+    return linhas.join('\n');
+  }
+
+  function buildSheetsMatriculas(resumo) {
+    const cab = ['Turma', 'UCs lidas', 'Matriculados', 'Ativos', 'Suspensos/inativos', `Sem acesso há ${resumo.limite}+ dias`, 'Nunca acessaram'];
+    const turmas = [cab, ...resumo.turmas.map(t => [t.turma, t.ucs.length, t.matriculados, t.ativos, t.suspensos, t.semAcesso, t.nunca]),
+      ['Total', resumo.turmas.reduce((n, t) => n + t.ucs.length, 0), resumo.totais.matriculados, resumo.totais.ativos, resumo.totais.suspensos, resumo.totais.semAcesso, resumo.totais.nunca]];
+    const porUc = [['Turma', 'UC', 'Matriculados', 'Ativos', 'Suspensos/inativos', `Sem acesso há ${resumo.limite}+ dias`, 'Nunca acessaram'],
+      ...resumo.turmas.flatMap(t => t.ucs.map(u => [t.turma, u.name, u.matriculados, u.ativos, u.suspensos, u.semAcesso, u.nunca]))];
+    const sheets = [{ name: 'Turmas', rows: turmas }, { name: 'Por UC', rows: porUc }];
+    const atencao = resumo.turmas.flatMap(t => t.atencao.map(a => [a.name, t.turma, a.ucs.join('; '), a.dias === NUNCA ? 'Nunca acessou' : a.dias]));
+    if (atencao.length) sheets.push({ name: 'Atenção', rows: [['Aluno', 'Turma', 'UC(s)', 'Dias sem acesso'], ...atencao] });
+    if (resumo.falhas.length) sheets.push({ name: 'Avisos', rows: [['UC', 'Turma', 'Motivo'], ...resumo.falhas.map(f => [f.name, f.category, f.reason])] });
+    return sheets;
+  }
+
+  ALN.turma = { groupByTurma, turmaRows, situationCounts, buildSheets, detectCourses, matriculas, contar, resumoMatriculas, snapshot, diffTurmas, resumoTexto, buildSheetsMatriculas, DIAS_SEM_ACESSO };
 })(globalThis);

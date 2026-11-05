@@ -829,3 +829,79 @@ test('turma: sem cursos na região principal, procura na página toda, mas ignor
   const d = page('<html><body><nav><a href="/course/view.php?id=99">Menu: outro curso</a></nav><div role="main"><p>Bem-vindo</p></div><div id="cursos"><div class="coursebox"><a class="coursename" href="/course/view.php?id=12">Lógica</a><span class="categoryname">Turma C</span></div></div><footer><a href="/course/view.php?id=98">Rodapé</a></footer></body></html>');
   eq(w.ALN.turma.detectCourses(d, 'https://ead.fieg.com.br'), [{ id: '12', name: 'Lógica', category: 'Turma C' }]);
 });
+
+// ---- Relatório da turma: matriculados ----
+test('matriculados: só estudantes contam; suspensos e "Não atual" saem dos ativos; sem acesso 7+ dias e nunca', () => {
+  const w = load(); const T = w.ALN.turma;
+  const rows = [
+    { key: 'id:1', name: 'Ana', role: 'Estudante', status: 'Ativo', lastAccessDays: 1 },
+    { key: 'id:2', name: 'Bia', role: 'Estudante', status: 'Ativo', lastAccessDays: 7 },
+    { key: 'id:3', name: 'Caio', role: 'Estudante', status: 'Ativo', lastAccessDays: 9999 },
+    { key: 'id:4', name: 'Duda', role: 'Estudante', status: 'Suspenso', lastAccessDays: 40 },
+    { key: 'id:5', name: 'Edu', role: 'Estudante', status: 'Não atual', lastAccessDays: null },
+    { key: 'id:6', name: 'Prof', role: 'Professor', status: 'Ativo', lastAccessDays: 0 },
+    { key: 'id:7', name: 'Tutora', role: 'Tutor, Professor sem permissão de edição', status: 'Ativo', lastAccessDays: 0 }
+  ];
+  const m = T.matriculas(rows); const c = T.contar(m.alunos);
+  assert.equal(m.alunos.length, 5); assert.equal(m.avisos.length, 0);
+  assert.equal(c.matriculados, 5); assert.equal(c.ativos, 3); assert.equal(c.suspensos, 2); assert.equal(c.semAcesso, 2); assert.equal(c.nunca, 1);
+});
+
+test('matriculados: sem coluna de papéis conta todos e avisa; lista vazia avisa', () => {
+  const w = load(); const T = w.ALN.turma;
+  const a = T.matriculas([{ key: 'id:1', name: 'Ana', role: '', status: 'Ativo', lastAccessDays: 1 }]);
+  assert.equal(a.alunos.length, 1); assert.match(a.avisos[0], /papéis/);
+  assert.match(T.matriculas([]).avisos[0], /vazia/);
+  assert.match(T.matriculas([{ key: 'x', name: 'P', role: 'Professor', status: '', lastAccessDays: 0 }]).avisos[0], /Nenhum participante/);
+});
+
+test('turma: aluno em duas UCs conta uma vez; ativo em alguma UC fica ativo; vale o acesso mais recente; Atenção só com ativos sem acesso', () => {
+  const w = load(); const T = w.ALN.turma;
+  const al = (key, name, suspenso, dias) => ({ key, name, suspenso, dias });
+  const reports = [
+    { id: '1', name: 'UC A', category: 'Turma X', alunos: [al('a', 'Ana', false, 20), al('b', 'Bia', true, 50), al('c', 'Caio', false, 2)] },
+    { id: '2', name: 'UC B', category: 'Turma X', alunos: [al('a', 'Ana Souza', false, 3), al('b', 'Bia', false, 60)] },
+    { id: '3', name: 'UC C', category: 'Turma Y', alunos: [al('z', 'Zé', false, 9999)] }
+  ];
+  const r = T.resumoMatriculas(reports, [{ name: 'UC D', category: 'Turma Y', reason: 'falhou' }]);
+  const x = r.turmas.find(t => t.turma === 'Turma X'), y = r.turmas.find(t => t.turma === 'Turma Y');
+  assert.equal(x.matriculados, 3); assert.equal(x.ativos, 3); assert.equal(x.suspensos, 0);
+  assert.equal(x.semAcesso, 1); // Bia: ativa na UC B, acesso 50 dias (o mais recente entre as UCs); Ana tem 3
+  assert.deepEqual(Array.from(x.atencao.map(a => a.name)), ['Bia']);
+  assert.equal(x.ucs.length, 2); assert.equal(x.ucs[0].matriculados, 3);
+  assert.equal(y.nunca, 1); assert.equal(y.atencao[0].dias, 9999);
+  assert.equal(r.totais.matriculados, 4); assert.equal(r.falhas.length, 1);
+});
+
+test('turma: comparação com a leitura anterior usa só números e ignora turma nova ou formato desconhecido', () => {
+  const w = load(); const T = w.ALN.turma;
+  const mk = (n, a) => ({ turma: 'T', ucs: [], matriculados: n, ativos: a, suspensos: n - a, semAcesso: 1, nunca: 0, atencao: [] });
+  const prev = T.snapshot({ turmas: [mk(30, 28)] }, 123);
+  assert.deepEqual(JSON.parse(JSON.stringify(prev)), { v: 1, lidoEm: 123, turmas: { T: { matriculados: 30, ativos: 28, suspensos: 2, semAcesso: 1 } } });
+  const d = T.diffTurmas(prev, { turmas: [mk(33, 29), { ...mk(5, 5), turma: 'Nova' }] });
+  assert.equal(d.get('T').matriculados, 3); assert.equal(d.get('T').suspensos, 2); assert.equal(d.has('Nova'), false);
+  assert.equal(T.diffTurmas({ v: 9 }, { turmas: [mk(1, 1)] }).size, 0); assert.equal(T.diffTurmas(null, { turmas: [] }).size, 0);
+});
+
+test('turma: Excel de matriculados (Turmas, Por UC, Atenção, Avisos) e texto de resumo', () => {
+  const w = load(); const T = w.ALN.turma;
+  const al = (key, name, suspenso, dias) => ({ key, name, suspenso, dias });
+  const r = T.resumoMatriculas([{ id: '1', name: 'UC A', category: 'Turma X', alunos: [al('a', 'Ana', false, 30), al('b', 'Bia', true, 1)] }], [{ name: 'UC B', category: 'Turma X', reason: 'sessão expirada' }]);
+  const sheets = T.buildSheetsMatriculas(r);
+  assert.deepEqual(Array.from(sheets.map(s => s.name)), ['Turmas', 'Por UC', 'Atenção', 'Avisos']);
+  assert.deepEqual(Array.from(sheets[0].rows[1]), ['Turma X', 1, 2, 1, 1, 1, 0]);
+  assert.deepEqual(Array.from(sheets[0].rows[2]).slice(2, 5), [2, 1, 1]);
+  assert.deepEqual(Array.from(sheets[2].rows[1]), ['Ana', 'Turma X', 'UC A', 30]);
+  const txt = T.resumoTexto(r, new Map([['Turma X', { matriculados: 2, ativos: 0, suspensos: 0, semAcesso: 0 }]]), '05/11/2026');
+  assert.match(txt, /2 matriculados em 1 turma/); assert.match(txt, /\+2 matriculados/);
+});
+
+test('turma HTML: escapa texto do Moodle, não tem script nem recurso externo e mostra totais e comparação', () => {
+  const w = load(); const T = w.ALN.turma;
+  const al = (key, name, suspenso, dias) => ({ key, name, suspenso, dias });
+  const r = T.resumoMatriculas([{ id: '1', name: 'UC <b>A</b>', category: 'Turma "X" & Cia', alunos: [al('a', '<img src=x onerror=alert(1)>', false, 30), al('b', 'Bia', false, 1)] }]);
+  const html = w.ALN.turmaHtml.build(r, { diff: new Map([['Turma "X" & Cia', { matriculados: 1, ativos: 0, suspensos: 0, semAcesso: 0 }]]), geradoEm: 0 });
+  assert.ok(!/<script/i.test(html)); assert.ok(!/<img src=x/i.test(html)); assert.ok(!/(src|href)=["']https?:/i.test(html));
+  assert.match(html, /UC &lt;b&gt;A&lt;\/b&gt;/); assert.match(html, /Turma &quot;X&quot; &amp; Cia/);
+  assert.match(html, /Matriculados 1?\+1|Matriculados \+1/); assert.match(html, /<b>2<\/b><span>Matriculados/);
+});
