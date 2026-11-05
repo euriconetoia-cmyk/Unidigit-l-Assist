@@ -896,12 +896,20 @@ test('turma: Excel de matriculados (Turmas, Por UC, Atenção, Avisos) e texto d
   assert.match(txt, /2 matriculados em 1 turma/); assert.match(txt, /\+2 matriculados/);
 });
 
-test('turma HTML: escapa texto do Moodle, não tem script nem recurso externo e mostra totais e comparação', () => {
+test('turma HTML (painel): escapa texto do Moodle, só o script fixo, sem recurso externo, Atenção no fim e notas parciais/falhas visíveis', () => {
   const w = load(); const T = w.ALN.turma;
   const al = (key, name, suspenso, dias) => ({ key, name, suspenso, dias });
   const r = T.resumoMatriculas([{ id: '1', name: 'UC <b>A</b>', category: 'Turma "X" & Cia', alunos: [al('a', '<img src=x onerror=alert(1)>', false, 30), al('b', 'Bia', false, 1)] }]);
-  const html = w.ALN.turmaHtml.build(r, { diff: new Map([['Turma "X" & Cia', { matriculados: 1, ativos: 0, suspensos: 0, semAcesso: 0 }]]), geradoEm: 0 });
-  assert.ok(!/<script/i.test(html)); assert.ok(!/<img src=x/i.test(html)); assert.ok(!/(src|href)=["']https?:/i.test(html));
-  assert.match(html, /UC &lt;b&gt;A&lt;\/b&gt;/); assert.match(html, /Turma &quot;X&quot; &amp; Cia/);
-  assert.match(html, /Matriculados 1?\+1|Matriculados \+1/); assert.match(html, /<b>2<\/b><span>Matriculados/);
+  const notas = T.resumoNotas([
+    { id: '1', name: 'UC <b>A</b>', category: 'Turma "X" & Cia', estado: 'parcial', students: [{ totalPct: 74, situation: 'media' }, { totalPct: 40, situation: 'abaixo' }, { totalPct: null, situation: 'sem_nota' }], de: 5, motivo: 'x' },
+    { id: '2', name: 'UC B', category: 'Turma "X" & Cia', estado: 'falhou', motivo: 'erro <script>alert(1)</script> 503' }
+  ]);
+  assert.equal(notas[0].media, 5.7); assert.equal(notas[0].abaixo, 1); assert.equal(notas[0].semNota, 1); assert.equal(notas[0].lidos, 3);
+  const html = w.ALN.turmaHtml.build(r, { diff: new Map([['Turma "X" & Cia', { matriculados: 1, ativos: 0, suspensos: 0, semAcesso: 0 }]]), geradoEm: 0, notas });
+  assert.equal((html.match(/<script/gi) || []).length, 1); assert.ok(!/<img src=x/i.test(html)); assert.ok(!/(src|href)=["']https?:/i.test(html)); assert.ok(!/fetch\(|XMLHttpRequest|eval\(/.test(html));
+  assert.match(html, /UC &lt;b&gt;A&lt;\/b&gt;/); assert.match(html, /Turma &quot;X&quot; &amp; Cia/); assert.match(html, /erro &lt;script&gt;alert\(1\)&lt;\/script&gt; 503/);
+  assert.match(html, /Matriculados \+1/); assert.match(html, /<b>2<\/b><span>Matriculados/);
+  assert.match(html, /Parcial · 3 de 5 aluno/); assert.match(html, /Não coletada/);
+  assert.ok(html.indexOf('id="turmas"') < html.indexOf('id="notas"') && html.indexOf('id="notas"') < html.indexOf('id="atencao"'));
+  assert.ok(!/id="notas"/.test(w.ALN.turmaHtml.build(r, { geradoEm: 0 })));
 });

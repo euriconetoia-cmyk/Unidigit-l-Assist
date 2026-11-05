@@ -103,9 +103,10 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
       root.document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
     }
     function entregar() {
-      const picked = courses.filter(c => sel.has(c.id) && lido(c.id));
+      // Tudo o que foi lido entra, mesmo que a outra leitura da mesma UC tenha falhado (as matrículas não se perdem por causa das notas).
+      const picked = courses.filter(c => sel.has(c.id) && ((st.inc.mat && st.mat.has(c.id)) || (st.inc.notas && st.reports.has(c.id))));
       if (!picked.length) return;
-      const falhas = courses.filter(c => sel.has(c.id) && (!picked.includes(c) || incompleta(c.id))).map(c => ({ name: c.name, category: c.category, reason: motivo(c.id) }));
+      const falhas = courses.filter(c => sel.has(c.id) && (!lido(c.id) || incompleta(c.id))).map(c => ({ name: c.name, category: c.category, reason: motivo(c.id) }));
       const day = new Date().toISOString().slice(0, 10).replace(/-/g, '');
       const feitos = [];
       let resumo = null;
@@ -114,7 +115,14 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
         const avisos = [...new Set(picked.flatMap(c => (st.mat.get(c.id) || {}).avisos || []))];
         resumo = ALN.turma.resumoMatriculas(reps, falhas);
         st.diff = ALN.turma.diffTurmas(st.prev, resumo); st.resumo = resumo; st.avisosLeitura = avisos;
-        if (st.out.html) { baixarArquivo(`turmas-matriculados-${day}.html`, new Blob([ALN.turmaHtml.build(resumo, { diff: st.diff, avisos })], { type: 'text/html;charset=utf-8' })); feitos.push('HTML'); }
+        if (st.out.html) {
+          const notas = st.inc.notas ? ALN.turma.resumoNotas(courses.filter(c => sel.has(c.id)).map(c => {
+            const r = st.reports.get(c.id), m = st.mat.get(c.id);
+            if (!r) return { id: c.id, name: c.name, category: c.category, estado: 'falhou', motivo: (st.failed.get(c.id) || {}).reason || 'Livro de notas não lido.' };
+            return { id: c.id, name: c.name, category: c.category, estado: r.complete ? 'completa' : 'parcial', students: r.students, de: m ? m.alunos.length : null, motivo: r.reason };
+          })) : null;
+          baixarArquivo(`painel-turmas-${day}.html`, new Blob([ALN.turmaHtml.build(resumo, { diff: st.diff, avisos, notas, anteriorEm: st.prev && st.prev.lidoEm })], { type: 'text/html;charset=utf-8' })); feitos.push('HTML');
+        }
       }
       if (st.out.xlsx) {
         let sheets = resumo ? ALN.turma.buildSheetsMatriculas(resumo) : [];
@@ -152,31 +160,30 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
           if (st.ctl.signal.aborted) throw new Error('Leitura cancelada.');
           st.status.set(c.id, { tone: 'go', text: 'lendo…' }); st.pct = Math.round((i / picked.length) * 100); st.msg = `Lendo ${i + 1} de ${picked.length} — ${c.name}`; draw();
           const onProgress = p => { st.msg = `Lendo ${i + 1} de ${picked.length} — ${c.name}: ${p.text || ''}`; const m = box.querySelector('.msg'); if (m) m.textContent = st.msg; };
-          try {
-            st.failed.delete(c.id); st.mat.delete(c.id); st.reports.delete(c.id);
-            const partes = [];
-            if (st.inc.mat) {
+          st.failed.delete(c.id); st.mat.delete(c.id); st.reports.delete(c.id);
+          const partes = []; const erros = [];
+          // Cada leitura tem o seu try: se as notas falharem, as matrículas já lidas ficam.
+          if (st.inc.mat) {
+            try {
               const r = await ALN.reader.readParticipantsFor({ id: c.id, name: c.name }, { signal: st.ctl.signal, onProgress });
               const m = ALN.turma.matriculas(r.rows);
               const aviso = [...r.warnings, ...m.avisos];
               st.mat.set(c.id, { alunos: m.alunos, avisos: aviso, complete: Boolean(r.complete) && !m.avisos.length, reason: r.complete ? aviso.join(' ') : `Leitura parcial: ${[r.error, ...aviso].filter(Boolean).join(' ') || 'conferir no Moodle'}` });
               partes.push(`${m.alunos.length} matriculados`);
-            }
-            if (st.inc.notas) {
-              if (st.inc.mat) await ALN.reader.sleep(ALN.reader.SETTINGS.requestDelayMs);
+            } catch (e) { if (st.ctl.signal.aborted) throw e; erros.push(`Matrículas: ${e && e.message ? e.message : e}`); }
+          }
+          if (st.inc.notas) {
+            if (st.inc.mat) await ALN.reader.sleep(ALN.reader.SETTINGS.requestDelayMs);
+            try {
               const r = await ALN.reader.readGradebookFor({ id: c.id, name: c.name }, { signal: st.ctl.signal, onProgress });
               const students = ALN.buildStudents({ gradebook: r.gradebook, participants: [] }, ALN.DEFAULTS);
               st.reports.set(c.id, { id: c.id, name: c.name, category: c.category, students, complete: Boolean(r.complete), reason: r.complete ? '' : `Leitura parcial: ${r.warnings.join(' ') || 'conferir no Moodle'}` });
               partes.push(`${students.length} com notas`);
-            }
-            const parcial = incompleta(c.id);
-            st.status.set(c.id, { tone: parcial ? 'go' : 'ok', text: `${partes.join(' · ')}${parcial ? ' (parcial)' : ''}` });
-          } catch (e) {
-            if (st.ctl.signal.aborted) throw e;
-            st.mat.delete(c.id); st.reports.delete(c.id);
-            st.failed.set(c.id, { reason: e && e.message ? e.message : String(e) });
-            st.status.set(c.id, { tone: 'er', text: 'não verificada' });
+            } catch (e) { if (st.ctl.signal.aborted) throw e; erros.push(`Notas: ${e && e.message ? e.message : e}`); }
           }
+          if (erros.length) st.failed.set(c.id, { reason: erros.join(' | ') });
+          const parcial = incompleta(c.id);
+          st.status.set(c.id, erros.length && !partes.length ? { tone: 'er', text: 'não verificada' } : { tone: parcial ? 'go' : 'ok', text: `${partes.join(' · ')}${parcial ? ' (parcial)' : ''}` });
           if (i < picked.length - 1) await ALN.reader.sleep(ALN.reader.SETTINGS.requestDelayMs);
         }
         const pend = pendentes();

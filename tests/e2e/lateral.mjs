@@ -530,10 +530,50 @@ try {
   const matHtmlTxt = matDlHtml ? fs.readFileSync(matHtmlPath, 'utf8') : '';
   if (matDlXls) await matDlXls.saveAs(path.join(SHOTS, 'turmas-matriculados.xlsx'));
   const matXb = matDlXls ? fs.readFileSync(path.join(SHOTS, 'turmas-matriculados.xlsx')) : Buffer.alloc(0);
-  check('gera HTML e Excel de matriculados sem ler o livro de notas', Boolean(matDlHtml) && Boolean(matDlXls) && state.graderHits === matGh && /Turmas e matriculados/.test(matHtmlTxt) && !/<script/i.test(matHtmlTxt) && ['Turmas', 'Por UC', 'Matriculados'].every(t => matXb.includes(Buffer.from(t))), `html=${Boolean(matDlHtml)} xlsx=${Boolean(matDlXls)} grader+${state.graderHits - matGh}`);
+  check('gera HTML e Excel de matriculados sem ler o livro de notas', Boolean(matDlHtml) && Boolean(matDlXls) && state.graderHits === matGh && /Painel das turmas/.test(matHtmlTxt) && (matHtmlTxt.match(/<script/gi) || []).length === 1 && !/(src|href)=["']https?:/i.test(matHtmlTxt) && matHtmlTxt.indexOf('id="turmas"') < matHtmlTxt.indexOf('id="atencao"') && ['Turmas', 'Por UC', 'Matriculados'].every(t => matXb.includes(Buffer.from(t))), `html=${Boolean(matDlHtml)} xlsx=${Boolean(matDlXls)} grader+${state.graderHits - matGh}`);
   check('mostra "Copiar resumo" e a mensagem de resultado', await tshadow('button:has-text("Copiar resumo")').count() === 1 && /Gerado: HTML e Excel/.test(await tshadow('.msg').last().textContent()), await tshadow('.msg').last().textContent());
   await pg.screenshot({ path: path.join(SHOTS, '34-turma-matriculados.png') });
   await tshadow('button:has-text("Fechar")').click();
+
+  // ---- Painel HTML: interativo offline (filtro por turma, cartão "Sem acesso", ordenação) ----
+  const pgH = await pg.context().newPage(); const errosH = []; pgH.on('pageerror', e => errosH.push(e.message));
+  await pgH.goto('file://' + matHtmlPath);
+  const filtroOculto = !(await pgH.locator('#fm').isVisible());
+  const totCards = await pgH.locator('.tc').count();
+  await pgH.selectOption('#fT', { index: 1 });
+  const vis1 = await pgH.locator('.tc:not([hidden])').count();
+  await pgH.selectOption('#fT', '');
+  await pgH.click('.kpi[data-k="sem"]');
+  const kOn = await pgH.locator('.kpi.on').count();
+  const lin = await pgH.locator('#tAt tbody tr.ar:not([hidden])').count();
+  await pgH.selectOption('#aO', 'nome');
+  const nomes = await pgH.locator('#tAt tbody tr.ar:not([hidden])').evaluateAll(l => l.map(x => x.getAttribute('data-n')));
+  await pgH.fill('#fQ', 'zzzz');
+  const semRes = await pgH.locator('.tc:not([hidden])').count();
+  check('painel HTML: filtra por turma, cartão "Sem acesso" liga o filtro, ordena Atenção por nome, busca sem resultado esconde cartões e não dá erro de script', totCards >= 2 && vis1 === 1 && kOn === 1 && lin >= 1 && nomes.join('|') === [...nomes].sort((a, b) => a.localeCompare(b, 'pt-BR')).join('|') && semRes === 0 && errosH.length === 0 && filtroOculto, `cards=${totCards} vis=${vis1} on=${kOn} lin=${lin} erros=${errosH.join(';')}`);
+  await pgH.fill('#fQ', ''); await pgH.click('#fc');
+  await pgH.screenshot({ path: path.join(SHOTS, '35-painel-html.png'), fullPage: true });
+  await pgH.close();
+
+  // ---- Notas junto: uma UC falha (503), as matrículas e a leitura parcial NÃO se perdem e a UC aparece como "Não coletada" ----
+  state.modoMeus = true;
+  await pg.goto(`${ORIGIN}/my/`);
+  await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
+  await pg.click('#hub-ead-launcher .tab');
+  await pg.click('#hub-ead-launcher .app[data-app="relatorio-turma"]');
+  await pg.waitForSelector('#hub-aln-turma', { state: 'attached', timeout: 15000 });
+  await tshadow('.list .it').first().waitFor();
+  await tshadow('button:has-text("Selecionar todas")').click();
+  await tshadow('.opt label:has-text("Notas e situação") input').check();
+  await tshadow('.opt label:has-text("Excel") input').uncheck();
+  await tshadow('button.pri').click();
+  await tshadow('button:has-text("Gerar assim mesmo")').waitFor({ timeout: 60000 });
+  const [dlN] = await Promise.all([pg.waitForEvent('download', { timeout: 40000 }), tshadow('button:has-text("Gerar assim mesmo")').click()]);
+  const nPath = path.join(SHOTS, 'painel-com-notas.html'); await dlN.saveAs(nPath);
+  const nTxt = fs.readFileSync(nPath, 'utf8');
+  check('com notas: a UC que falhou vira "Não coletada" com motivo, as outras mostram média, e as matrículas das 3 UCs continuam no painel', /Não coletada/.test(nTxt) && /id="notas"/.test(nTxt) && /Completa/.test(nTxt) && (nTxt.match(/class="card tc"/g) || []).length >= 2 && /12 matriculados|6 matriculados/.test(nTxt));
+  await tshadow('button:has-text("Fechar")').click();
+  state.modoMeus = false;
   state.modoMeus = false;
 
   // ---- 0.13: Compatibilidade, Sobre e Meus dados ----

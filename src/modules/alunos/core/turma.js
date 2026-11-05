@@ -149,6 +149,21 @@
     return linhas.join('\n');
   }
 
+  // Notas por UC para o painel. items: [{ id, name, category, estado: 'completa'|'parcial'|'falhou', students, de, motivo }].
+  // Leitura parcial vale: mostra o que foi lido (lidos/de). Falha total aparece com o motivo, nunca some.
+  function resumoNotas(items) {
+    return (Array.isArray(items) ? items : []).map(it => {
+      const turma = clean(it.category) || 'Turma sem identificação';
+      const base = { id: it.id, uc: clean(it.name), turma, estado: it.estado, motivo: clean(it.motivo) };
+      if (it.estado === 'falhou') return base;
+      const alunos = Array.isArray(it.students) ? it.students : [];
+      const c = situationCounts(alunos);
+      const pcts = alunos.map(x => x.totalPct).filter(n => typeof n === 'number' && Number.isFinite(n));
+      const media = pcts.length ? Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length) / 10 : null;
+      return { ...base, media, abaixo: c.abaixo, recuperacao: c.recuperacao, semNota: c.sem_nota, lidos: alunos.length, de: Number.isFinite(it.de) && it.de > 0 ? it.de : null };
+    }).sort((a, b) => a.turma.localeCompare(b.turma, 'pt-BR') || a.uc.localeCompare(b.uc, 'pt-BR'));
+  }
+
   function buildSheetsMatriculas(resumo) {
     const cab = ['Turma', 'UCs lidas', 'Matriculados', 'Ativos', 'Suspensos/inativos', `Sem acesso há ${resumo.limite}+ dias`, 'Nunca acessaram'];
     const turmas = [cab, ...resumo.turmas.map(t => [t.turma, t.ucs.length, t.matriculados, t.ativos, t.suspensos, t.semAcesso, t.nunca]),
@@ -162,5 +177,5 @@
     return sheets;
   }
 
-  ALN.turma = { groupByTurma, turmaRows, situationCounts, buildSheets, detectCourses, matriculas, contar, resumoMatriculas, snapshot, diffTurmas, resumoTexto, buildSheetsMatriculas, DIAS_SEM_ACESSO };
+  ALN.turma = { groupByTurma, turmaRows, situationCounts, buildSheets, detectCourses, matriculas, contar, resumoMatriculas, resumoNotas, snapshot, diffTurmas, resumoTexto, buildSheetsMatriculas, DIAS_SEM_ACESSO };
 })(globalThis);
