@@ -1,0 +1,47 @@
+<!doctype html><meta charset="utf-8"><title>Relatório da turma — matriculados</title><style>
+:root{--p:#1a4b9f;--o:#ef5e31;--bg:#e9eef5;--card:#fff;--line:#d6dee9;--m:#55657a;--ok:#0f6b4f;--wn:#a14d08;--er:#b3261e;--soft:#e8f0fa}
+*{box-sizing:border-box}body{margin:0;padding:22px;background:var(--bg);font:14px/1.45 Inter,Segoe UI,system-ui,sans-serif;color:#14202e}
+h1{margin:0 0 4px;font-size:21px}p.s{margin:0 0 16px;color:var(--m)}.g{display:grid;grid-template-columns:420px 1fr;gap:18px;align-items:start}
+.card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 4px 18px rgba(20,40,70,.1)}.card h2{margin:0 0 2px;font-size:16px}.sub{margin:0 0 10px;color:var(--m);font-size:12.5px}
+.tag{display:inline-block;padding:1px 9px;border-radius:99px;font-size:11.5px;font-weight:600;background:var(--soft);color:var(--p)}.new{background:#ffe9e1;color:#b13a14}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:10px;margin:6px 0}.opt.on{border:2px solid var(--p);background:var(--soft)}
+.opt b{display:block;font-size:13.5px}.opt small{color:var(--m);font-size:12px}.chk{flex:0 0 18px;height:18px;border-radius:5px;border:2px solid var(--p);background:var(--p);color:#fff;font-size:12px;display:grid;place-items:center;margin-top:2px}.chk.off{background:#fff}
+.uc{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--line);border-radius:10px;margin:4px 0;font-size:13px}.uc small{color:var(--m);margin-left:auto}
+.btn{display:inline-block;padding:9px 16px;border-radius:9px;background:var(--p);color:#fff;font-weight:600;margin:6px 6px 0 0}.btn.s{background:#fff;color:var(--p);border:1px solid var(--p)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0}.k{border:1px solid var(--line);border-radius:12px;padding:10px;border-left:5px solid var(--p)}.k b{display:block;font-size:24px;line-height:1.1}.k span{color:var(--m);font-size:12px}.k.o{border-left-color:var(--o)}.k.w{border-left-color:var(--wn)}.k.e{border-left-color:var(--er)}
+table{width:100%;border-collapse:collapse;font-size:13px}th{background:var(--p);color:#fff;text-align:left;padding:8px;font-size:12px}th:first-child{border-radius:8px 0 0 0}th:last-child{border-radius:0 8px 0 0}td{padding:8px;border-bottom:1px solid var(--line)}td.n,th.n{text-align:right}tr.sub td{background:#f6f9fd;color:var(--m);font-size:12.5px;padding-left:26px}
+.bar{display:flex;height:10px;border-radius:6px;overflow:hidden;background:var(--line);min-width:120px}.bar i{display:block}.b1{background:var(--ok)}.b2{background:#c9a227}.b3{background:var(--wn)}.b4{background:var(--er)}.b5{background:#9aa8b8}
+.pill{padding:1px 8px;border-radius:8px;font-size:11.5px;font-weight:600}.pe{background:#fde8e5;color:#8e1b1b}.pw{background:#fff0d6;color:#7a4300}.po{background:#e1f5ec;color:#0f5c3a}
+.note{margin:10px 0 0;padding:9px 11px;border-radius:10px;background:#fff7e0;color:#6b4b00;font-size:12.5px}
+.leg{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--m);margin:6px 0 2px}.leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px}
+.idea{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.idea div{border:1px dashed var(--line);border-radius:10px;padding:8px 10px;font-size:12.5px}.idea b{display:block}
+</style>
+<h1>Relatório da turma — turmas e matriculados</h1>
+<p class="s">Dados abaixo são ilustrativos. À esquerda: o painel que abre em “Meus cursos”. À direita: a página HTML de saída (o Excel tem o mesmo conteúdo, uma aba por turma).</p>
+<div class="g">
+<div class="card"><h2>Relatório da turma</h2><p class="sub">Nada é lido antes de “Gerar”. Somente leitura; nada é gravado no Moodle.</p>
+<b style="font-size:13px">O que incluir</b>
+<div class="opt on"><span class="chk">✓</span><span><b>Matrículas por turma <span class="tag new">novo</span></b><small>Alunos matriculados, ativos, suspensos e sem acesso. Rápido: 1 consulta por UC.</small></span></div>
+<div class="opt on"><span class="chk">✓</span><span><b>Notas e situação por UC</b><small>O que já existe: total do curso e faixas (abaixo, recuperação, média).</small></span></div>
+<b style="font-size:13px;display:block;margin-top:10px">Unidades curriculares</b>
+<div class="uc"><span class="chk" style="margin:0">✓</span>Segurança em Redes <small>TEC.2026.2.184</small></div>
+<div class="uc"><span class="chk" style="margin:0">✓</span>Serviços de Redes <small>TEC.2026.2.184</small></div>
+<div class="uc"><span class="chk" style="margin:0">✓</span>Lógica de Programação <small>1037240</small></div>
+<div class="uc"><span class="chk off" style="margin:0"></span>Planilha Eletrônica <small>EJA 2026</small></div>
+<b style="font-size:13px;display:block;margin:10px 0 4px">Saída</b>
+<span class="btn">Página HTML</span><span class="btn s">Excel (.xlsx)</span><span class="btn s">Os dois</span>
+<div class="note">Leitura de matrículas: 3 UCs ≈ 3 consultas, com pausa entre elas. Dá para cancelar.</div></div>
+
+<div class="card"><h2>Resultado: 3 turmas · 3 UCs lidas <span class="tag">HTML</span></h2><p class="sub">Lido em 05/11/2026 às 14:32 · “Matriculados” conta alunos distintos da turma (quem está em mais de uma UC conta uma vez).</p>
+<div class="kpis"><div class="k"><b>74</b><span>Matriculados</span></div><div class="k o"><b>66</b><span>Ativos</span></div><div class="k w"><b>5</b><span>Suspensos</span></div><div class="k e"><b>11</b><span>Sem acesso há 7+ dias</span></div></div>
+<table><thead><tr><th>Turma</th><th class="n">UCs</th><th class="n">Matriculados</th><th class="n">Ativos</th><th class="n">Suspensos</th><th class="n">Sem acesso 7d+</th><th>Situação nas notas</th><th>Alerta</th></tr></thead><tbody>
+<tr><td><b>Técnico em Redes — TEC.2026.2.184</b></td><td class="n">2</td><td class="n"><b>32</b></td><td class="n">30</td><td class="n">2</td><td class="n">3</td><td><div class="bar"><i class="b1" style="width:50%"></i><i class="b2" style="width:20%"></i><i class="b3" style="width:15%"></i><i class="b5" style="width:15%"></i></div></td><td><span class="pill po">tudo certo</span></td></tr>
+<tr class="sub"><td>Segurança em Redes</td><td class="n">1</td><td class="n">32</td><td class="n">30</td><td class="n">2</td><td class="n">3</td><td></td><td></td></tr>
+<tr class="sub"><td>Serviços de Redes</td><td class="n">1</td><td class="n">31</td><td class="n">29</td><td class="n">2</td><td class="n">4</td><td></td><td></td></tr>
+<tr><td><b>Informática p/ Internet — 1037240</b></td><td class="n">1</td><td class="n"><b>28</b></td><td class="n">25</td><td class="n">3</td><td class="n">6</td><td><div class="bar"><i class="b1" style="width:30%"></i><i class="b2" style="width:25%"></i><i class="b3" style="width:35%"></i><i class="b5" style="width:10%"></i></div></td><td><span class="pill pw">6 sem acesso</span></td></tr>
+<tr><td><b>Operador de Computador — EJA 2026</b></td><td class="n">1</td><td class="n"><b>14</b></td><td class="n">11</td><td class="n">0</td><td class="n">2</td><td><div class="bar"><i class="b2" style="width:40%"></i><i class="b3" style="width:45%"></i><i class="b5" style="width:15%"></i></div></td><td><span class="pill pe">6 abaixo da faixa</span></td></tr>
+</tbody></table>
+<div class="leg"><span><i class="b1"></i>Média alcançada</span><span><i class="b2"></i>Recuperação</span><span><i class="b3"></i>Abaixo da faixa</span><span><i class="b5"></i>Sem nota</span></div>
+<b style="display:block;margin-top:12px;font-size:13.5px">Sugestões que posso incluir</b>
+<div class="idea"><div><b>Comparar com a leitura anterior</b>Mostra “+3 matriculados / −1 suspenso” desde a última vez (fica só no navegador).</div><div><b>Copiar resumo em texto</b>Um parágrafo pronto para WhatsApp ou e-mail com turmas e totais.</div><div><b>Lista de quem está sem acesso</b>Aba “Atenção” no Excel: nome, turma, UC e dias sem acesso.</div><div><b>Só turmas em andamento</b>Ignora UCs encerradas ou ainda não iniciadas.</div></div>
+</div></div>
