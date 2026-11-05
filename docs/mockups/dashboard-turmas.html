@@ -1,0 +1,91 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Painel das turmas — mockup</title>
+<style>
+:root{--p:#1a4b9f;--o:#ef5e31;--ink:#14202e;--mut:#55657a;--bd:#d6dee9;--bg:#f3f6fa;--bg2:#e8eef5;--s:#fff;--ok:#0f6b4f;--wn:#a14d08;--er:#b3261e;--soft:#e8f0fa;--okb:#dff3ea;--wnb:#fff0d6;--erb:#fde6e3}
+@media (prefers-color-scheme:dark){:root{--p:#6b9be0;--ink:#e6ecf5;--mut:#9aa8bd;--bd:#2e3a4b;--bg:#121821;--bg2:#222d3b;--s:#1b2431;--ok:#6fd0a0;--wn:#f0b45a;--er:#ff8a80;--soft:#22344a;--okb:#143a2b;--wnb:#3a2c12;--erb:#3d1d1a}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 60px}
+.hero{background:linear-gradient(135deg,#1a4b9f,#123a7d);color:#fff;border-radius:18px;padding:20px 24px;border-left:8px solid var(--o);display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.hero small{opacity:.85;letter-spacing:.08em;text-transform:uppercase;font-weight:700;font-size:12px}.hero h1{margin:4px 0 2px;font-size:24px}.hero p{margin:0;opacity:.9;font-size:13.5px}
+.tools{display:flex;gap:8px;flex-wrap:wrap}.tools select,.tools input{min-height:38px;border-radius:9px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;padding:0 10px;font:inherit}.tools option{color:#14202e}.tools input::placeholder{color:#dbe6f7}
+nav{position:sticky;top:0;z-index:5;display:flex;gap:6px;flex-wrap:wrap;background:var(--bg);padding:10px 0;margin-top:6px}
+nav a{padding:6px 12px;border-radius:99px;background:var(--s);border:1px solid var(--bd);color:var(--ink);text-decoration:none;font-size:13px;font-weight:600}nav a:hover,nav a:focus-visible{border-color:var(--p);color:var(--p);outline:none}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:8px 0 16px}
+.kpi{all:unset;box-sizing:border-box;cursor:pointer;background:var(--s);border:1px solid var(--bd);border-left:5px solid var(--p);border-radius:14px;padding:12px 14px}.kpi:focus-visible{outline:3px solid #f6b900;outline-offset:2px}
+.kpi b{display:block;font-size:28px;line-height:1.1}.kpi span{color:var(--mut);font-size:13px}.kpi.o{border-left-color:var(--o)}.kpi.w{border-left-color:var(--wn)}.kpi.e{border-left-color:var(--er)}.kpi.on{background:var(--soft);border-color:var(--p)}
+h2{font-size:18px;margin:26px 0 8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}h2 small{font-weight:400;color:var(--mut);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.card{background:var(--s);border:1px solid var(--bd);border-radius:14px;padding:14px 16px}
+.card h3{margin:0;font-size:16px}.sub{color:var(--mut);font-size:13px;margin:0 0 8px}
+.bar{display:flex;height:12px;border-radius:7px;overflow:hidden;background:var(--bg2);margin:8px 0 4px}.bar i{display:block;height:100%}.b1{background:var(--ok)}.b2{background:var(--o)}.b3{background:var(--wn)}
+.leg{display:flex;gap:12px;flex-wrap:wrap;color:var(--mut);font-size:12px}.leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+.chip{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12px;font-weight:700;margin:0 4px 4px 0}.c-d{background:var(--soft);color:var(--p)}.c-ok{background:var(--okb);color:var(--ok)}.c-wn{background:var(--wnb);color:var(--wn)}.c-er{background:var(--erb);color:var(--er)}
+button.lnk{font:inherit;min-height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--bd);background:var(--s);color:var(--p);cursor:pointer;font-weight:600}button.lnk:focus-visible{outline:3px solid #f6b900;outline-offset:2px}
+table{width:100%;border-collapse:collapse}th,td{padding:7px 9px;text-align:left;border-bottom:1px solid var(--bd);font-size:13.5px}th{background:var(--bg2);color:var(--mut);font-size:11px;letter-spacing:.06em;text-transform:uppercase}td.n,th.n{text-align:right}th button{all:unset;cursor:pointer}th button:focus-visible{outline:2px solid #f6b900}
+.tw{overflow-x:auto}.det{margin-top:10px;display:none}.det.on{display:block}
+.mini{display:inline-block;width:70px;height:8px;border-radius:5px;background:var(--bg2);vertical-align:middle;overflow:hidden;margin-right:6px}.mini i{display:block;height:100%;background:var(--p)}
+.note{background:var(--wnb);color:var(--wn);border-radius:10px;padding:8px 12px;font-size:13px;margin:8px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}.row select,.row input{min-height:36px;border:1px solid var(--bd);border-radius:8px;background:var(--s);color:var(--ink);padding:0 10px;font:inherit}.sp{flex:1}
+.empty{padding:16px;text-align:center;color:var(--mut)}footer{margin-top:24px;color:var(--mut);font-size:12.5px}
+.tag{font-size:11px;background:var(--o);color:#fff;border-radius:6px;padding:1px 7px;margin-left:8px;vertical-align:middle}
+@media (prefers-reduced-motion:no-preference){.card,.kpi{transition:border-color .2s}}
+</style></head><body><div class="wrap">
+<header class="hero"><div><small>Unidigit@l Assist · mockup com dados fictícios</small><h1>Painel das turmas</h1><p id="quando"></p></div>
+<div class="tools"><select id="fTurma" aria-label="Filtrar por turma"></select><input id="fBusca" type="search" placeholder="Buscar turma, UC ou aluno" aria-label="Buscar"></div></header>
+<nav aria-label="Seções"><a href="#resumo">Resumo</a><a href="#turmas">Turmas</a><a href="#notas">Notas por UC</a><a href="#atencao">Atenção</a></nav>
+
+<section id="resumo"><div class="kpis" id="kpis"></div><div id="filtroMsg" class="row" hidden></div></section>
+
+<h2 id="turmas">Turmas <small id="nTurmas"></small></h2><div class="grid" id="gTurmas"></div>
+
+<h2 id="notas">Notas por UC <small>mesmo quando a leitura vem parcial, o que foi lido aparece</small></h2>
+<div class="card"><div class="tw"><table id="tNotas"><thead><tr><th>UC</th><th>Turma</th><th>Leitura</th><th class="n">Média</th><th class="n">Abaixo da faixa</th><th class="n">Sem nota</th></tr></thead><tbody></tbody></table></div>
+<div class="note" id="notaAviso"></div></div>
+
+<h2 id="atencao">Atenção <small>ativos sem acesso há 7+ dias · no fim da página, onde se age</small></h2>
+<div class="card"><div class="row"><select id="aTurma" aria-label="Turma"></select><select id="aOrd" aria-label="Ordenar"><option value="dias">Mais tempo sem acesso</option><option value="nome">Nome (A–Z)</option></select><span class="sp" id="aCont" role="status"></span><button class="lnk" id="aCopiar" type="button">Copiar nomes</button></div>
+<div class="tw"><table id="tAt"><thead><tr><th>Aluno</th><th>Turma</th><th>UC(s)</th><th class="n">Dias sem acesso</th></tr></thead><tbody></tbody></table></div></div>
+
+<footer>Nada aqui é gravado no Moodle. Aluno em várias UCs conta uma vez. Filtros, ordenação e detalhes funcionam dentro do próprio arquivo, sem internet.</footer>
+</div>
+<script>
+const LIM=7;
+const T=[
+ {n:'Téc. Redes · Turma A',m:36,a:34,s:2,sa:9,d:{m:3,a:2,s:1,sa:-2},ucs:[
+  {n:'Redes de Computadores',m:36,a:34,s:2,sa:6,nota:{ok:'completa',media:7.4,ab:5,sn:3}},
+  {n:'Segurança em Redes',m:35,a:33,s:2,sa:7,nota:{ok:'parcial',media:6.8,ab:4,sn:9,lidos:22,de:35}},
+  {n:'Administração de Servidores',m:34,a:32,s:2,sa:5,nota:{ok:'falhou',motivo:'Moodle recusou a leitura (erro 503)'}}]},
+ {n:'Téc. Informática · Turma B',m:28,a:26,s:2,sa:4,d:{m:0,a:0,s:0,sa:1},ucs:[
+  {n:'Lógica de Programação',m:28,a:26,s:2,sa:4,nota:{ok:'completa',media:8.1,ab:2,sn:1}}]},
+ {n:'Téc. Logística · Turma C',m:41,a:35,s:6,sa:12,d:null,ucs:[
+  {n:'Gestão de Estoques',m:41,a:35,s:6,sa:12,nota:{ok:'completa',media:6.2,ab:11,sn:7}},
+  {n:'Transporte e Distribuição',m:40,a:35,s:5,sa:10,nota:{ok:'completa',media:6.9,ab:8,sn:4}}]}
+];
+const AT=[['Carla M.','Téc. Redes · Turma A','Segurança em Redes',31],['Diego F.','Téc. Redes · Turma A','Redes de Computadores',22],['Elaine S.','Téc. Logística · Turma C','Gestão de Estoques; Transporte e Distribuição',45],['Fábio R.','Téc. Logística · Turma C','Gestão de Estoques',19],['Gil P.','Téc. Informática · Turma B','Lógica de Programação',9999],['Helena T.','Téc. Redes · Turma A','Redes de Computadores',12],['Igor L.','Téc. Logística · Turma C','Transporte e Distribuição',8]];
+const $=s=>document.querySelector(s);const el=(t,c,x)=>{const n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n};
+const sg=n=>n>0?'+'+n:n<0?'−'+Math.abs(n):'0';const fold=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+$('#quando').textContent='3 turmas · lido em 05/11/2026, 23:22 · comparado com a leitura de 28/10';
+const st={turma:'',q:'',kpi:''};
+const fT=$('#fTurma'),aT=$('#aTurma');[fT,aT].forEach(s=>{s.append(new Option('Todas as turmas',''));T.forEach(t=>s.append(new Option(t.n,t.n)))});
+function vis(){return T.filter(t=>(!st.turma||t.n===st.turma)&&(!st.q||fold(t.n+' '+t.ucs.map(u=>u.n).join(' ')).includes(fold(st.q))||AT.some(a=>a[1]===t.n&&fold(a[0]).includes(fold(st.q)))))}
+function kpis(){const v=vis(),S=k=>v.reduce((x,t)=>x+t[k],0);const defs=[['m','Matriculados','',null],['a','Ativos','o','ativos'],['s','Suspensos/inativos','w','susp'],['sa','Sem acesso 7+ dias','e','sem']];
+ const box=$('#kpis');box.replaceChildren();defs.forEach(([k,r,c,f])=>{const b=el('button','kpi '+c+(st.kpi===f&&f?' on':''));b.type='button';b.append(el('b','',S(k)),el('span','',r+(f?' · filtrar':'')));b.setAttribute('aria-pressed',String(st.kpi===f&&!!f));b.onclick=()=>{if(!f)return;st.kpi=st.kpi===f?'':f;draw();if(f==='sem'&&st.kpi)location.hash='#atencao'};box.append(b)});
+ const m=$('#filtroMsg');m.hidden=!st.kpi;m.replaceChildren();if(st.kpi){m.append(el('span','chip c-d','Filtro: '+({ativos:'ativos',susp:'suspensos',sem:'sem acesso'})[st.kpi]));const x=el('button','lnk','Limpar filtro');x.onclick=()=>{st.kpi='';draw()};m.append(x)}}
+function turmas(){const g=$('#gTurmas');g.replaceChildren();const v=vis();$('#nTurmas').textContent=v.length+' de '+T.length;if(!v.length){g.append(el('div','empty','Nenhuma turma encontrada.'));return}
+ v.forEach((t,i)=>{if(st.kpi==='susp'&&!t.s)return;const c=el('div','card');c.append(el('h3','',t.n),el('p','sub',t.m+' matriculados · '+t.ucs.length+' UC(s)'));
+  if(t.d){const w=el('div');[['m','Matriculados'],['a','Ativos'],['s','Suspensos'],['sa','Sem acesso']].forEach(([k,r])=>{if(t.d[k])w.append(el('span','chip c-d',r+' '+sg(t.d[k])))});if(!w.childNodes.length)w.append(el('span','chip c-d','Sem mudança'));c.append(w)}else c.append(el('span','chip c-d','Primeira leitura: sem comparação'));
+  const com=t.a-t.sa;const bar=el('div','bar');bar.setAttribute('role','img');bar.setAttribute('aria-label',com+' ativos com acesso, '+t.sa+' sem acesso, '+t.s+' suspensos');[['b1',com],['b2',t.sa],['b3',t.s]].forEach(([k,n])=>{const x=el('i',k);x.style.width=(n/t.m*100)+'%';bar.append(x)});c.append(bar);
+  const l=el('div','leg');[['b1','Com acesso',com],['b2','Sem acesso',t.sa],['b3','Suspensos',t.s]].forEach(([k,r,n])=>{const s=el('span');const d=el('i',k);s.append(d,r+' ('+n+')');l.append(s)});c.append(l);
+  const b=el('button','lnk','Ver UCs');b.type='button';b.style.marginTop='10px';b.setAttribute('aria-expanded','false');const d=el('div','det');const tw=el('div','tw');const tb=el('table');const th=el('thead');const hr=el('tr');['UC','Matric.','Ativos','Susp.','Sem acesso'].forEach((h,j)=>hr.append(Object.assign(el('th',j?'n':'',h))));th.append(hr);const body=el('tbody');t.ucs.forEach(u=>{const r=el('tr');[u.n,u.m,u.a,u.s,u.sa].forEach((x,j)=>r.append(el('td',j?'n':'',x)));body.append(r)});tb.append(th,body);tw.append(tb);d.append(tw);
+  b.onclick=()=>{const on=d.classList.toggle('on');b.textContent=on?'Ocultar UCs':'Ver UCs';b.setAttribute('aria-expanded',String(on))};c.append(b,d);g.append(c)})}
+function notas(){const tb=$('#tNotas tbody');tb.replaceChildren();let falhas=0,parc=0;vis().forEach(t=>t.ucs.forEach(u=>{const n=u.nota;const r=el('tr');r.append(el('td','',u.n),el('td','',t.n));const c=el('td');
+  if(n.ok==='completa')c.append(el('span','chip c-ok','Completa'));else if(n.ok==='parcial'){parc++;c.append(el('span','chip c-wn','Parcial · '+n.lidos+' de '+n.de+' alunos'))}else{falhas++;c.append(el('span','chip c-er','Não coletada'))}r.append(c);
+  if(n.ok==='falhou'){const td=el('td','',n.motivo);td.colSpan=3;td.style.color='var(--er)';r.append(td)}else{const m=el('td','n');const mi=el('span','mini');const i=el('i');i.style.width=(n.media*10)+'%';mi.append(i);m.append(mi,String(n.media).replace('.',','));r.append(m,el('td','n',n.ab),el('td','n',n.sn))}tb.append(r)}));
+ const a=$('#notaAviso');a.hidden=!(falhas||parc);a.replaceChildren(document.createTextNode((parc?parc+' UC com leitura parcial: os números valem só para os alunos lidos. ':'')+(falhas?falhas+' UC sem leitura: ela aparece aqui com o motivo, e o painel guarda o que já veio. ':'')+'No painel, o botão “Tentar de novo só as pendentes” relê apenas essas.'))}
+function atencao(){const tb=$('#tAt tbody');tb.replaceChildren();let l=AT.filter(a=>(!aT.value||a[1]===aT.value)&&(!st.turma||a[1]===st.turma)&&(!st.q||fold(a[0]+a[1]+a[2]).includes(fold(st.q))));l.sort($('#aOrd').value==='nome'?(x,y)=>x[0].localeCompare(y[0],'pt-BR'):(x,y)=>y[3]-x[3]);
+ $('#aCont').textContent=l.length+' aluno(s)';if(!l.length){const r=el('tr');const td=el('td','empty','Ninguém em atenção neste filtro.');td.colSpan=4;r.append(td);tb.append(r)}
+ l.forEach(a=>{const r=el('tr');r.append(el('td','',a[0]),el('td','',a[1]),el('td','',a[2]),el('td','n',a[3]===9999?'nunca acessou':a[3]));tb.append(r)});return l}
+function draw(){kpis();turmas();notas();atencao()}
+fT.onchange=()=>{st.turma=fT.value;draw()};$('#fBusca').oninput=e=>{st.q=e.target.value;draw()};aT.onchange=atencao;$('#aOrd').onchange=atencao;
+$('#aCopiar').onclick=async e=>{const l=atencao().map(a=>a[0]).join('\n');try{await navigator.clipboard.writeText(l);e.target.textContent='Copiado ✓'}catch(x){e.target.textContent='Selecione e copie'}setTimeout(()=>e.target.textContent='Copiar nomes',1800)};
+draw();
+</script></body></html>
