@@ -1,4 +1,4 @@
 {
-  "scripts": ["namespace.js", "core.js", "api.js", "ui.js"],
+  "scripts": ["namespace.js", "core.js", "docx.js", "api.js", "ui.js"],
   "css": []
 }

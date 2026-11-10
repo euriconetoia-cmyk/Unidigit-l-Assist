@@ -21,11 +21,21 @@
   const urlForm = (origin, modname, cursoId, secao) => `${origin}/course/modedit.php?add=${encodeURIComponent(modname)}&course=${encodeURIComponent(cursoId)}&section=${encodeURIComponent(secao)}&return=0`;
   const urlCurso = (origin, cursoId) => `${origin}/course/view.php?id=${encodeURIComponent(cursoId)}`;
 
+  // Se a seção escolhida na tela não é mais a mesma no curso (sumiu, mudou de número ou de nome), não cria.
+  function secaoMudou(doc, secao, secaoNome) {
+    if (secaoNome == null) return '';
+    const l = C.secoes(doc); if (!l.length) return '';
+    const x = l.find(y => y.numero === Number(secao));
+    if (!x) return `A seção ${secao} não existe mais neste curso. Escolha de novo.`;
+    return C.fold(x.nome) === C.fold(secaoNome) ? '' : `A seção ${secao} agora se chama “${x.nome}” (era “${secaoNome}”). Escolha de novo.`;
+  }
+
   // Só leitura. Diz se dá para criar neste curso e se já existe algo com o mesmo nome.
-  async function checar({ origin, curso, modelo, nome, secao, opcoes = {} }) {
+  async function checar({ origin, curso, modelo, nome, secao, secaoNome, opcoes = {} }) {
     const base = { curso, estado: 'pronta', detalhe: '', avisos: [] };
     try {
       const pag = await pegar(urlCurso(origin, curso.id), opcoes);
+      const sc = secaoMudou(pag.doc, secao, secaoNome); if (sc) return { ...base, estado: 'erro', detalhe: sc };
       const dup = C.acharPorNome(pag.doc, nome);
       if (dup.length) return { ...base, estado: 'existe', detalhe: 'Já existe uma atividade com este nome. Será pulada.' };
       await sleep(PAUSA_MS / 3, opcoes.signal);
@@ -39,8 +49,9 @@
   }
 
   // Cria UMA atividade, oculta, e lê de volta para confirmar. Devolve { estado: 'criada'|'incerta'|'falhou', detalhe, cmid }.
-  async function criar({ origin, curso, modelo, nome, html, secao, abertura, prazo, opcoes = {} }) {
+  async function criar({ origin, curso, modelo, nome, html, secao, secaoNome, abertura, prazo, opcoes = {} }) {
     try {
+      if (secaoNome != null) { const pg = await pegar(urlCurso(origin, curso.id), opcoes); const sc = secaoMudou(pg.doc, secao, secaoNome); if (sc) return { estado: 'falhou', detalhe: `${sc} Nada foi criado.` }; await sleep(PAUSA_MS / 3, opcoes.signal); }
       const f = await pegar(urlForm(origin, modelo.modname, curso.id, secao), opcoes);
       const form = C.achaForm(f.doc);
       if (!form) return { estado: 'falhou', detalhe: 'Sem permissão de edição neste curso (o Moodle não abriu o formulário).' };
@@ -68,5 +79,8 @@
     } catch (e) { return { estado: 'falhou', detalhe: e && e.message ? e.message : String(e) }; }
   }
 
-  CRI.api = { checar, criar, sleep, PAUSA_MS, urlForm, urlCurso };
+  // Só leitura: as seções do curso, para a pessoa escolher pelo nome.
+  async function lerSecoes({ origin, curso, opcoes = {} }) { const pag = await pegar(urlCurso(origin, curso.id), opcoes); return C.secoes(pag.doc); }
+
+  CRI.api = { checar, criar, lerSecoes, secaoMudou, sleep, PAUSA_MS, urlForm, urlCurso };
 })(globalThis);

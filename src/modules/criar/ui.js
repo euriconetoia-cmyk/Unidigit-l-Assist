@@ -18,7 +18,7 @@ label.l{display:block;font-size:12px;font-weight:700;color:var(--m);margin:10px 
 input,select,textarea{width:100%;font:inherit;border:1px solid var(--bd);border-radius:8px;background:var(--s);color:inherit;padding:8px 10px;min-height:38px}textarea{min-height:120px;resize:vertical;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--f);outline-offset:2px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:560px){.two{grid-template-columns:1fr}}
-.list{display:grid;gap:6px;max-height:200px;overflow:auto}.it{display:flex;gap:10px;align-items:center;border:1px solid var(--bd);background:var(--c);border-radius:10px;padding:7px 10px}.it input{width:auto;min-height:0}.it b{flex:1;font-size:13px}.it small{color:var(--m)}
+.list{display:grid;gap:6px;max-height:340px;overflow:auto}.it{display:flex;gap:10px;align-items:center;border:1px solid var(--bd);background:var(--c);border-radius:10px;padding:7px 10px}.it input{width:auto;min-height:0}.it b{flex:1;font-size:13px}.it small{color:var(--m)}
 .st{font-size:12px;padding:2px 9px;border-radius:8px;white-space:nowrap;font-weight:700;background:var(--bd);color:var(--m)}.st.ok{background:var(--okbg);color:var(--ok)}.st.go{background:var(--wnbg);color:var(--wn)}.st.er{background:var(--erbg);color:var(--er)}
 .row2{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}.row2 .sp{flex:1;color:var(--m);font-size:12.5px;align-self:center}
 button{font:inherit;min-height:38px;padding:0 16px;border-radius:9px;border:1px solid var(--bd);background:var(--s);color:inherit;cursor:pointer}button.pri{background:var(--p);border-color:var(--p);color:#fff;font-weight:700}button:disabled{opacity:.5;cursor:default}
@@ -27,6 +27,7 @@ button{font:inherit;min-height:38px;padding:0 16px;border-radius:9px;border:1px 
 table{width:100%;border-collapse:collapse;margin-top:6px}th,td{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:left;font-size:13px;vertical-align:top}th{background:var(--c);color:var(--m);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
 .msg{margin-top:10px;padding:8px 10px;border-radius:8px;font-size:13px;background:var(--wnbg);color:var(--wn)}.msg.ok{background:var(--okbg);color:var(--ok)}.msg.err{background:var(--erbg);color:var(--er)}.msg.in{background:var(--c);color:inherit}
 .prog{height:10px;border-radius:6px;background:var(--bd);overflow:hidden;margin:10px 0}.prog i{display:block;height:100%;background:var(--p);transition:width .3s}
+.cw{margin:4px 0}.sec{margin:2px 0 6px 26px}.okd{color:#1b7a3d;font-weight:600}.avd{color:#b3411c;font-weight:600}
 code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}`;
 
@@ -48,13 +49,52 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
     const amanha = new Date(); amanha.setDate(amanha.getDate() + 1); amanha.setHours(8, 0, 0, 0);
     const fim = new Date(amanha.getTime() + 14 * 864e5); fim.setHours(23, 59, 0, 0);
     const tutor = C.nomeDoTutor(doc);
-    const st = { passo: 0, modelo: C.MODELOS.forum, nome: C.MODELOS.forum.nome, texto: C.MODELOS.forum.texto, custom: {}, abertura: dtLocal(amanha), prazo: dtLocal(fim), secao: 0, sel: new Set(cursoAtual ? [cursoAtual.id] : []), checks: new Map(), resultados: new Map(), running: false, ctl: null, msg: '', arquivo: '' };
+    const st = { passo: 0, modelo: C.MODELOS.forum, nome: C.MODELOS.forum.nome, texto: C.MODELOS.forum.texto, custom: {}, abertura: dtLocal(amanha), prazo: dtLocal(fim), secoes: new Map(), secaoPor: new Map(), busca: '', lendoSecoes: false, sel: new Set(cursoAtual ? [cursoAtual.id] : []), checks: new Map(), resultados: new Map(), running: false, ctl: null, msg: '', arquivo: '' };
     const box = h('div', { class: 'box', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Criar conteúdo' });
     const back = h('div', { class: 'back', onclick: e => { if (e.target === back && !st.running) close(); } }, box);
     shadow.append(back);
     function close() { if (st.running) return; host.remove(); }
     host.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); if (st.running) cancelar(); else close(); } });
     const cancelar = () => { if (st.ctl) st.ctl.abort(); };
+    // Seção de cada curso: lida do próprio curso (só leitura) e escolhida pelo nome.
+    const nomeDaSecao = c => { const k = st.secoes.get(c.id); const n = st.secaoPor.get(c.id); if (!k || k.estado !== 'ok' || n == null) return null; const x = k.lista.find(y => y.numero === n); return x ? x.nome : null; };
+    const rotuloSecao = c => { const n = st.secaoPor.get(c.id); if (n == null) return '—'; const nm = nomeDaSecao(c); return nm ? `Seção ${n} · ${nm}` : `Seção ${n}`; };
+    async function carregarSecoes() {
+      if (st.lendoSecoes) return; st.lendoSecoes = true;
+      try {
+        const pend = () => escolhidos().find(c => !st.secoes.has(c.id));
+        let c; let primeiro = true;
+        while ((c = pend())) {
+          if (!primeiro) await A.sleep(A.PAUSA_MS / 3); primeiro = false;
+          st.secoes.set(c.id, { estado: 'lendo' }); draw();
+          try {
+            const lista = await A.lerSecoes({ origin, curso: c });
+            if (lista.length) { st.secoes.set(c.id, { estado: 'ok', lista }); const n = st.busca ? C.acharSecao(lista, st.busca) : null; if (n != null) st.secaoPor.set(c.id, n); }
+            else { st.secoes.set(c.id, { estado: 'manual', lista: [], aviso: 'Não consegui listar as seções deste curso. Digite o número.' }); st.secaoPor.set(c.id, 0); }
+          } catch (e) { st.secoes.set(c.id, { estado: 'manual', lista: [], aviso: `${e && e.message ? e.message : 'Falha ao ler as seções.'} Digite o número.` }); st.secaoPor.set(c.id, 0); }
+        }
+      } finally { st.lendoSecoes = false; }
+      draw();
+    }
+    // Procurar por nome: atualiza os seletores no lugar (sem redesenhar, para não perder o foco do campo).
+    function aplicarBusca() {
+      escolhidos().forEach(c => {
+        const k = st.secoes.get(c.id); if (!k || k.estado !== 'ok') return;
+        const n = st.busca ? C.acharSecao(k.lista, st.busca) : null; if (n != null) st.secaoPor.set(c.id, n); else if (st.busca) st.secaoPor.delete(c.id);
+        const sel = box.querySelector(`select[data-curso="${c.id}"]`); if (sel) sel.value = st.secaoPor.has(c.id) ? String(st.secaoPor.get(c.id)) : '';
+        const dica = box.querySelector(`[data-dica="${c.id}"]`); if (dica) { dica.textContent = st.busca ? (n != null ? `✓ achei “${st.busca}”` : `⚠ não achei “${st.busca}”: escolha na lista`) : ''; dica.className = `sub ${n != null || !st.busca ? 'okd' : 'avd'}`; }
+      });
+    }
+    function secaoCtl(c) {
+      const k = st.secoes.get(c.id);
+      if (!k || k.estado === 'lendo') return h('div', { class: 'sub', role: 'status' }, 'Lendo as seções do curso…');
+      if (k.estado === 'manual') return h('div', { class: 'sec' }, h('div', { class: 'sub' }, k.aviso), h('input', { type: 'number', min: '0', max: '60', value: String(st.secaoPor.get(c.id) ?? 0), 'aria-label': `Número da seção em ${c.name}`, onchange: e => { st.secaoPor.set(c.id, Math.max(0, parseInt(e.target.value, 10) || 0)); } }));
+      const sel = h('select', { 'data-curso': c.id, 'aria-label': `Seção em ${c.name}`, onchange: e => { if (e.target.value === '') st.secaoPor.delete(c.id); else st.secaoPor.set(c.id, Number(e.target.value)); } },
+        h('option', { value: '' }, 'Escolha a seção deste curso…'), k.lista.map(x => h('option', { value: String(x.numero) }, `${x.numero} · ${x.nome}${x.oculta ? ' (oculta)' : ''}`)));
+      sel.value = st.secaoPor.has(c.id) ? String(st.secaoPor.get(c.id)) : '';
+      const n = st.busca ? C.acharSecao(k.lista, st.busca) : null;
+      return h('div', { class: 'sec' }, sel, h('div', { 'data-dica': c.id, class: `sub ${n != null || !st.busca ? 'okd' : 'avd'}` }, st.busca ? (n != null ? `✓ achei “${st.busca}”` : `⚠ não achei “${st.busca}”: escolha na lista`) : ''));
+    }
 
     const mount = (...k) => box.replaceChildren(...k.flat().filter(x => x != null && x !== false));
     const escolhidos = () => cursos.filter(c => st.sel.has(c.id));
@@ -82,15 +122,22 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
       mount(...cab('Escolha o que criar. Nada é criado até você confirmar na prévia; tudo nasce oculto para os alunos.'),
         h('label', { class: 'l' }, 'O que criar'),
         h('div', { class: 'cards' }, Object.values(C.MODELOS).map(m => h('button', { type: 'button', class: `opt${st.modelo.id === m.id ? ' on' : ''}`, 'aria-pressed': String(st.modelo.id === m.id), onclick: () => { st.modelo = m; st.nome = m.nome; st.texto = m.texto; st.custom = {}; draw(); } }, h('div', { class: 'ico' }, m.icone), h('b', {}, m.titulo), h('span', {}, m.descricao)))),
-        rodape(h('button', { type: 'button', onclick: close }, 'Cancelar'), h('button', { type: 'button', class: 'pri', onclick: () => { st.passo = 1; draw(); } }, 'Continuar')));
+        rodape(h('button', { type: 'button', onclick: close }, 'Cancelar'), h('button', { type: 'button', class: 'pri', onclick: () => { st.passo = 1; draw(); carregarSecoes(); } }, 'Continuar')));
     }
     function p1() {
       const m = st.modelo; const ok = st.sel.size > 0;
       const nome = h('input', { type: 'text', value: st.nome, 'aria-label': 'Nome', oninput: e => { st.nome = e.target.value; } });
       const txt = h('textarea', { 'aria-label': 'Texto (HTML simples)', oninput: e => { st.texto = e.target.value; } }); txt.value = st.texto;
-      const arq = h('input', { type: 'file', accept: '.html,.htm,.txt,text/html,text/plain', 'aria-label': 'Importar modelo (HTML ou texto)', onchange: async e => {
+      const arq = h('input', { type: 'file', accept: '.html,.htm,.txt,.docx,text/html,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'aria-label': 'Importar modelo (DOCX, HTML ou texto)', onchange: async e => {
         const f = e.target.files && e.target.files[0]; if (!f) return;
-        if (/\.(docx?|pdf)$/i.test(f.name)) { st.arquivo = 'DOCX e PDF chegam na próxima versão. Por enquanto use um modelo HTML ou texto (.html, .txt).'; draw(); return; }
+        if (/\.pdf$/i.test(f.name)) { st.arquivo = 'PDF ainda não pode ser lido nem anexado nesta versão. Salve o documento como DOCX (Word) ou cole o texto.'; draw(); return; }
+        if (/\.doc$/i.test(f.name)) { st.arquivo = 'Arquivo .doc antigo não é suportado. No Word, use “Salvar como” e escolha DOCX.'; draw(); return; }
+        if (/\.docx$/i.test(f.name)) {
+          if (f.size > 5242880) { st.arquivo = 'Arquivo grande demais (máximo 5 MB).'; draw(); return; }
+          try { const r = await CRI.docx.ler(await f.arrayBuffer()); st.texto = r.html; st.arquivo = `Lido: ${f.name}. Títulos, negrito, listas, links e tabelas foram mantidos.${r.avisos.length ? ' ' + r.avisos.join(' ') : ''}`; }
+          catch (er) { st.arquivo = er && er.message ? er.message : 'Não consegui ler este DOCX.'; }
+          draw(); return;
+        }
         if (f.size > 1048576) { st.arquivo = 'Arquivo grande demais (máximo 1 MB).'; draw(); return; }
         const t = await f.text(); st.texto = /\.txt$/i.test(f.name) ? t.split(/\n{2,}/).map(p => `<p>${C.esc(p.trim()).replace(/\n/g, '<br>')}</p>`).join('') : t;
         st.arquivo = `Lido: ${f.name}. Scripts, estilos, imagens e eventos foram removidos.`; draw();
@@ -102,7 +149,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
         aut.map(c => h('tr', {}, h('td', {}, h('code', {}, `{{${c}}}`)), h('td', {}, 'automático'))),
         nCampos.map(c => h('tr', {}, h('td', {}, h('code', {}, `{{${c}}}`)), h('td', {}, h('input', { type: 'text', placeholder: c === 'tutor' ? 'não achei seu nome: digite aqui' : 'preencha', 'aria-label': `Valor de ${c}`, value: st.custom[c] || '', oninput: e => { st.custom[c] = e.target.value; } })))))) : null;
       const datas = m.modname === 'assign' ? h('div', { class: 'two' }, h('div', {}, h('label', { class: 'l' }, 'Abertura'), h('input', { type: 'datetime-local', value: st.abertura, 'aria-label': 'Abertura', onchange: e => { st.abertura = e.target.value; } })), h('div', {}, h('label', { class: 'l' }, 'Prazo'), h('input', { type: 'datetime-local', value: st.prazo, 'aria-label': 'Prazo de entrega', onchange: e => { st.prazo = e.target.value; } }))) : null;
-      const lista = cursos.length ? h('div', { class: 'list' }, cursos.map(c => h('label', { class: 'it' }, h('input', { type: 'checkbox', checked: st.sel.has(c.id), 'aria-label': c.name, onchange: e => { if (e.target.checked) st.sel.add(c.id); else st.sel.delete(c.id); draw(); } }), h('b', {}, c.name), c.category ? h('small', {}, c.category) : null))) : h('div', { class: 'msg' }, 'Não achei cursos nesta página. Abra a página de um curso ou “Meus cursos”.');
+      const lista = cursos.length ? h('div', { class: 'list' }, cursos.map(c => h('div', { class: 'cw' }, h('label', { class: 'it' }, h('input', { type: 'checkbox', checked: st.sel.has(c.id), 'aria-label': c.name, onchange: e => { if (e.target.checked) st.sel.add(c.id); else st.sel.delete(c.id); draw(); carregarSecoes(); } }), h('b', {}, c.name), c.category ? h('small', {}, c.category) : null), st.sel.has(c.id) ? secaoCtl(c) : null))) : h('div', { class: 'msg' }, 'Não achei cursos nesta página. Abra a página de um curso ou “Meus cursos”.');
       mount(...cab('Edite o texto e escolha onde criar.'),
         h('label', { class: 'l' }, 'Nome'), nome,
         h('label', { class: 'l' }, m.modname === 'label' ? 'Texto (HTML simples)' : 'Descrição (HTML simples)'), txt,
@@ -110,7 +157,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
         st.arquivo ? h('div', { class: 'msg in', role: 'status' }, st.arquivo) : null,
         h('p', { class: 'sub' }, 'Use campos como {{uc}}, {{turma}}, {{tutor}}, {{prazo}} ou crie os seus ({{link_sala}}).'), tab,
         datas,
-        h('div', { class: 'two' }, h('div', {}, h('label', { class: 'l' }, 'Seção (número)'), h('input', { type: 'number', min: '0', max: '60', value: String(st.secao), 'aria-label': 'Número da seção', onchange: e => { st.secao = Math.max(0, parseInt(e.target.value, 10) || 0); } }), h('p', { class: 'sub' }, '0 = seção geral, no topo.')), h('div', {}, h('label', { class: 'l' }, 'Visibilidade'), h('input', { type: 'text', value: 'Oculto para alunos (sempre)', disabled: true }))),
+        h('div', { class: 'two' }, h('div', {}, h('label', { class: 'l' }, 'Procurar seção por nome (opcional)'), h('input', { type: 'text', value: st.busca, placeholder: 'ex.: Unidade 2', 'aria-label': 'Procurar seção por nome', oninput: e => { st.busca = C.clean(e.target.value); aplicarBusca(); } }), h('p', { class: 'sub' }, 'Cada curso tem as suas seções. Escolha a certa em cada curso abaixo.')), h('div', {}, h('label', { class: 'l' }, 'Visibilidade'), h('input', { type: 'text', value: 'Oculto para alunos (sempre)', disabled: true }))),
         h('label', { class: 'l' }, cursoAtual ? 'Onde criar' : 'Onde criar (escolha os cursos)'), lista,
         rodape(h('span', { class: 'sp', role: 'status' }, `${st.sel.size} curso(s) selecionado(s)`), h('button', { type: 'button', onclick: () => { st.passo = 0; draw(); } }, 'Voltar'), h('button', { type: 'button', class: 'pri', disabled: !ok, onclick: irPrevia }, 'Ver prévia')));
     }
@@ -118,13 +165,14 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
       const m = st.modelo; const nome = C.clean(st.nome);
       if (!nome) { st.msg = 'Escreva o nome.'; return alertaP1(st.msg); }
       if (m.modname === 'assign' && (!dAb() || !dPr() || dPr() <= dAb())) return alertaP1('Confira as datas: o prazo precisa ser depois da abertura.');
+      const semSecao = escolhidos().filter(c => !st.secaoPor.has(c.id)); if (semSecao.length) { draw(); return alertaP1(`Escolha a seção em: ${semSecao.map(c => c.name).join(', ')}.`); }
       const f = faltando(); if (f.length) { draw(); return alertaP1(`Preencha os campos: ${f.map(x => `{{${x}}}`).join(', ')}.`); } // redesenha para mostrar o campo novo
       st.passo = 2; st.checks = new Map(); st.running = true; st.ctl = new AbortController(); st.msg = 'Conferindo cada curso (só leitura)…'; draw();
       try {
         const alvos = escolhidos();
         for (let i = 0; i < alvos.length; i++) {
           const c = alvos[i]; st.checks.set(c.id, { estado: 'lendo', detalhe: '' }); draw();
-          st.checks.set(c.id, await A.checar({ origin, curso: c, modelo: m, nome, secao: st.secao, opcoes: { signal: st.ctl.signal } }));
+          st.checks.set(c.id, await A.checar({ origin, curso: c, modelo: m, nome, secao: st.secaoPor.get(c.id), secaoNome: nomeDaSecao(c), opcoes: { signal: st.ctl.signal } }));
           if (i < alvos.length - 1) await A.sleep(A.PAUSA_MS, st.ctl.signal);
         }
         st.msg = '';
@@ -139,12 +187,12 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
       const prev = h('div', { class: 'bd' }, h('h3', {}, st.nome));
       if (ex) { const corpo = h('div', {}); const dd = new root.DOMParser().parseFromString(`<body>${htmlPara(ex)}`, 'text/html'); [...dd.body.childNodes].forEach(n => corpo.append(doc.importNode(n, true))); prev.append(corpo); }
       const dl = h('dl', {}); const resumo = [...m.resumo]; if (m.modname === 'assign') resumo.unshift(['Abertura', dAb() ? C.fmtData(dAb()) : '—'], ['Prazo', dPr() ? C.fmtData(dPr()) : '—']); resumo.forEach(([k, v]) => dl.append(h('dt', {}, k), h('dd', {}, v))); prev.append(dl);
-      const view = h('div', { class: 'view' }, h('div', { class: 'hd' }, h('span', {}, `${m.titulo}${ex ? ` · ${ex.name}` : ''} · seção ${st.secao}`), h('span', { class: 'eye' }, 'Oculto para alunos')), prev);
+      const view = h('div', { class: 'view' }, h('div', { class: 'hd' }, h('span', {}, `${m.titulo}${ex ? ` · ${ex.name}` : ''} · ${ex ? rotuloSecao(ex) : ''}`), h('span', { class: 'eye' }, 'Oculto para alunos')), prev);
       mount(...cab('Confira como vai ficar e o que será criado.'),
         h('div', { class: 'msg' }, 'Nada foi gravado ainda. Ao confirmar, cada item é criado oculto, lido de volta no Moodle e só então marcado como criado.'),
         h('label', { class: 'l' }, 'Como vai ficar (visão do aluno, depois de você revelar)'), view,
         h('label', { class: 'l' }, 'O que será criado'),
-        h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Curso'), h('th', {}, 'Situação'))), h('tbody', {}, escolhidos().map(c => { const k = st.checks.get(c.id) || { estado: 'lendo' }; const r = rotulo[k.estado] || [k.estado, '']; return h('tr', {}, h('td', {}, c.name), h('td', {}, h('span', { class: `st ${r[1]}` }, r[0]), k.detalhe && k.estado !== 'pronta' ? h('div', { class: 'sub' }, k.detalhe) : null, (k.avisos || []).map(a => h('div', { class: 'sub' }, a)))); }))),
+        h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Curso'), h('th', {}, 'Situação'))), h('tbody', {}, escolhidos().map(c => { const k = st.checks.get(c.id) || { estado: 'lendo' }; const r = rotulo[k.estado] || [k.estado, '']; return h('tr', {}, h('td', {}, c.name, h('div', { class: 'sub' }, rotuloSecao(c))), h('td', {}, h('span', { class: `st ${r[1]}` }, r[0]), k.detalhe && k.estado !== 'pronta' ? h('div', { class: 'sub' }, k.detalhe) : null, (k.avisos || []).map(a => h('div', { class: 'sub' }, a)))); }))),
         st.msg ? h('div', { class: 'msg in', role: 'status' }, st.msg) : null,
         rodape(st.running ? h('button', { type: 'button', onclick: cancelar }, 'Cancelar') : h('button', { type: 'button', onclick: () => { st.passo = 1; draw(); } }, 'Voltar'),
           h('button', { type: 'button', class: 'pri', disabled: st.running || !prontos.length, onclick: () => iniciar(prontos) }, `Criar (ocultas)${prontos.length ? ` — ${prontos.length}` : ''}`)));
@@ -155,7 +203,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
       try {
         for (let i = 0; i < alvos.length; i++) {
           const c = alvos[i]; st.pct = Math.round((i / alvos.length) * 100); st.msg = `Criando ${i + 1} de ${alvos.length} — ${c.name}`; draw();
-          st.resultados.set(c.id, await A.criar({ origin, curso: c, modelo: st.modelo, nome, html: htmlPara(c), secao: st.secao, abertura: dAb(), prazo: dPr(), opcoes: { signal: st.ctl.signal } }));
+          st.resultados.set(c.id, await A.criar({ origin, curso: c, modelo: st.modelo, nome, html: htmlPara(c), secao: st.secaoPor.get(c.id), secaoNome: nomeDaSecao(c), abertura: dAb(), prazo: dPr(), opcoes: { signal: st.ctl.signal } }));
           if (i < alvos.length - 1) await A.sleep(A.PAUSA_MS, st.ctl.signal);
         }
         st.msg = '';

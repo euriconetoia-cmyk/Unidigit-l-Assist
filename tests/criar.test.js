@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
 import fs from 'node:fs';
 import path from 'node:path';
+import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -13,7 +14,7 @@ const ORIGIN = 'https://ead.senai.br';
 
 function load(url = `${ORIGIN}/course/view.php?id=7`, body = '<h1>Curso</h1>', ate = 'api.js') {
   const dom = new JSDOM(`<!doctype html><html><body>${body}</body></html>`, { url, runScripts: 'outside-only', pretendToBeVisual: true });
-  const w = dom.window;
+  const w = dom.window; w.TextDecoder = TextDecoder;
   for (const f of files.slice(0, files.indexOf(ate) + 1)) w.eval(fs.readFileSync(path.join(mod, f), 'utf8'));
   return w;
 }
@@ -92,9 +93,9 @@ test('página do curso: acha atividade pelo nome (sem acento/caixa) e lê o cmid
 });
 
 // Moodle de mentira: roteia o fetch como o servidor faria.
-function moodle(w, { form = formAssign(), pos = 'ok', visivelFinal = '0', existe = false, semForm = false } = {}) {
+function moodle(w, { form = formAssign(), pos = 'ok', visivelFinal = '0', existe = false, semForm = false, secoesHtml = '' } = {}) {
   const log = { gets: [], posts: [] }; const acts = existe ? [{ id: 48, nome: 'Atividade 1' }] : [];
-  const pagina = () => `<ul>${acts.map(a => `<li class="activity" data-id="${a.id}"><a href="/mod/assign/view.php?id=${a.id}"><span class="instancename">${a.nome}</span></a></li>`).join('')}</ul>`;
+  const pagina = () => `${secoesHtml}<ul>${acts.map(a => `<li class="activity" data-id="${a.id}"><a href="/mod/assign/view.php?id=${a.id}"><span class="instancename">${a.nome}</span></a></li>`).join('')}</ul>`;
   const resp = (url, body, extra = {}) => ({ ok: true, status: 200, redirected: false, url, text: async () => body, ...extra });
   const fetchImpl = async (url, init = {}) => {
     const u = new URL(url);
@@ -161,4 +162,98 @@ test('ponte: em página de curso abre; em página qualquer sem cursos recusa com
   c.eval(fs.readFileSync(path.join(mod, 'bridge.js'), 'utf8'));
   const out = await c.HUB_CRI.run('criar.abrir'); assert.equal(out.aberto, true);
   assert.ok(c.document.getElementById('hub-cri-host'));
+});
+
+// ---------- seções por nome ----------
+const SEC = '<ul><li class="section main" data-number="0" data-sectionname="Geral"></li><li class="section main" data-number="1" data-sectionname="Unidade 1 — Fundamentos"></li><li class="section main hidden" data-number="2" data-sectionname="Unidade 2 — Endereçamento IP"></li><li class="section main" data-number="3" data-sectionname="Unidade 3 — Roteamento"></li></ul>';
+test('secoes: lê número, nome e se está oculta; acharSecao casa sem acento/caixa e nunca chuta quando há 0 ou 2+ resultados', () => {
+  const w = load(); const l = eq(w.CRI.core.secoes(docDe(w, SEC)));
+  assert.equal(l.length, 4); assert.deepEqual(l.map(x => x.numero), [0, 1, 2, 3]); assert.equal(l[2].oculta, true); assert.equal(l[1].oculta, false);
+  assert.equal(w.CRI.core.acharSecao(l, 'unidade 2'), 2); assert.equal(w.CRI.core.acharSecao(l, 'ENDERECAMENTO'), 2);
+  assert.equal(w.CRI.core.acharSecao(l, 'unidade'), null, 'ambígua: três seções');
+  assert.equal(w.CRI.core.acharSecao(l, 'módulo 9'), null); assert.equal(w.CRI.core.acharSecao(l, ''), null);
+});
+test('criar: se a seção mudou de nome ou sumiu depois da escolha, não cria nada (nem abre o formulário)', async () => {
+  const w = load(); const m = moodle(w, { secoesHtml: SEC });
+  const ok = await w.CRI.api.criar({ ...base(w, m.fetchImpl), secao: 2, secaoNome: 'Unidade 2 — Endereçamento IP' });
+  assert.equal(ok.estado, 'criada'); assert.equal(m.log.posts[0].get('name'), 'Atividade 1');
+  const m2 = moodle(w, { secoesHtml: SEC });
+  const mudou = await w.CRI.api.criar({ ...base(w, m2.fetchImpl), secao: 2, secaoNome: 'Módulo antigo' });
+  assert.equal(mudou.estado, 'falhou'); assert.match(mudou.detalhe, /agora se chama/); assert.match(mudou.detalhe, /Nada foi criado/);
+  assert.equal(m2.log.posts.length, 0); assert.ok(!m2.log.gets.some(g => g.includes('modedit')));
+  const m3 = moodle(w, { secoesHtml: SEC });
+  const sumiu = await w.CRI.api.criar({ ...base(w, m3.fetchImpl), secao: 9, secaoNome: 'Qualquer' });
+  assert.equal(sumiu.estado, 'falhou'); assert.match(sumiu.detalhe, /não existe mais/); assert.equal(m3.log.posts.length, 0);
+});
+test('criar: a seção escolhida vai no endereço do formulário; sem lista de seções (manual) segue sem a trava', async () => {
+  const w = load(); const m = moodle(w, { secoesHtml: SEC });
+  await w.CRI.api.criar({ ...base(w, m.fetchImpl), secao: 3, secaoNome: 'Unidade 3 — Roteamento' });
+  assert.ok(m.log.gets.some(g => g.includes('add=assign') && g.includes('section=3')));
+  const m2 = moodle(w); const r = await w.CRI.api.criar({ ...base(w, m2.fetchImpl), secao: 0, secaoNome: null }); assert.equal(r.estado, 'criada');
+});
+test('checar: seção que mudou aparece como não conferida, sem abrir o formulário', async () => {
+  const w = load(); const m = moodle(w, { secoesHtml: SEC });
+  const r = await w.CRI.api.checar({ origin: ORIGIN, curso: { id: '7', name: 'Redes' }, modelo: w.CRI.core.MODELOS.envio, nome: 'Atividade 1', secao: 1, secaoNome: 'Outro nome', opcoes: { fetchImpl: m.fetchImpl } });
+  assert.equal(r.estado, 'erro'); assert.match(r.detalhe, /agora se chama/); assert.ok(!m.log.gets.some(g => g.includes('modedit')));
+});
+test('lerSecoes: devolve a lista do curso (só leitura)', async () => {
+  const w = load(); const m = moodle(w, { secoesHtml: SEC });
+  const l = await w.CRI.api.lerSecoes({ origin: ORIGIN, curso: { id: '7' }, opcoes: { fetchImpl: m.fetchImpl } });
+  assert.equal(l.length, 4); assert.equal(m.log.posts.length, 0);
+});
+
+// ---------- DOCX ----------
+const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+const crc = b => zlib.crc32 ? zlib.crc32(b) : 0;
+function zip(entradas) { // monta um ZIP mínimo (deflate) para testar o leitor
+  const partes = []; const central = []; let off = 0;
+  for (const [nome, txt, metodo = 8] of entradas) {
+    const raw = Buffer.from(txt, 'utf8'); const comp = metodo === 8 ? zlib.deflateRawSync(raw) : raw; const n = Buffer.from(nome);
+    const lh = Buffer.alloc(30); lh.writeUInt32LE(0x04034b50, 0); lh.writeUInt16LE(20, 4); lh.writeUInt16LE(metodo, 8); lh.writeUInt32LE(crc(raw) >>> 0, 14); lh.writeUInt32LE(comp.length, 18); lh.writeUInt32LE(raw.length, 22); lh.writeUInt16LE(n.length, 26);
+    partes.push(lh, n, comp);
+    const ch = Buffer.alloc(46); ch.writeUInt32LE(0x02014b50, 0); ch.writeUInt16LE(20, 4); ch.writeUInt16LE(20, 6); ch.writeUInt16LE(metodo, 10); ch.writeUInt32LE(crc(raw) >>> 0, 16); ch.writeUInt32LE(comp.length, 20); ch.writeUInt32LE(raw.length, 24); ch.writeUInt16LE(n.length, 28); ch.writeUInt32LE(off, 42);
+    central.push(ch, n); off += 30 + n.length + comp.length;
+  }
+  const cd = Buffer.concat(central); const eo = Buffer.alloc(22); eo.writeUInt32LE(0x06054b50, 0); eo.writeUInt16LE(entradas.length, 8); eo.writeUInt16LE(entradas.length, 10); eo.writeUInt32LE(cd.length, 12); eo.writeUInt32LE(off, 16);
+  const b = Buffer.concat([...partes, cd, eo]); return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+}
+const run = (t, rpr = '') => `<w:r>${rpr ? `<w:rPr>${rpr}</w:rPr>` : ''}<w:t xml:space="preserve">${t}</w:t></w:r>`;
+const par = (inner, ppr = '') => `<w:p>${ppr ? `<w:pPr>${ppr}</w:pPr>` : ''}${inner}</w:p>`;
+const DOC = `<?xml version="1.0"?><w:document ${W}><w:body>
+${par(run('Plano de ensino'), '<w:pStyle w:val="Heading1"/>')}
+${par(run('Olá, ') + run('{{', '<w:b/>') + run('uc', '<w:b/>') + run('}}', '<w:b/>') + run('! Veja o ') + `<w:hyperlink r:id="rId5">${run('guia', '<w:u w:val="single"/>')}</w:hyperlink>` + run(' &lt;b&gt;x&lt;/b&gt; &amp; mais', '<w:i/>'))}
+${par(run('Leia o material'), '<w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr>')}
+${par(run('Entregue em PDF'), '<w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr>')}
+${par(run('Passo um'), '<w:numPr><w:ilvl w:val="0"/><w:numId w:val="2"/></w:numPr>')}
+<w:tbl><w:tblPr><w:tblLook w:firstRow="1"/></w:tblPr><w:tr><w:tc>${par(run('Critério'))}</w:tc><w:tc>${par(run('Peso'))}</w:tc></w:tr><w:tr><w:tc>${par(run('Clareza'))}</w:tc><w:tc>${par(run('40%'))}</w:tc></w:tr></w:tbl>
+${par('<w:r><w:drawing/></w:r>')}${par('')}
+</w:body></w:document>`;
+const NUM = `<w:numbering ${W}><w:abstractNum w:abstractNumId="0"><w:lvl w:ilvl="0"><w:numFmt w:val="bullet"/></w:lvl></w:abstractNum><w:abstractNum w:abstractNumId="1"><w:lvl w:ilvl="0"><w:numFmt w:val="decimal"/></w:lvl></w:abstractNum><w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num><w:num w:numId="2"><w:abstractNumId w:val="1"/></w:num></w:numbering>`;
+const RELS = '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId5" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="https://exemplo.com/guia" TargetMode="External"/></Relationships>';
+const inflar = async b => new Uint8Array(zlib.inflateRawSync(Buffer.from(b)));
+
+test('docx: lê título, negrito/itálico/sublinhado, link, listas (ponto e número), tabela; junta runs para o {{campo}} não quebrar', async () => {
+  const w = load(); const buf = zip([['word/document.xml', DOC], ['word/numbering.xml', NUM], ['word/_rels/document.xml.rels', RELS]]);
+  const r = await w.CRI.docx.ler(buf, { inflar });
+  assert.match(r.html, /<h2>Plano de ensino<\/h2>/);
+  assert.match(r.html, /<strong>\{\{uc\}\}<\/strong>/, 'campo inteiro dentro de um único negrito');
+  assert.deepEqual(eq(w.CRI.core.campos(w.CRI.core.sanitizar(r.html))), ['uc']);
+  assert.match(r.html, /<a href="https:\/\/exemplo.com\/guia"><u>guia<\/u><\/a>/);
+  assert.match(r.html, /<em> &lt;b&gt;x&lt;\/b&gt; &amp; mais<\/em>/, 'texto do Word é escapado, nunca vira HTML');
+  assert.match(r.html, /<ul><li>Leia o material<\/li><li>Entregue em PDF<\/li><\/ul>/); assert.match(r.html, /<ol><li>Passo um<\/li><\/ol>/);
+  assert.match(r.html, /<table><tr><th>Critério<\/th><th>Peso<\/th><\/tr><tr><td>Clareza<\/td><td>40%<\/td><\/tr><\/table>/);
+  assert.ok(r.avisos.some(a => /Imagens/.test(a)));
+  assert.ok(!/<script|onerror|<img/i.test(w.CRI.core.sanitizar(r.html)));
+});
+test('docx: erros claros (não é zip, sem texto, senha, protegido) e sem permissão de internet', async () => {
+  const w = load();
+  await assert.rejects(() => w.CRI.docx.ler(new TextEncoder().encode('isto não é zip').buffer, { inflar }), /não parece um DOCX/);
+  await assert.rejects(() => w.CRI.docx.ler(zip([['outro.txt', 'x']]), { inflar }), /falta o texto/);
+  await assert.rejects(() => w.CRI.docx.ler(zip([['word/document.xml', `<w:document ${W}><w:body>${par('')}</w:body></w:document>`]]), { inflar }), /Não achei texto/);
+  await assert.rejects(() => w.CRI.docx.ler(zip([['word/document.xml', '<w:document ']]), { inflar }), /Não consegui ler/);
+  const r = await w.CRI.docx.ler(zip([['word/document.xml', DOC, 0]]), { inflar }); assert.match(r.html, /Plano de ensino/, 'entrada sem compactação também lê');
+});
+test('docx: script embutido no texto do Word vira texto inofensivo', () => {
+  const w = load(); const r = w.CRI.docx.paraHtml(`<w:document ${W}><w:body>${par(run('&lt;script&gt;alert(1)&lt;/script&gt;&lt;img src=x onerror=alert(2)&gt;'))}</w:body></w:document>`);
+  assert.ok(!/<script|<img/i.test(r.html)); assert.match(r.html, /&lt;script&gt;/);
 });

@@ -169,9 +169,15 @@
     const out = []; const vistos = new Set();
     doc.querySelectorAll('li.section[data-number], li.course-section[data-number], [data-for="section"][data-number]').forEach(s => {
       const n = s.getAttribute('data-number'); if (n == null || vistos.has(n)) return; vistos.add(n);
-      out.push({ numero: Number(n), nome: clean(s.getAttribute('data-sectionname')) || textoDe(s.querySelector('.sectionname, [data-for="section_title"], h3')) || (n === '0' ? 'Geral' : `Seção ${n}`) });
+      out.push({ oculta: s.classList.contains('hidden') || s.classList.contains('dimmed'), numero: Number(n), nome: clean(s.getAttribute('data-sectionname')) || textoDe(s.querySelector('.sectionname, [data-for="section_title"], h3')) || (n === '0' ? 'Geral' : `Seção ${n}`) });
     });
     return out;
+  }
+  // Procura, entre as seções lidas, a que melhor casa com o texto (sem acento/maiúscula). Devolve o número ou null. Nunca chuta: só aceita se achar UMA.
+  function acharSecao(lista, busca) {
+    const q = fold(busca); if (!q) return null;
+    const exato = lista.filter(x => fold(x.nome) === q); if (exato.length === 1) return exato[0].numero;
+    const parc = lista.filter(x => fold(x.nome).includes(q)); return parc.length === 1 ? parc[0].numero : null;
   }
   const valorVisivel = doc => { const s = doc.querySelector('select[name="visible"]'); const o = s && (s.options[s.selectedIndex] || [...s.options].find(x => x.selected)); return o ? o.value : null; };
   function cursoIdDaUrl(href) { try { const u = new URL(href); return /\/course\/view\.php$/.test(u.pathname) && /^\d+$/.test(u.searchParams.get('id') || '') ? u.searchParams.get('id') : null; } catch (_) { return null; } }
@@ -191,5 +197,5 @@
   }
   function nomeDoTutor(doc) { const n = doc.querySelector('.usermenu .usertext, [data-region="usermenu"] .usertext, .userbutton .usertext, .usermenu .login .usertext'); return textoDe(n); }
 
-  CRI.core = { MODELOS, campos, preencher, sanitizar, partesData, fmtData, lerLocal, coletar, definir, achaForm, montarEnvio, codificar, errosDoForm, atividades, acharPorNome, secoes, valorVisivel, cursoIdDaUrl, cursosDaPagina, nomeDoTutor, fold, clean, esc };
+  CRI.core = { MODELOS, campos, preencher, sanitizar, partesData, fmtData, lerLocal, coletar, definir, achaForm, montarEnvio, codificar, errosDoForm, atividades, acharPorNome, secoes, acharSecao, valorVisivel, cursoIdDaUrl, cursosDaPagina, nomeDoTutor, fold, clean, esc };
 })(globalThis);
