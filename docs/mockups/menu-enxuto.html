@@ -1,0 +1,78 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Menu enxuto — proposta</title>
+<style>
+:root{--p:#1a4b9f;--o:#ef5e31;--bd:#d9dfeb;--bg:#eef2f8;--t:#1c2433;--m:#5b667a;--ok:#1b7a3d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:14px/1.4 system-ui,Segoe UI,Arial;color:var(--t);padding:22px}
+h1{font-size:20px;margin:0 0 4px;color:var(--p)}.lead{color:var(--m);margin:0 0 16px;max-width:900px}
+.grid{display:grid;grid-template-columns:270px repeat(3,260px);gap:18px;align-items:start;max-width:1260px}
+.col h3{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--m)}
+.col .cap{font-size:12px;color:var(--m);margin:6px 2px 0}
+.hoje img{width:100%;border:1px solid var(--bd);border-radius:14px;display:block}
+.menu{background:#fff;border:1px solid var(--bd);border-radius:16px;box-shadow:0 6px 22px #1a4b9f1f;overflow:hidden}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 6px}
+.hd b{font-size:15px}.hd span{color:var(--m);font-size:12px}
+.ic{display:flex;gap:6px}.ib{width:32px;height:32px;border-radius:50%;border:1px solid var(--bd);display:grid;place-items:center;color:var(--p);background:#fff;font-size:15px}
+.it{display:flex;align-items:center;gap:12px;padding:0 14px;min-height:44px;border-top:1px solid #edf0f6}
+.it:first-of-type{border-top:0}
+.dot{width:28px;height:28px;border-radius:50%;background:var(--p);color:#fff;display:grid;place-items:center;font-size:13px;position:relative;flex:none}
+.dot:after{content:"";position:absolute;right:-1px;bottom:-1px;width:8px;height:8px;border-radius:50%;background:var(--o);border:2px solid #fff;display:none}
+.it b{font-weight:600}.it small{margin-left:auto;color:var(--m);font-size:12px}
+.ft{padding:8px 14px 10px;border-top:1px solid #edf0f6;color:var(--m);font-size:11.5px;display:flex;gap:6px;align-items:center}
+.ft i{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block}
+.sheet{margin-top:10px;background:#fff;border:1px solid var(--bd);border-radius:14px;padding:6px 0}
+.sheet .it{min-height:38px}
+.nums{margin-top:18px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:1260px}
+.n{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:10px 14px}.n b{display:block;font-size:22px;color:var(--p)}.n s{color:var(--m)}.n span{font-size:12px;color:var(--m)}
+.tabs{display:flex;gap:2px;padding:0 10px;border-bottom:1px solid var(--bd);background:#fff;border-radius:14px 14px 0 0;margin-top:0}
+.tabs div{padding:10px 10px;font-size:13px;color:var(--m)}.tabs .on{color:var(--p);font-weight:600;border-bottom:3px solid var(--p)}
+.panel{margin-top:18px;max-width:1260px;background:#fff;border:1px solid var(--bd);border-radius:14px}
+.panel .top{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:linear-gradient(90deg,#1a4b9f,#123a7e);color:#fff;border-radius:14px 14px 0 0}
+.panel .top span{font-size:12px;opacity:.85}.pbody{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:14px 16px}
+.cmp{font-size:12.5px}.cmp b{color:var(--p)}.old{color:#8a93a6;text-decoration:line-through}
+.tag{display:inline-block;background:var(--o);color:#fff;border-radius:99px;font-size:11px;padding:2px 9px;font-weight:600;margin-bottom:6px}
+</style>
+<h1>Menu enxuto</h1>
+<p class="lead">Ideia: o menu mostra só o que vale para a página em que você está, sem descrições nem rótulos de grupo, e o que é de apoio (ajuda, dados, compatibilidade) vai para uma engrenagem. Hoje são 15 entradas; na proposta aparecem no máximo 4 por vez.</p>
+<div class="grid">
+ <div class="col hoje"><h3>Hoje (curso)</h3><img src="menu-hoje.png" alt="Menu atual"><div class="cap">6 itens + gaveta com 9, cada um com descrição, 4 rótulos e itens “não se aplica aqui”.</div></div>
+
+ <div class="col"><h3>Proposta · página do curso</h3>
+  <div class="menu"><div class="hd"><b>Unidigit@l Assist</b><div class="ic"><div class="ib" title="Ajuda e dados">⚙</div><div class="ib">✕</div></div></div>
+   <div class="it"><div class="dot">🎓</div><b>Alunos</b></div>
+   <div class="it"><div class="dot">✓</div><b>Correção</b></div>
+   <div class="it"><div class="dot">＋</div><b>Criar conteúdo</b></div>
+   <div class="it"><div class="dot">📅</div><b>Datas do curso</b></div>
+   <div class="ft"><i></i>Só age quando você clica</div></div>
+  <div class="cap">Alunos junta Acompanhamento, Alunos e notas e Relatório da UC (viram abas). Correção junta Pendências e Lançar notas. Datas do curso junta Conferir datas e Cronograma.</div></div>
+
+ <div class="col"><h3>Proposta · Meus cursos</h3>
+  <div class="menu"><div class="hd"><b>Unidigit@l Assist</b><div class="ic"><div class="ib">⚙</div><div class="ib">✕</div></div></div>
+   <div class="it"><div class="dot">▦</div><b>Relatório da turma</b></div>
+   <div class="it"><div class="dot">＋</div><b>Criar conteúdo</b></div>
+   <div class="ft"><i></i>Só age quando você clica</div></div>
+  <div class="cap">Itens que não servem aqui simplesmente não aparecem (some o “não se aplica aqui”).</div>
+  <h3 style="margin-top:18px">Proposta · Kahoot</h3>
+  <div class="menu"><div class="hd"><b>Unidigit@l Assist</b><div class="ic"><div class="ib">⚙</div><div class="ib">✕</div></div></div>
+   <div class="it"><div class="dot">?</div><b>Importar perguntas</b><small>baixar modelo</small></div>
+   <div class="ft"><i></i>Só age quando você clica</div></div></div>
+
+ <div class="col"><h3>Engrenagem ⚙ (apoio)</h3>
+  <div class="menu"><div class="hd"><b>Ajuda e dados</b><div class="ic"><div class="ib">←</div></div></div>
+   <div class="it" style="min-height:40px"><div class="dot" style="width:24px;height:24px">✔</div><b>Compatibilidade</b></div>
+   <div class="it" style="min-height:40px"><div class="dot" style="width:24px;height:24px">▤</div><b>Meus dados</b></div>
+   <div class="it" style="min-height:40px"><div class="dot" style="width:24px;height:24px">i</div><b>Sobre e novidades</b></div>
+   <div class="it" style="min-height:40px"><div class="dot" style="width:24px;height:24px">▥</div><b>Automação por blocos</b><small>avançado</small></div></div>
+  <div class="cap">Tudo que se usa pouco fica aqui, a um toque, fora da vista no dia a dia. Modelo do Kahoot vira o link “baixar modelo” dentro do Kahoot.</div></div>
+</div>
+
+<div class="panel"><div class="top"><b>Alunos</b><span>Somente leitura · nada é gravado no Moodle</span></div>
+ <div class="tabs"><div class="on">Resumo</div><div>Alunos</div><div>Acompanhamento</div><div>Relatório</div><div style="margin-left:auto">⚙ Ajustes</div></div>
+ <div class="pbody"><div class="cmp"><span class="tag">hoje · 6 abas</span><br>Resumo · Alunos · <span class="old">Notas</span> · Acompanhamento · Relatório da UC · <span class="old">Ajustes</span>, repetidas também no menu.</div>
+ <div class="cmp"><span class="tag">proposta · 4 abas</span><br><b>Notas</b> vira uma visão dentro de “Alunos” (alternar <b>Lista | Notas</b>). <b>Ajustes</b> vai para a engrenagem do próprio painel. O menu deixa de repetir as abas.</div></div></div>
+
+<div class="nums">
+ <div class="n"><b>15 → 4</b><span>entradas visíveis por vez (no máx.)</span></div>
+ <div class="n"><b>2 → 0</b><span>linhas de descrição por item e rótulos de grupo</span></div>
+ <div class="n"><b>6 → 4</b><span>abas no painel de Alunos</span></div>
+ <div class="n"><b>6 → 0</b><span>avisos “não se aplica aqui” (o item some)</span></div>
+</div>
+</html>
