@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { abrirItem } from './menu.mjs';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -60,9 +61,8 @@ try {
   await pg.goto(`${ORIGIN}/course/view.php?id=7`);
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached', timeout: 15000 });
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
   check('gaveta tem "Conferir datas" disponível', await pg.evaluate(() => document.querySelector('#hub-ead-launcher').shadowRoot.querySelector('[data-app="conferir-datas"]').getAttribute('aria-disabled') === 'false'));
-  await pg.click('#hub-ead-launcher .app[data-app="conferir-datas"]');
+  await abrirItem(pg, 'conferir-datas');
   await pg.waitForSelector('#hub-dts-host', { state: 'attached', timeout: 15000 });
   const q = s => pg.locator(`#hub-dts-host ${s}`);
   check('antes do clique em Ler, nada foi consultado', log.gets === 0);

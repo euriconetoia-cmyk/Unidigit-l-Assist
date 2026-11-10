@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { abrirItem } from './menu.mjs';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -55,9 +56,8 @@ try {
   await pg.goto(`${ORIGIN}/course/view.php?id=7`);
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached', timeout: 15000 });
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
   check('gaveta tem "Cronograma da turma" disponível', await pg.evaluate(() => document.querySelector('#hub-ead-launcher').shadowRoot.querySelector('[data-app="cronograma-turma"]').getAttribute('aria-disabled') === 'false'));
-  await pg.click('#hub-ead-launcher .app[data-app="cronograma-turma"]');
+  await abrirItem(pg, 'cronograma-turma');
   await pg.waitForSelector('#hub-crn-host', { state: 'attached', timeout: 15000 });
   const q = s => pg.locator(`#hub-crn-host ${s}`);
   await q('input[type=file]').first().waitFor({ state: 'attached', timeout: 10000 });

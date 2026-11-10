@@ -7,6 +7,9 @@
 - **Painel das turmas (HTML dinâmico)**: filtro por turma, busca (turma, UC ou aluno), cartões clicáveis (ativos, suspensos, sem acesso), detalhe de UCs, seção **Notas por UC** (média, abaixo da faixa, recuperação, sem nota; leitura **parcial** aparece com “N de M alunos” e a UC que falhou aparece como “Não coletada” com o motivo) e **Atenção no fim**, com filtro, ordenação e “Copiar nomes”. Se as notas falharem, as matrículas já lidas continuam no painel. O script do arquivo é fixo, sem internet e sem recurso externo.
 - **Relatório da turma com matriculados**: lista as turmas e quantos alunos estão matriculados em cada uma (só alunos; o aluno em várias UCs conta uma vez), com ativos, suspensos e sem acesso há 7+ dias. Lê só a lista de participantes de cada UC (uma por vez, com pausa e botão Cancelar). Saída em **página HTML** (arquivo único, abre offline) e/ou **Excel** (abas Turmas, Por UC, Atenção, Avisos). Compara com a leitura anterior (só números, `uas.turmas`) e tem **Copiar resumo**. “Notas e situação por UC” continua disponível como opção.
 
+### Mudou
+- **Menu enxuto** (estilo C: quadrado arredondado azul-claro com ícone azul; ativo/hover em azul cheio): o painel mostra só o que serve para a página em que você está (no máximo 4 entradas), sem descrições nem rótulos de grupo — a descrição virou dica ao passar o mouse. Grupos parecidos foram juntados (Alunos, Correção, Criar conteúdo, Datas, Turma) e o que é de apoio (Compatibilidade, Meus dados, Sobre e novidades, Kahoot, Modelo CSV, Automação por blocos) ficou atrás da engrenagem ⚙ no topo. Nenhuma função saiu; só mudou onde cada uma fica.
+
 ### Interno
 - Chaves `uas.turmas` (comparativo de matriculados) e módulo `criar` (sem permissão nova). Validado só no Moodle simulado; falta homologar no SENAI e no FIEG.
 

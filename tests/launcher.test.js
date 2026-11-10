@@ -30,33 +30,59 @@ test('não monta duas vezes na mesma página', () => {
   assert.equal(dom.window.document.querySelectorAll('#hub-ead-launcher').length, 1);
 });
 
-test('o menu principal tem 6 ferramentas + "Ferramentas"; as indisponíveis ficam na gaveta como "em breve"', () => {
+const nomesMain = ui => [...ui.shadow.querySelectorAll('[data-view="main"] .items > .app b')].map(b => b.textContent);
+
+test('menu na página do curso: só 4 entradas, sem descrição e sem rótulos de grupo; toda ferramenta continua existindo', () => {
   const { ui } = mount();
   ui.tab.click();
   assert.equal(ui.isOpen(), true);
-  assert.equal(ui.items.length, APPS.length + 1); // + o botão da gaveta
-  const main = [...ui.shadow.querySelectorAll('[data-view="main"] > .items > .app b')].map(b => b.textContent);
-  assert.deepEqual(main, ['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Ferramentas']);
-  const gav = [...ui.shadow.querySelectorAll('[data-view="gaveta"] .app b')].map(b => b.textContent);
-  assert.deepEqual(gav, ['Kahoot — importar perguntas', 'Modelo de perguntas (CSV)', 'Conferir datas', 'Cronograma da turma', 'Criar conteúdo', 'Automação por blocos', 'Compatibilidade', 'Meus dados', 'Sobre']);
-  const tag = n => ui.shadow.querySelector(`[data-app="${n}"]`).getAttribute('aria-disabled');
-  assert.deepEqual(['kahoot', 'modelo-kahoot', 'conferir-datas', 'blocos'].map(tag), ['false', 'false', 'false', 'true']);
-  assert.match(ui.shadow.querySelector('[data-app="blocos"]').textContent, /em breve/);
+  assert.deepEqual(nomesMain(ui), ['Alunos', 'Correção', 'Criar conteúdo', 'Datas do curso']);
+  assert.equal(ui.shadow.querySelectorAll('.sec, small, .hint').length, 0);
+  assert.equal(ui.shadow.querySelector('.rodape').textContent, 'Só age quando você clica');
+  const ids = ui.items.map(i => i.getAttribute('data-app'));
+  for (const a of APPS.filter(x => !x.oculto)) assert.ok(ids.includes(a.id), `falta ${a.id}`);
+  assert.ok(ids.includes('grupo-correcao') && ids.includes('grupo-datas'));
 });
 
-test('a gaveta Ferramentas abre com voltar, e fechar o menu volta ao principal', () => {
+test('o menu muda com a página: Meus cursos, atividade e página qualquer', () => {
+  const nomes = url => { const { ui } = mountAt(url); ui.tab.click(); return nomesMain(ui); };
+  assert.deepEqual(nomes('https://ead.senai.br/my/'), ['Criar conteúdo', 'Relatório da turma']);
+  assert.deepEqual(nomes('https://ead.senai.br/mod/assign/view.php?id=55'), ['Alunos', 'Correção']);
+  assert.deepEqual(nomes('https://ead.senai.br/user/index.php?id=3'), ['Alunos']);
+  const { ui } = mountAt('https://ead.senai.br/mod/assign/view.php?id=55');
+  assert.ok(ui.shadow.querySelector('[data-view="main"] [data-app="correcao"]'), 'na atividade, Correção abre direto (sem grupo)');
+  assert.equal(ui.shadow.querySelector('[data-app="grupo-correcao"]'), null);
+});
+
+test('a engrenagem abre "Ajuda e dados" com voltar; fechar o menu volta ao principal', () => {
   const { ui } = mount();
   ui.tab.click();
   const view = n => ui.shadow.querySelector(`[data-view="${n}"]`);
-  assert.equal(view('gaveta').hidden, true);
-  ui.shadow.querySelector('[data-app="ferramentas"]').click();
-  assert.equal(view('main').hidden, false); assert.equal(view('gaveta').hidden, false); // a lista continua visível; a gaveta abre logo abaixo de Ferramentas
-  assert.equal(ui.shadow.querySelector('[data-app="ferramentas"]').getAttribute('aria-expanded'), 'true');
-  ui.shadow.querySelector('[data-app="ferramentas"]').click(); // clicar de novo recolhe
-  assert.equal(view('main').hidden, false); assert.equal(view('gaveta').hidden, true);
-  ui.shadow.querySelector('[data-app="ferramentas"]').click();
-  ui.tab.click(); ui.tab.click(); // fecha e reabre: a gaveta volta fechada
-  assert.equal(view('main').hidden, false); assert.equal(view('gaveta').hidden, true);
+  assert.equal(view('apoio').hidden, true);
+  ui.shadow.querySelector('[data-ctl="apoio"]').click();
+  assert.equal(view('main').hidden, true); assert.equal(view('apoio').hidden, false);
+  const nomes = [...view('apoio').querySelectorAll('.app b')].map(b => b.textContent);
+  assert.deepEqual(nomes, ['Compatibilidade', 'Meus dados', 'Sobre e novidades', 'Kahoot: importar perguntas', 'Modelo de perguntas (CSV)', 'Automação por blocos']);
+  assert.match(view('apoio').textContent, /Mover aba/);
+  view('apoio').querySelector('[data-ctl="voltar"]').click();
+  assert.equal(view('main').hidden, false); assert.equal(view('apoio').hidden, true);
+  ui.shadow.querySelector('[data-ctl="apoio"]').click();
+  ui.tab.click(); ui.tab.click(); // fecha e reabre: volta ao principal
+  assert.equal(view('main').hidden, false); assert.equal(view('apoio').hidden, true);
+  ui.shadow.querySelector('[data-ctl="fechar"]').click();
+  assert.equal(ui.isOpen(), false);
+});
+
+test('grupo: Correção abre a escolha (Pendências / Lançar notas) e Datas do curso (Conferir datas / Cronograma)', () => {
+  const { ui } = mount();
+  ui.tab.click();
+  const view = n => ui.shadow.querySelector(`[data-view="${n}"]`);
+  ui.shadow.querySelector('[data-app="grupo-correcao"]').click();
+  assert.equal(view('main').hidden, true);
+  assert.deepEqual([...view('grupo-correcao').querySelectorAll('.app b')].map(b => b.textContent), ['Pendências', 'Lançar notas por CSV']);
+  view('grupo-correcao').querySelector('[data-ctl="voltar"]').click();
+  ui.shadow.querySelector('[data-app="grupo-datas"]').click();
+  assert.deepEqual([...view('grupo-datas').querySelectorAll('.app b')].map(b => b.textContent), ['Conferir datas', 'Cronograma da turma']);
 });
 
 test('Alt+U abre e fecha o menu; a lingueta anuncia o atalho', () => {
@@ -80,13 +106,13 @@ test('Mover aba sobe e desce 48 px, sem passar dos limites', () => {
   assert.equal(wrap.style.getPropertyValue('--bt'), '24px');
 });
 
-test('setas ↑ ↓ andam entre as ferramentas visíveis (a gaveta fechada não entra)', () => {
+test('setas ↑ ↓ andam entre as entradas visíveis do menu', () => {
   const { ui, dom } = mount();
   ui.open();
   const key = k => ui.shadow.querySelector('.panel').dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
-  assert.equal(ui.shadow.activeElement.getAttribute('data-app'), 'pendencias');
-  key('ArrowDown'); assert.equal(ui.shadow.activeElement.getAttribute('data-app'), 'correcao');
-  key('ArrowUp'); key('ArrowUp'); assert.equal(ui.shadow.activeElement.getAttribute('data-app'), 'ferramentas');
+  assert.equal(ui.shadow.activeElement.getAttribute('data-app'), 'alunos-notas');
+  key('ArrowDown'); assert.equal(ui.shadow.activeElement.getAttribute('data-app'), 'grupo-correcao');
+  key('ArrowUp'); key('ArrowUp'); assert.equal(ui.shadow.activeElement.getAttribute('data-app'), 'grupo-datas');
 });
 
 test('cada ferramenta tem ícone próprio (exceto as que repetem de propósito) e todos existem', () => {
@@ -98,11 +124,13 @@ test('cada ferramenta tem ícone próprio (exceto as que repetem de propósito) 
   assert.ok(nomes.every(Boolean));
 });
 
-test('ferramenta que não serve para a página mostra o chip "não se aplica aqui" e a dica, sem esmaecer o texto', () => {
+test('ferramenta que não serve para a página some do menu (sem aviso "não se aplica aqui"), mas continua existindo oculta', () => {
   const { ui } = mountAt('https://ead.senai.br/mod/assign/view.php?id=55');
+  ui.tab.click();
+  assert.doesNotMatch(ui.shadow.textContent, /não se aplica aqui/);
   const pend = ui.shadow.querySelector('[data-app="pendencias"]');
-  assert.match(pend.querySelector('.tag').textContent, /não se aplica aqui/);
-  assert.ok(pend.querySelector('small').textContent.length > 5);
+  assert.ok(pend.closest('[hidden]'), 'Pendências fica no depósito oculto');
+  assert.ok(!nomesMain(ui).includes('Datas do curso'));
 });
 
 test('Kahoot na gaveta pede a página da extensão; o modelo CSV baixa sem enviar nada', async () => {
@@ -116,15 +144,17 @@ test('Kahoot na gaveta pede a página da extensão; o modelo CSV baixa sem envia
   assert.deepEqual(sent, [{ type: 'hub-open', app: 'kahoot' }]);
 });
 
-test('clicar em Pendências envia o pedido e fecha o menu; em breve não envia nada', async () => {
+test('clicar em Pendências (dentro de Correção) envia o pedido e fecha o menu; "em breve" não envia nada', async () => {
   const { ui, sent } = mount();
   ui.tab.click();
-  ui.shadow.querySelector('[data-app="ferramentas"]').click();
+  ui.shadow.querySelector('[data-ctl="apoio"]').click();
   ui.shadow.querySelector('[data-app="blocos"]').click();
   await flush();
   assert.deepEqual(sent, []);
   assert.match(ui.status.textContent, /ainda não está disponível/);
-  ui.items[0].click();
+  ui.shadow.querySelector('[data-view="apoio"] [data-ctl="voltar"]').click();
+  ui.shadow.querySelector('[data-app="grupo-correcao"]').click();
+  ui.shadow.querySelector('[data-app="pendencias"]').click();
   await flush();
   assert.deepEqual(sent, [{ type: 'hub-open', app: 'pendencias' }]);
   assert.equal(ui.isOpen(), false);
@@ -190,11 +220,9 @@ test('handler: Acompanhamento, Alunos e notas e Relatório da UC chamam o módul
   assert.deepEqual(calls.map(c => c.slice(1)), [['alunos', 'alunos.abrir', { aba: 'acomp' }], ['alunos', 'alunos.abrir', { aba: 'resumo' }], ['alunos', 'alunos.abrir', { aba: 'relatorio' }]]);
 });
 
-test('menu em cards: seções, painel inerte quando fechado e rótulo do botão acompanha o estado', () => {
+test('menu em cards: painel inerte quando fechado e rótulo do botão acompanha o estado', () => {
   const { ui } = mount();
   assert.equal(ui.panel.hasAttribute('inert'), true);
-  const secoes = [...ui.shadow.querySelectorAll('.sec')].map(n => n.textContent);
-  assert.deepEqual(secoes, ['Correção', 'Alunos', 'Mais', 'Ferramentas', 'Ajuda e dados']);
   ui.tab.click();
   assert.equal(ui.panel.hasAttribute('inert'), false);
   assert.equal(ui.tab.getAttribute('aria-expanded'), 'true');
@@ -220,21 +248,19 @@ function mountAt(url, setup) {
   const ui = mountLauncher(dom.window.document, async message => { sent.push(message); return { ok: true, message: 'ok' }; });
   return { dom, ui, sent };
 }
-test('em página de atividade: Correção vale, Pendências fica esmaecida e só explica (nada é enviado)', async () => {
+test('em página de atividade: Correção abre direto; Pendências não aparece e, se pedida, só explica (nada é enviado)', async () => {
   const { ui, sent } = mountAt('https://ead.senai.br/mod/assign/view.php?id=55');
   const btn = id => ui.shadow.querySelector(`.app[data-app="${id}"]`);
-  assert.equal(btn('pendencias').getAttribute('data-fora'), 'true');
-  assert.equal(btn('correcao').getAttribute('data-fora'), null);
   btn('pendencias').click(); await flush();
   assert.equal(sent.length, 0);
   assert.match(ui.status.textContent, /não se aplica a esta página/);
   btn('correcao').click(); await flush();
   assert.deepEqual(sent, [{ type: 'hub-open', app: 'correcao' }]);
 });
-test('em página de curso: Pendências e Correção valem', () => {
+test('em página de curso: só o Relatório da turma é exclusivo de "Meus cursos" (fica oculto)', () => {
   const { ui } = mountAt('https://ead.senai.br/course/view.php?id=7');
-  const fora = [...ui.shadow.querySelectorAll('[data-fora="true"]')].map(b => b.getAttribute('data-app'));
-  assert.deepEqual(fora, ['relatorio-turma']); // só o Relatório da turma é exclusivo de "Meus cursos"
+  const ocultos = [...ui.shadow.querySelectorAll('[data-deposito] .app')].map(b => b.getAttribute('data-app'));
+  assert.deepEqual(ocultos, ['relatorio-turma']);
 });
 test('depois de salvar no Moodle (conferência pendente) a Correção é retomada sozinha, uma vez', async () => {
   const { sent } = mountAt('https://ead.senai.br/mod/assign/view.php?id=55&action=grading', w => w.sessionStorage.setItem('imn_verify_v1', '{}'));

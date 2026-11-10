@@ -6,6 +6,7 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import { execSync } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { abrirItem } from './menu.mjs';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -91,9 +92,8 @@ try {
   await pg.goto(`${ORIGIN}/my/`);
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached', timeout: 15000 });
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
   check('gaveta mostra "Criar conteúdo" disponível em Meus cursos', await pg.evaluate(() => document.querySelector('#hub-ead-launcher').shadowRoot.querySelector('[data-app="criar-conteudo"]').getAttribute('aria-disabled') === 'false'));
-  await pg.click('#hub-ead-launcher .app[data-app="criar-conteudo"]');
+  await abrirItem(pg, 'criar-conteudo');
   await pg.waitForSelector('#hub-cri-host', { state: 'attached', timeout: 15000 });
   const q = s => pg.locator(`#hub-cri-host >> ${s}`);
   check('abrir não consulta nada no Moodle', log.gets === 0 && log.posts.length === 0);
@@ -141,7 +141,7 @@ try {
   // ---- Fórum no curso 8 (já existe) e texto no 7, a partir da página do curso ----
   await pg.goto(`${ORIGIN}/course/view.php?id=8`);
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
-  await pg.click('#hub-ead-launcher .tab'); await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]'); await pg.click('#hub-ead-launcher .app[data-app="criar-conteudo"]');
+  await pg.click('#hub-ead-launcher .tab'); await abrirItem(pg, 'criar-conteudo');
   await pg.waitForSelector('#hub-cri-host', { state: 'attached' });
   await q('button.pri:has-text("Continuar")').click();
   await q('select[data-curso="8"]').waitFor({ timeout: 30000 }); await q('select[data-curso="8"]').selectOption('2');
@@ -175,7 +175,7 @@ try {
 
   // ---- Moodle falha (503): vira "Falhou" e não conta como criada ----
   falha503 = true; acts[8] = [];
-  await pg.click('#hub-ead-launcher .tab'); await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]'); await pg.click('#hub-ead-launcher .app[data-app="criar-conteudo"]');
+  await pg.click('#hub-ead-launcher .tab'); await abrirItem(pg, 'criar-conteudo');
   await pg.waitForSelector('#hub-cri-host', { state: 'attached' });
   await q('button.opt:has-text("Fórum de apresentação")').click();
   await q('button.pri:has-text("Continuar")').click(); await q('select[data-curso="8"]').waitFor({ timeout: 30000 }); await q('select[data-curso="8"]').selectOption('2'); await q('button.pri:has-text("Ver prévia")').click();

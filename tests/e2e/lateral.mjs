@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { abrirItem } from './menu.mjs';
 import { fileURLToPath } from 'node:url';
 import { graderPage, participantsPage } from '../fixtures/moodle-alunos.js';
 import { TAREFAS, assignViewPage, assignGradingPage } from '../fixtures/moodle-tarefas.js';
@@ -94,19 +95,18 @@ try {
   await pg.screenshot({ path: path.join(SHOTS, '1-botao-fechado.png') });
 
   await pg.click('#hub-ead-launcher .tab');
-  const names = await pg.locator('#hub-ead-launcher [data-view="main"] > .items > .app b').allTextContents();
-  check('o menu principal lista 6 ferramentas + Ferramentas (gaveta)', JSON.stringify(names) === JSON.stringify(['Pendências', 'Correção', 'Acompanhamento', 'Alunos e notas', 'Relatório da UC', 'Relatório da turma', 'Ferramentas']), JSON.stringify(names));
+  const names = await pg.locator('#hub-ead-launcher [data-view="main"] .items > .app b').allTextContents();
+  check('o menu enxuto lista só o que vale para a página (categoria: Alunos e Correção, sem descrição)', JSON.stringify(names) === JSON.stringify(['Alunos', 'Correção']) && await pg.locator('#hub-ead-launcher .sec, #hub-ead-launcher .txt small').count() === 0, JSON.stringify(names));
   await sleep(900);
   await pg.screenshot({ path: path.join(SHOTS, '2-menu-aberto.png') });
 
-  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
+  await pg.click('#hub-ead-launcher [data-ctl="apoio"]');
   await sleep(500);
   await pg.screenshot({ path: path.join(SHOTS, '2b-gaveta-aberta.png') });
-  await pg.click('#hub-ead-launcher .app[data-app="blocos"]', { force: true });
+  await abrirItem(pg, 'blocos', { force: true });
   check('ferramenta "em breve" explica e não faz nada', /ainda não está disponível/.test(await pg.locator('#hub-ead-launcher .status').textContent()) && await pg.locator('.imn-bar').count() === 0);
-  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
 
-  await pg.click('#hub-ead-launcher .app[data-app="pendencias"]');
+  await abrirItem(pg, 'pendencias');
   await pg.waitForSelector('.imn-bar', { timeout: 15000 });
   check('Pendências: injeta o módulo e mostra a barra, o menu fecha', await pg.locator('#hub-ead-launcher .panel').waitFor({ state: 'hidden', timeout: 3000 }).then(() => true, () => false));
   await sleep(800);
@@ -120,7 +120,7 @@ try {
 
   const bars = await pg.locator('.imn-bar').count();
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="correcao"]');
+  await abrirItem(pg, 'correcao');
   await pg.waitForSelector('#imn-batch-root .imn-backdrop:not([hidden])', { timeout: 15000 });
   check('Correção: abre a janela de lançamento de notas (CSV), sem duplicar a barra', await pg.locator('.imn-bar').count() === bars);
   await pg.screenshot({ path: path.join(SHOTS, '5-correcao-aberta.png') });
@@ -130,10 +130,10 @@ try {
   await pg.goto(`${ORIGIN}/mod/assign/view.php?id=101`);
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
   await pg.click('#hub-ead-launcher .tab');
-  check('na página da atividade: Correção disponível e Pendências esmaecida (não se aplica)', await pg.locator('#hub-ead-launcher .app[data-app="pendencias"][data-fora="true"]').count() === 1 && await pg.locator('#hub-ead-launcher .app[data-app="correcao"][data-fora="true"]').count() === 0);
+  check('na página da atividade: Correção abre direto e Pendências nem aparece (não se aplica)', JSON.stringify(await pg.locator('#hub-ead-launcher [data-view="main"] .items > .app b').allTextContents()) === JSON.stringify(['Alunos', 'Correção']) && await pg.locator('#hub-ead-launcher [data-view="main"] .app[data-app="correcao"]').count() === 1 && !(await pg.locator('#hub-ead-launcher .app[data-app="pendencias"]').isVisible()));
   await sleep(900);
   await pg.screenshot({ path: path.join(SHOTS, '24-atividade-menu.png') });
-  await pg.click('#hub-ead-launcher .app[data-app="correcao"]');
+  await abrirItem(pg, 'correcao');
   await pg.waitForURL(/action=grading/, { timeout: 15000 });
   await pg.waitForSelector('#imn-root .imn-backdrop:not([hidden])', { timeout: 20000 });
   check('Correção fora da tela de avaliação leva até ela e abre o painel de importar notas sozinha, uma vez', await pg.locator('#imn-root').count() === 1 && await pg.locator('.imn-launcher').count() === 1);
@@ -144,7 +144,7 @@ try {
   await sleep(800);
   check('recarregar a tela de avaliação sem pedir nada NÃO injeta o painel', await pg.locator('#imn-root').count() === 0);
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="correcao"]');
+  await abrirItem(pg, 'correcao');
   await pg.waitForSelector('#imn-root .imn-backdrop:not([hidden])', { timeout: 15000 });
   check('já na tela de avaliação: Correção abre o painel direto, ao lado do botão Nota', await pg.locator('.imn-launcher.imn-inline').count() === 1);
   // ---- 0.16: régua de nota na prévia da Correção ----
@@ -174,7 +174,7 @@ try {
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
   const g0 = state.graderHits;
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="alunos-notas"]');
+  await abrirItem(pg, 'alunos-notas');
   await pg.waitForSelector('#hub-aln-host', { state: 'attached', timeout: 15000 });
   await sleep(700);
   const shadow = sel => pg.locator(`#hub-aln-host ${sel}`);
@@ -353,7 +353,8 @@ try {
   });
   await pg.keyboard.press('Escape');
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="acompanhamento"]');
+  await abrirItem(pg, 'alunos-notas');
+  await shadow('button[role="tab"]:has-text("Acompanhamento")').click(); // Acompanhamento agora é aba dentro de Alunos
   await shadow('.rbox').waitFor();
   check('"Retornos de hoje": o retorno que vence hoje aparece com Feito e Adiar', /Retornos de hoje \(1\)/.test(await shadow('.rbox').textContent()) && /Camila Ferreira/.test(await shadow('.rbox').textContent()) && await shadow('.rbox button:has-text("Adiar 3 dias")').count() === 1);
   await shadow('details.cmpbox').waitFor();
@@ -379,7 +380,8 @@ try {
   await pg.keyboard.press('Escape');
   check('Esc fecha o painel', !(await shadow('.drawer').isVisible()));
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="relatorio-uc"]');
+  await abrirItem(pg, 'alunos-notas');
+  await shadow('button[role="tab"]:has-text("Relatório da UC")').click(); // Relatório da UC agora é aba dentro de Alunos
   await sleep(500);
   check('reabrir mostra os dados já lidos, sem nova consulta', await shadow('.drawer').isVisible() && state.graderHits === g0 + 1 && /média da turma|Precisam de atenção/.test(await shadow('.body').textContent()));
 
@@ -390,7 +392,7 @@ try {
   state.failUsers = true;
   const gC = state.graderHits;
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="alunos-notas"]');
+  await abrirItem(pg, 'alunos-notas');
   await pg.waitForSelector('#hub-aln-host', { state: 'attached' });
   await sleep(700);
   await shadow('.btn.pri').first().click();
@@ -459,9 +461,9 @@ try {
   await pg.goto(`${ORIGIN}/my/`);
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
   await pg.click('#hub-ead-launcher .tab');
-  check('menu mostra "Relatório da turma" disponível em Meus cursos', await pg.evaluate(() => { const b = document.querySelector('#hub-ead-launcher').shadowRoot.querySelector('.app[data-app="relatorio-turma"]'); return Boolean(b) && b.getAttribute('data-fora') !== 'true'; }));
+  check('em Meus cursos o menu mostra só Criar conteúdo e Relatório da turma', JSON.stringify(await pg.locator('#hub-ead-launcher [data-view="main"] .items > .app b').allTextContents()) === JSON.stringify(['Criar conteúdo', 'Relatório da turma']) && await pg.locator('#hub-ead-launcher .app[data-app="relatorio-turma"]').isVisible());
   const gh0 = state.graderHits;
-  await pg.click('#hub-ead-launcher .app[data-app="relatorio-turma"]');
+  await abrirItem(pg, 'relatorio-turma');
   await pg.waitForSelector('#hub-aln-turma', { state: 'attached', timeout: 15000 });
   const tshadow = sel => pg.locator(`#hub-aln-turma >> ${sel}`);
   await tshadow('.list .it').first().waitFor();
@@ -514,7 +516,7 @@ try {
   await pg.goto(`${ORIGIN}/my/`);
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="relatorio-turma"]');
+  await abrirItem(pg, 'relatorio-turma');
   await pg.waitForSelector('#hub-aln-turma', { state: 'attached', timeout: 15000 });
   await tshadow('.list .it').first().waitFor();
   check('padrão: lê só matrículas (leve) e gera HTML e Excel; notas desligadas', await tshadow('.opt label:has-text("Matrículas por turma") input').isChecked() && !(await tshadow('.opt label:has-text("Notas e situação") input').isChecked()) && await tshadow('.opt label:has-text("Página HTML") input').isChecked());
@@ -560,7 +562,7 @@ try {
   await pg.goto(`${ORIGIN}/my/`);
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="relatorio-turma"]');
+  await abrirItem(pg, 'relatorio-turma');
   await pg.waitForSelector('#hub-aln-turma', { state: 'attached', timeout: 15000 });
   await tshadow('.list .it').first().waitFor();
   await tshadow('button:has-text("Selecionar todas")').click();
@@ -581,8 +583,7 @@ try {
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
   const gh1 = state.graderHits, uh1 = state.usersHits;
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
-  await pg.click('#hub-ead-launcher .app[data-app="compat"]');
+  await abrirItem(pg, 'compat');
   await pg.waitForSelector('#hub-aln-sistema', { state: 'attached', timeout: 15000 });
   const sis = sel => pg.locator(`#hub-aln-sistema >> ${sel}`);
   await sis('.it').first().waitFor();
@@ -592,8 +593,7 @@ try {
   await sis('button:has-text("Fechar")').click();
 
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
-  await pg.click('#hub-ead-launcher .app[data-app="sobre"]');
+  await abrirItem(pg, 'sobre');
   await sis('h2').waitFor();
   const sobre = await sis('.box').textContent();
   const link = await sis('a:has-text("Ver se há versão nova")').getAttribute('href');
@@ -602,8 +602,7 @@ try {
   await sis('button:has-text("Fechar")').click();
 
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
-  await pg.click('#hub-ead-launcher .app[data-app="meus-dados"]');
+  await abrirItem(pg, 'meus-dados');
   await sis('button:has-text("Exportar backup")').waitFor();
   check('Meus dados: mostra o uso em KB (baixo) e sem aviso de limite', /Uso: \d+ (B|KB) de 10,0 MB/.test(await sis('.box').textContent()) && !(await sis('.bar.hot').count()), (await sis('.box').textContent()).slice(0, 300));
   const [dlB] = await Promise.all([pg.waitForEvent('download', { timeout: 15000 }), sis('button:has-text("Exportar backup")').click()]);
@@ -640,14 +639,13 @@ try {
   await pg.goto(`${ORIGIN}/course/view.php?id=7`);
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="ferramentas"]');
   await pg.screenshot({ path: path.join(SHOTS, '50-gaveta.png') });
-  check('gaveta Ferramentas: Kahoot e Modelo disponíveis; Conferir datas disponível; Automação "em breve"', await pg.evaluate(() => { const r = document.querySelector('#hub-ead-launcher').shadowRoot; const d = id => r.querySelector(`[data-app="${id}"]`).getAttribute('aria-disabled'); return d('kahoot') === 'false' && d('modelo-kahoot') === 'false' && d('conferir-datas') === 'false' && d('blocos') === 'true'; }));
-  const [dlM] = await Promise.all([pg.waitForEvent('download', { timeout: 15000 }), pg.click('#hub-ead-launcher .app[data-app="modelo-kahoot"]')]);
+  check('engrenagem (Ajuda e dados): Kahoot e Modelo disponíveis; Conferir datas disponível; Automação "em breve"', await pg.evaluate(() => { const r = document.querySelector('#hub-ead-launcher').shadowRoot; const d = id => r.querySelector(`[data-app="${id}"]`).getAttribute('aria-disabled'); return d('kahoot') === 'false' && d('modelo-kahoot') === 'false' && d('conferir-datas') === 'false' && d('blocos') === 'true'; }));
+  const [dlM] = await Promise.all([pg.waitForEvent('download', { timeout: 15000 }), abrirItem(pg, 'modelo-kahoot')]);
   const mPath = path.join(SHOTS, 'modelo.csv'); await dlM.saveAs(mPath);
   check('Modelo de perguntas: baixa o CSV com o cabeçalho esperado, sem consultar nada', dlM.suggestedFilename() === 'modelo-perguntas-kahoot.csv' && /^﻿pergunta;opcao1;opcao2;opcao3;opcao4;correta/.test(fs.readFileSync(mPath, 'utf8')) && kahootHits.length === 0);
 
-  const [kpage] = await Promise.all([ctx.waitForEvent('page', { timeout: 15000 }), pg.click('#hub-ead-launcher .app[data-app="kahoot"]')]).catch(async e => { throw new Error(`${e.message} | status do menu: ${await pg.locator('#hub-ead-launcher .status').textContent()} | páginas: ${ctx.pages().map(p => p.url()).join(' ; ')} | aberto: ${await pg.locator('#hub-ead-launcher .panel').isVisible()} | erros: ${JSON.stringify(errors)} | abas: ${JSON.stringify(await sw.evaluate(() => chrome.tabs.query({}).then(t => t.map(x => x.url || x.pendingUrl))))}`); });
+  const [kpage] = await Promise.all([ctx.waitForEvent('page', { timeout: 15000 }), abrirItem(pg, 'kahoot')]).catch(async e => { throw new Error(`${e.message} | status do menu: ${await pg.locator('#hub-ead-launcher .status').textContent()} | páginas: ${ctx.pages().map(p => p.url()).join(' ; ')} | aberto: ${await pg.locator('#hub-ead-launcher .panel').isVisible()} | erros: ${JSON.stringify(errors)} | abas: ${JSON.stringify(await sw.evaluate(() => chrome.tabs.query({}).then(t => t.map(x => x.url || x.pendingUrl))))}`); });
   await kpage.waitForLoadState('domcontentloaded');
   check('Kahoot no menu: abre a página da extensão (nada do Kahoot foi tocado ainda)', /^chrome-extension:\/\/.+\/kahoot\.html$/.test(kpage.url()) && kahootHits.length === 0, kpage.url());
   await kpage.waitForSelector('#com:not([hidden])', { timeout: 10000 });
@@ -683,12 +681,12 @@ try {
   await pg.goto(`${ORIGIN}/course/view.php?id=7`);
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="alunos-notas"]');
+  await abrirItem(pg, 'alunos-notas');
   await pg.waitForSelector('#hub-aln-host', { state: 'attached' });
   await pg.keyboard.press('Escape');
   const hits0 = state.summaryHits;
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="pendencias"]');
+  await abrirItem(pg, 'pendencias');
   await pg.waitForSelector('.imn-bar', { timeout: 15000 });
   await sleep(600);
   const topo = await pg.evaluate(() => { const b = document.querySelector('.imn-search').getBoundingClientRect(); const e = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2); return e && e.closest('.imn-search') ? 'lupa' : (e && e.id) || String(e && e.tagName); });
@@ -703,7 +701,7 @@ try {
   await pg.goto(`${ORIGIN}/course/view.php?id=9`);
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="pendencias"]');
+  await abrirItem(pg, 'pendencias');
   await pg.waitForSelector('.imn-bar', { timeout: 15000 });
   await sleep(500);
   check('UC sem links de tarefa: a barra aparece e nada foi consultado antes da lupa', state.indexHits === 0 && await pg.locator('.imn-bar').isVisible() && /Nada lido/i.test(await pg.locator('.imn-bar-status').textContent()), await pg.locator('.imn-bar-status').textContent());
@@ -717,7 +715,7 @@ try {
   check('botão de fechar esconde a barra', !(await pg.locator('.imn-bar').isVisible()));
   await pg.screenshot({ path: path.join(SHOTS, '14-barra-fechada.png') });
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="pendencias"]');
+  await abrirItem(pg, 'pendencias');
   await sleep(500);
   check('Pendências no menu reabre a barra fechada', await pg.locator('.imn-bar').isVisible());
 
@@ -726,7 +724,8 @@ try {
   await pg.goto(`${ORIGIN}/my/`);
   await pg.waitForSelector('#hub-ead-launcher', { state: 'attached' });
   await pg.click('#hub-ead-launcher .tab');
-  await pg.click('#hub-ead-launcher .app[data-app="pendencias"]');
+  check('em Meus cursos, Pendências nem aparece no menu', !(await pg.locator('#hub-ead-launcher .app[data-app="pendencias"]').isVisible()));
+  await pg.evaluate(() => document.querySelector('#hub-ead-launcher').shadowRoot.querySelector('.app[data-app="pendencias"]').click()); // pedido direto: a ferramenta explica e não injeta nada
   await pg.waitForFunction(() => document.querySelector('#hub-ead-launcher').shadowRoot.querySelector('.status').textContent.length > 0, null, { timeout: 15000 });
   check('em página que não é curso/categoria: aviso claro no menu e nada injetado', /não se aplica.*curso ou categoria/.test(await pg.locator('#hub-ead-launcher .status').textContent()) && await pg.locator('.imn-bar').count() === 0);
   await pg.screenshot({ path: path.join(SHOTS, '6-erro-pagina.png') });
