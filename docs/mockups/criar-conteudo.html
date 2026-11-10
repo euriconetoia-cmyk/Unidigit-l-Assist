@@ -1,0 +1,82 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Criar conteúdo — mockup</title>
+<style>
+:root{--p:#1a4b9f;--o:#ef5e31;--ink:#14202e;--mut:#55657a;--bd:#d6dee9;--bg:#f3f6fa;--bg2:#e8eef5;--s:#fff;--ok:#0f6b4f;--wn:#a14d08;--er:#b3261e;--soft:#e8f0fa;--okb:#dff3ea;--wnb:#fff0d6;--erb:#fde6e3}
+@media (prefers-color-scheme:dark){:root{--p:#6b9be0;--ink:#e6ecf5;--mut:#9aa8bd;--bd:#2e3a4b;--bg:#121821;--bg2:#222d3b;--s:#1b2431;--ok:#6fd0a0;--wn:#f0b45a;--er:#ff8a80;--soft:#22344a;--okb:#143a2b;--wnb:#3a2c12;--erb:#3d1d1a}}
+*{box-sizing:border-box}body{margin:0;background:#8a94a3;color:var(--ink);font:14px/1.45 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;display:grid;place-items:center;padding:16px}
+.box{width:min(760px,100%);background:var(--s);border-radius:16px;padding:18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.4);max-height:calc(100vh - 32px);overflow:auto}
+.top{display:flex;gap:10px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}h2{margin:0;font-size:19px}.sub{color:var(--mut);font-size:12.5px;margin:2px 0 0}
+.steps{display:flex;gap:6px;margin:12px 0;flex-wrap:wrap}.steps li{list-style:none;padding:4px 11px;border-radius:99px;background:var(--bg2);color:var(--mut);font-size:12px;font-weight:700}.steps li.on{background:var(--p);color:#fff}.steps li.done{background:var(--okb);color:var(--ok)}.steps{padding:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;border:1px solid var(--bd);background:var(--bg);border-radius:12px;padding:12px 14px;display:block}.opt:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #f6b900;outline-offset:2px}
+.opt b{display:block;font-size:15px}.opt span{color:var(--mut);font-size:12.5px}.opt.on{border-color:var(--p);background:var(--soft)}
+.ico{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--p);color:#fff;font-weight:800;margin-bottom:6px}
+label{display:block;font-size:12px;font-weight:700;color:var(--mut);margin:10px 0 3px;text-transform:uppercase;letter-spacing:.05em}
+input,select,textarea{width:100%;font:inherit;border:1px solid var(--bd);border-radius:8px;background:var(--s);color:inherit;padding:8px 10px;min-height:38px}textarea{min-height:92px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:560px){.two{grid-template-columns:1fr}}
+.list{display:grid;gap:6px;max-height:190px;overflow:auto}.it{display:flex;gap:10px;align-items:center;border:1px solid var(--bd);background:var(--bg);border-radius:10px;padding:7px 10px}.it b{flex:1;font-size:13px}.it small{color:var(--mut)}
+.st{font-size:12px;padding:2px 9px;border-radius:8px;white-space:nowrap;font-weight:700}.ok{background:var(--okb);color:var(--ok)}.go{background:var(--wnb);color:var(--wn)}.er{background:var(--erb);color:var(--er)}.mu{background:var(--bg2);color:var(--mut)}
+.row2{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}.row2 .sp{flex:1;color:var(--mut);font-size:12.5px;align-self:center}
+button{font:inherit;min-height:38px;padding:0 16px;border-radius:9px;border:1px solid var(--bd);background:var(--s);color:inherit;cursor:pointer}button.pri{background:var(--p);border-color:var(--p);color:#fff;font-weight:700}button:disabled{opacity:.5;cursor:default}
+.view{border:1px solid var(--bd);border-radius:12px;overflow:hidden}.view .hd{background:var(--bg2);padding:6px 12px;font-size:12px;color:var(--mut);display:flex;justify-content:space-between}
+.view .bd{padding:14px 16px}.view h3{margin:0 0 6px;font-size:17px}.view dl{display:grid;grid-template-columns:150px 1fr;gap:4px 12px;margin:10px 0 0;font-size:13px}.view dt{color:var(--mut)}.view dd{margin:0}
+.eye{display:inline-flex;gap:6px;align-items:center;background:var(--wnb);color:var(--wn);padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700}
+table{width:100%;border-collapse:collapse;margin-top:6px}th,td{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:left;font-size:13px}th{background:var(--bg2);color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.msg{margin-top:10px;padding:8px 10px;border-radius:8px;font-size:13px;background:var(--wnb);color:var(--wn)}.msg.ok{background:var(--okb);color:var(--ok)}
+.prog{height:10px;border-radius:6px;background:var(--bd);overflow:hidden;margin:10px 0}.prog i{display:block;height:100%;background:var(--p);width:100%}
+.tag{font-size:11px;background:var(--o);color:#fff;border-radius:6px;padding:1px 7px;margin-left:8px;vertical-align:middle}
+[hidden]{display:none!important}
+</style></head><body>
+<div class="box" role="dialog" aria-label="Criar conteúdo">
+<div class="top"><div><h2>Criar conteúdo <span class="tag">mockup · dados fictícios</span></h2><p class="sub" id="sub"></p></div><span class="st mu" id="perm">Você pode editar este curso ✓</span></div>
+<ol class="steps" id="steps"></ol>
+
+<section data-s="0"><label>1. O que criar</label><div class="cards" id="tipos"></div></section>
+
+<section data-s="1" hidden><div id="form"></div>
+<label>Onde criar</label><div class="list" id="destinos"></div>
+<div class="row2"><span class="sp" id="cnt"></span></div></section>
+
+<section data-s="2" hidden><div class="msg" id="aviso2"></div><div id="prev"></div>
+<label>O que será criado</label><table><thead><tr><th>UC</th><th>Seção</th><th>Situação</th></tr></thead><tbody id="alvos"></tbody></table></section>
+
+<section data-s="3" hidden><div class="prog" role="progressbar" aria-label="Progresso"><i></i></div><div id="res"></div><div class="msg ok" id="fim"></div></section>
+
+<div class="row2"><button id="voltar" type="button">Voltar</button><button id="cancelar" type="button">Cancelar</button><button class="pri" id="seguir" type="button"></button></div>
+</div>
+<script>
+const MODELOS={
+ forum:{n:'Fórum de apresentação',i:'F',d:'Cada aluno abre um tópico se apresentando.',nome:'Fórum de apresentação',desc:'Bem-vindo(a)! Apresente-se à turma: conte seu nome, de onde fala, o que espera do curso e uma curiosidade sobre você. Responda também a pelo menos duas apresentações dos colegas.',extra:[['Tipo','Cada pessoa inicia um tópico'],['Assinatura','Não forçada'],['Conclusão','Ao postar 1 vez']]},
+ envio:{n:'Atividade de envio',i:'A',d:'Envio de arquivo com prazo, nota e avaliação.',nome:'Atividade 1 — Entrega do projeto',desc:'Leia o enunciado, desenvolva o que foi pedido e envie em um único arquivo (PDF ou DOCX, até 10 MB). Confira o prazo e os critérios de avaliação antes de enviar.',extra:[['Abertura','10/11/2026 08:00'],['Prazo','24/11/2026 23:59'],['Tipo de envio','Arquivo (1, até 10 MB)'],['Nota máxima','100']]},
+ boas:{n:'Texto de boas-vindas',i:'T',d:'Área de texto no topo do curso (HTML simples).',nome:'Boas-vindas',desc:'<b>Seja bem-vindo(a) ao curso!</b> Aqui você encontra o cronograma, as atividades e os canais de apoio. Em caso de dúvida, procure o seu tutor pelo fórum de dúvidas.',extra:[['Tipo','Área de texto e mídia (rótulo)'],['Aparece em','Topo da seção escolhida']]}
+};
+const UCS=[['Redes de Computadores','Téc. Redes · Turma A'],['Segurança em Redes','Téc. Redes · Turma A'],['Administração de Servidores','Téc. Redes · Turma A'],['Lógica de Programação','Téc. Informática · Turma B']];
+const $=s=>document.querySelector(s),el=(t,c,x)=>{const n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n};
+const S={passo:0,tipo:'forum',sel:new Set([0,1,2]),nome:'',desc:'',secao:'Seção 0 (geral)',existe:new Set([1])};
+const NOMES=['Escolher','Preencher','Prévia','Criar'];
+function passos(){const o=$('#steps');o.replaceChildren();NOMES.forEach((n,i)=>{const l=el('li',i===S.passo?'on':i<S.passo?'done':'',`${i+1}. ${n}`);o.append(l)})}
+function tipos(){const c=$('#tipos');c.replaceChildren();Object.entries(MODELOS).forEach(([k,m])=>{const b=el('button','opt'+(S.tipo===k?' on':''));b.type='button';b.setAttribute('aria-pressed',String(S.tipo===k));b.append(el('div','ico',m.i),el('b','',m.n),el('span','',m.d));b.onclick=()=>{S.tipo=k;S.nome=MODELOS[k].nome;S.desc=MODELOS[k].desc;tipos()};c.append(b)})}
+function form(){const m=MODELOS[S.tipo],f=$('#form');f.replaceChildren();
+ const campo=(rot,tag,val,set)=>{const l=el('label','',rot),i=el(tag);i.value=val;i.oninput=e=>set(e.target.value);f.append(l,i)};
+ campo('Nome','input',S.nome,v=>S.nome=v);campo(S.tipo==='boas'?'Texto (HTML simples)':'Descrição','textarea',S.desc,v=>S.desc=v);
+ const t=el('div','two');const a=el('div'),b=el('div');a.append(el('label','','Seção'));const sel=el('select');['Seção 0 (geral)','Seção 1','Seção 2'].forEach(x=>sel.append(new Option(x,x)));sel.value=S.secao;sel.onchange=e=>S.secao=e.target.value;a.append(sel);b.append(el('label','','Visibilidade'),Object.assign(el('input'),{value:'Oculto para alunos (padrão)',disabled:true}));t.append(a,b);f.append(t);
+ if(S.tipo==='envio'){const g=el('div','two');[['Abertura','2026-11-10T08:00'],['Prazo','2026-11-24T23:59']].forEach(([r,v])=>{const w=el('div');w.append(el('label','',r),Object.assign(el('input'),{type:'datetime-local',value:v}));g.append(w)});f.append(g);const n=el('div','msg','Datas sugeridas pelo Cronograma da turma (editáveis).');n.className='msg ok';f.append(n)}}
+function destinos(){const l=$('#destinos');l.replaceChildren();UCS.forEach((u,i)=>{const d=el('label','it');d.style.cssText='text-transform:none;letter-spacing:0;color:inherit;font-size:13px;margin:0';const c=el('input');c.type='checkbox';c.style.width='auto';c.style.minHeight='auto';c.checked=S.sel.has(i);c.onchange=()=>{c.checked?S.sel.add(i):S.sel.delete(i);cnt()};d.append(c,el('b','',u[0]),el('small','',u[1]));if(S.tipo!=='boas'&&S.existe.has(i))d.append(el('span','st go','já tem “'+S.nome.slice(0,14)+'…”'));l.append(d)});cnt()}
+function cnt(){$('#cnt').textContent=`${S.sel.size} UC(s) selecionada(s)`;$('#seguir').disabled=S.passo===1&&!S.sel.size}
+function previa(){const m=MODELOS[S.tipo],p=$('#prev');p.replaceChildren();
+ const v=el('div','view'),h=el('div','hd');h.append(el('span','',`${m.n} · Redes de Computadores · ${S.secao}`),el('span','eye','Oculto para alunos'));
+ const b=el('div','bd');b.append(el('h3','',S.nome||'(sem nome)'));const d=el('p');if(S.tipo==='boas'){const x=document.createElement('div');x.innerHTML=S.desc.replace(/<(?!\/?b>)[^>]*>/g,'');d.append(x)}else d.textContent=S.desc;b.append(d);
+ const dl=el('dl');m.extra.forEach(([k,x])=>{dl.append(el('dt','',k),el('dd','',x))});b.append(dl);v.append(h,b);p.append(el('label','','Como vai ficar (visão do aluno, depois de revelar)'),v);
+ $('#aviso2').textContent='Nada foi gravado ainda. Ao confirmar, cada item é criado oculto, lido de volta no Moodle e só então marcado como criado.';
+ const t=$('#alvos');t.replaceChildren();[...S.sel].forEach(i=>{const r=el('tr');const ja=S.tipo!=='boas'&&S.existe.has(i);r.append(el('td','',UCS[i][0]),el('td','',S.secao),Object.assign(el('td'),{}));const s=el('span','st '+(ja?'go':'ok'),ja?'Já existe: será pulada':'Será criada');r.lastChild.append(s);t.append(r)})}
+function fim(){const r=$('#res');r.replaceChildren();const t=el('table');t.innerHTML='';const h=el('thead'),hr=el('tr');['UC','Resultado','Conferido no Moodle'].forEach(x=>hr.append(el('th','',x)));h.append(hr);const b=el('tbody');
+ [...S.sel].forEach((i,k)=>{const tr=el('tr');tr.append(el('td','',UCS[i][0]));const ja=S.tipo!=='boas'&&S.existe.has(i);const falha=k===2&&!ja;const c1=el('td'),c2=el('td');c1.append(el('span','st '+(ja?'go':falha?'er':'ok'),ja?'Pulada (já existe)':falha?'Falhou':'Criada (oculta)'));c2.textContent=ja?'—':falha?'Moodle recusou (erro 503). Tentar de novo.':'✓ lido de volta · id 48213';tr.append(c1,c2);b.append(tr)});t.append(h,b);r.append(t);
+ const n=[...S.sel].filter(i=>!(S.tipo!=='boas'&&S.existe.has(i))).length;$('#fim').className='msg ok';$('#fim').textContent=`2 criadas, 1 pulada e 1 pendente. Tudo foi criado oculto: revele no Moodle depois de conferir.`}
+function desenha(){passos();document.querySelectorAll('section').forEach(s=>s.hidden=Number(s.dataset.s)!==S.passo);
+ $('#sub').textContent=['Escolha um modelo. Nada é criado até você confirmar na prévia.','Edite o texto e escolha em quais UCs criar.','Confira como vai ficar e o que será criado.','Resultado da criação.'][S.passo];
+ $('#voltar').hidden=S.passo===0||S.passo===3;$('#cancelar').textContent=S.passo===3?'Fechar':'Cancelar';
+ $('#seguir').textContent=['Continuar','Ver prévia','Criar (ocultas)','Tentar de novo as pendentes'][S.passo];$('#seguir').hidden=S.passo===3&&false;
+ if(S.passo===0)tipos();if(S.passo===1){form();destinos()}if(S.passo===2)previa();if(S.passo===3)fim();cnt()}
+$('#seguir').onclick=()=>{if(S.passo<3){S.passo++;desenha()}};$('#voltar').onclick=()=>{S.passo--;desenha()};$('#cancelar').onclick=()=>{S.passo=0;desenha()};
+S.nome=MODELOS.forum.nome;S.desc=MODELOS.forum.desc;
+const q=new URLSearchParams(location.search);if(q.get('t')){S.tipo=q.get('t');S.nome=MODELOS[S.tipo].nome;S.desc=MODELOS[S.tipo].desc}if(q.get('p'))S.passo=Number(q.get('p'));desenha();
+</script></body></html>
