@@ -5,7 +5,9 @@
   "type": "module",
   "description": "Unidigit@l Assist — ferramentas do tutor EaD para o Moodle (extensão do Chrome): correção, pendências, alunos, acompanhamento e relatórios.",
   "author": "Eurico Cirilo",
-  "contributors": ["Julio Alves"],
+  "contributors": [
+    "Julio Alves"
+  ],
   "license": "MIT",
   "homepage": "https://github.com/euriconetoia-cmyk/Unidigit-l-Assist#readme",
   "repository": {
@@ -35,7 +37,8 @@
     "build:blocos": "node scripts/build.mjs --with-blocos",
     "test:e2e:datas": "node tests/e2e/datas.mjs",
     "test:e2e:cronograma": "node tests/e2e/cronograma.mjs",
-    "test:e2e:blocos": "node tests/e2e/blocos.mjs"
+    "test:e2e:blocos": "node tests/e2e/blocos.mjs",
+    "test:e2e:criar": "node tests/e2e/criar.mjs"
   },
   "devDependencies": {
     "blockly": "^13.4.0",

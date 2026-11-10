@@ -56,6 +56,8 @@ if ((read('modules/importar-notas/vendor/src/ui/panel.js').match(/HUB-PATCH regu
 const alunos = JSON.parse(read('modules/alunos/files.json'));
 const datas = JSON.parse(read('modules/datas/files.json'));
 const crono = JSON.parse(read('modules/cronograma/files.json'));
+const criar = JSON.parse(read('modules/criar/files.json'));
+for (const f of [...criar.scripts, 'bridge.js']) if (!fs.existsSync(path.join(ext, 'modules/criar', f))) fail(`arquivo do módulo criar ausente: ${f}`);
 for (const f of [...crono.scripts, 'bridge.js']) if (!fs.existsSync(path.join(ext, 'modules/cronograma', f))) fail(`arquivo do módulo cronograma ausente: ${f}`);
 for (const f of [...datas.scripts, 'bridge.js']) if (!fs.existsSync(path.join(ext, 'modules/datas', f))) fail(`arquivo do módulo datas ausente: ${f}`);
 for (const f of [...alunos.scripts, 'bridge.js']) if (!fs.existsSync(path.join(ext, 'modules/alunos', f))) fail(`arquivo do módulo alunos ausente: ${f}`);

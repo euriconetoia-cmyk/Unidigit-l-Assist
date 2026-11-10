@@ -17,6 +17,7 @@ export const APPS = [
   { id: 'modelo-kahoot', gaveta: 'ferramentas', grupo: 'Ferramentas', nome: 'Modelo de perguntas (CSV)', descricao: 'Baixa a planilha-modelo, em qualquer página', origem: 'novo', icone: 'modelo', local: 'modelo-kahoot', disponivel: true },
   { id: 'conferir-datas', gaveta: 'ferramentas', grupo: 'Ferramentas', nome: 'Conferir datas', descricao: 'Cronograma do curso × datas das atividades', origem: 'novo', icone: 'calok', modulo: 'datas', comando: 'datas.abrir', comandoRetomar: 'datas.retomar', paginas: ['curso'], dicaPagina: 'Abra a página principal do curso, onde está o cronograma', disponivel: true },
   { id: 'cronograma-turma', gaveta: 'ferramentas', grupo: 'Ferramentas', nome: 'Cronograma da turma', descricao: 'Datas dos textos do curso pelo JSON do cronograma', origem: 'novo', icone: 'calcro', modulo: 'cronograma', comando: 'cronograma.abrir', paginas: ['curso'], dicaPagina: 'Abra a página principal do curso', disponivel: true },
+  { id: 'criar-conteudo', gaveta: 'ferramentas', grupo: 'Ferramentas', nome: 'Criar conteúdo', descricao: 'Fórum, atividade de envio e texto, com prévia (teste)', origem: 'novo', icone: 'criar', modulo: 'criar', comando: 'criar.abrir', paginas: ['curso', 'meus-cursos'], dicaPagina: 'Abra a página do curso (ou Meus cursos) onde quer criar', disponivel: true },
   { id: 'blocos', gaveta: 'ferramentas', grupo: 'Ferramentas', nome: 'Automação por blocos', descricao: 'Montar rotinas visualmente', origem: 'novo', icone: 'blo', disponivel: false }
 ];
 

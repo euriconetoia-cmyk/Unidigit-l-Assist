@@ -4,6 +4,7 @@ export const MODULE_PATHS = {
   alunos: { global: 'HUB_ALN', base: 'modules/alunos/', prefix: 'modules/alunos/', bridge: 'modules/alunos/bridge.js', manifest: 'modules/alunos/files.json' },
   datas: { global: 'HUB_DTS', base: 'modules/datas/', prefix: 'modules/datas/', bridge: 'modules/datas/bridge.js', manifest: 'modules/datas/files.json' },
   cronograma: { global: 'HUB_CRN', base: 'modules/cronograma/', prefix: 'modules/cronograma/', bridge: 'modules/cronograma/bridge.js', manifest: 'modules/cronograma/files.json' },
+  criar: { global: 'HUB_CRI', base: 'modules/criar/', prefix: 'modules/criar/', bridge: 'modules/criar/bridge.js', manifest: 'modules/criar/files.json' },
   kahoot: { global: 'HUB_KHT', base: 'modules/kahoot/', prefix: 'modules/kahoot/', bridge: 'modules/kahoot/bridge.js', manifest: 'modules/kahoot/files.json' }
 };
 

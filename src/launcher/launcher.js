@@ -28,6 +28,7 @@ const ICONS = {
   relat: 'M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 17v-3M12 17v-5M15 17v-2',
   calok: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M9 15l2 2 4-4',
   calcro: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M8 14h3M13 14h3M8 17h3',
+  criar: 'M5 4h14v16H5zM12 8v8M8 12h8',
   sobe: 'M6 14l6-6 6 6',
   desce: 'M6 10l6 6 6-6'
 };

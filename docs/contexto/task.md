@@ -71,4 +71,6 @@ Trabalhar uma por vez, na ordem. Decisões importantes vão para `memory.md`.
 
 - [x] N8 Relatório da turma com matriculados (HTML/Excel, comparação, copiar resumo) — testar no Moodle real (SENAI e FIEG).
 
+- [x] N10 Criar conteúdo (fórum, envio, texto) com prévia, oculto e conferido — código e e2e prontos; HOMOLOGAR no SENAI e FIEG antes de chamar de validado.
+- [ ] N11 Criar conteúdo fase 2: importar DOCX/PDF, anexar PDF, bloco HTML lateral, desfazer, lote por turma, integração com Cronograma.
 - [x] N9 Painel HTML dinâmico das turmas + Notas por UC com leitura parcial — testar no Moodle real.
