@@ -257,3 +257,19 @@ test('docx: script embutido no texto do Word vira texto inofensivo', () => {
   const w = load(); const r = w.CRI.docx.paraHtml(`<w:document ${W}><w:body>${par(run('&lt;script&gt;alert(1)&lt;/script&gt;&lt;img src=x onerror=alert(2)&gt;'))}</w:body></w:document>`);
   assert.ok(!/<script|<img/i.test(r.html)); assert.match(r.html, /&lt;script&gt;/);
 });
+
+// ---------- erro com nome do campo e obrigatórios vazios ----------
+test('errosDoForm: erro de campo vem com o rótulo e o nome do campo (para saber o que o Moodle recusou)', () => {
+  const w = load(); const d = docDe(w, '<form><div id="fitem_id_name"><label for="id_name">Nome do fórum</label><input id="id_name" name="name"><span class="form-control-feedback invalid-feedback" id="id_error_name">Inserir um valor</span></div><div class="alert alert-danger">Há campos com erro</div></form>');
+  const e = eq(w.CRI.core.errosDoForm(d));
+  assert.ok(e.includes('Nome do fórum (name): Inserir um valor'), e.join('|')); assert.ok(e.includes('Há campos com erro'));
+  assert.ok(!e.includes('Inserir um valor'), 'sem duplicar a mensagem solta');
+});
+test('montarEnvio: campo obrigatório do Moodle que iria vazio vira aviso na prévia (não bloqueia)', () => {
+  const w = load(); const html = formAssign().replace('<input type="submit" name="submitbutton"', '<div class="fitem"><label for="id_idnumber">Código da turma</label><input id="id_idnumber" type="text" name="idnumber" required value=""></div><input type="submit" name="submitbutton"');
+  const form = docDe(w, html).querySelector('form');
+  const r = w.CRI.core.montarEnvio(form, w.CRI.core.MODELOS.envio, { nome: 'A', html: '<p>x</p>', abertura: new w.Date(2026, 10, 10, 8), prazo: new w.Date(2026, 10, 20, 23, 59) });
+  assert.ok(r.pares, r.erro); assert.ok(r.avisos.some(a => /Código da turma \(idnumber\)/.test(a) && /obrigatório/.test(a)), r.avisos.join('|'));
+  const ok = w.CRI.core.montarEnvio(docDe(w, formAssign()).querySelector('form'), w.CRI.core.MODELOS.envio, { nome: 'A', html: '<p>x</p>', abertura: new w.Date(2026, 10, 10, 8), prazo: new w.Date(2026, 10, 20, 23, 59) });
+  assert.equal(ok.avisos.filter(a => /obrigatório/.test(a)).length, 0, 'formulário normal não gera aviso');
+});

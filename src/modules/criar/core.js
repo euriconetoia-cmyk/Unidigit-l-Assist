@@ -141,14 +141,39 @@
     const botao = form.querySelector('input[type="submit"][name="submitbutton"], button[type="submit"][name="submitbutton"]');
     if (!botao) return { erro: 'Não achei o botão de salvar do formulário. Nada foi criado.' };
     pares.push([botao.getAttribute('name'), botao.value || botao.textContent || 'Save and return to course']);
+    const vazios = obrigatoriosVazios(form, pares); if (vazios.length) avisos.push(`O Moodle marca como obrigatório e vai sem valor: ${vazios.join(', ')}. Pode recusar.`);
     return { pares, avisos };
   }
   const codificar = pares => { const u = new URLSearchParams(); pares.forEach(([k, v]) => u.append(k, v)); return u.toString(); };
 
-  // Mensagens de erro que o Moodle mostra quando recusa o formulário.
+  // Rótulo legível de um campo do formulário ("Nome", "Data de entrega"...).
+  function rotuloDoCampo(doc, nome) {
+    const base = String(nome).replace(/\[.*$/, '');
+    const l = doc.querySelector(`label[for="id_${nome}"], label[for="id_${base}"]`) || doc.querySelector(`#fitem_id_${base} label`);
+    return l ? textoDe(l) : '';
+  }
+  // Mensagens de erro que o Moodle mostra quando recusa o formulário. Erro de campo vem com o nome do campo ("Nome (name): Inserir um valor").
   function errosDoForm(doc) {
-    const out = [];
-    doc.querySelectorAll('.alert-danger, .errorbox, .notifyproblem, .form-control-feedback, [id^="id_error_"], .error').forEach(n => { const t = clean(n.textContent); if (t && !out.includes(t) && t.length < 300) out.push(t); });
+    const out = []; const add = t => { if (t && !out.includes(t) && t.length < 300) out.push(t); };
+    doc.querySelectorAll('[id^="id_error_"]').forEach(n => {
+      const t = clean(n.textContent); if (!t) return; const nome = n.id.replace(/^id_error_/, ''); const r = rotuloDoCampo(doc, nome);
+      add(`${r ? `${r} ` : ''}(${nome}): ${t}`);
+    });
+    doc.querySelectorAll('.alert-danger, .errorbox, .notifyproblem, .form-control-feedback, .error').forEach(n => { const t = clean(n.textContent); if (t && !out.some(o => o.endsWith(`: ${t}`))) add(t); });
+    return out;
+  }
+  // Campos que o Moodle marca como obrigatórios e que iriam vazios no envio (só para avisar na prévia; não bloqueia).
+  function obrigatoriosVazios(form, pares) {
+    const vistos = new Set(); const out = [];
+    [...form.elements].forEach(el => {
+      const nome = el.getAttribute && el.getAttribute('name'); if (!nome || el.disabled || vistos.has(nome)) return;
+      if (['hidden', 'submit', 'button', 'checkbox', 'radio', 'file'].includes((el.type || '').toLowerCase())) return;
+      const fi = el.closest && el.closest('.fitem, .form-group');
+      const obrig = el.required || el.getAttribute('aria-required') === 'true' || !!(fi && fi.querySelector('[title="Obrigatório"], [title="Required"], [title="Obligatorio"]'));
+      if (!obrig) return; vistos.add(nome);
+      const v = pares.filter(x => x[0] === nome).map(x => String(x[1]).trim()).join('');
+      if (!v) { const r = textoDe((form.ownerDocument || document).querySelector(`label[for="${el.id}"]`)); out.push(`${r ? `${r} ` : ''}(${nome})`); }
+    });
     return out;
   }
 
@@ -197,5 +222,5 @@
   }
   function nomeDoTutor(doc) { const n = doc.querySelector('.usermenu .usertext, [data-region="usermenu"] .usertext, .userbutton .usertext, .usermenu .login .usertext'); return textoDe(n); }
 
-  CRI.core = { MODELOS, campos, preencher, sanitizar, partesData, fmtData, lerLocal, coletar, definir, achaForm, montarEnvio, codificar, errosDoForm, atividades, acharPorNome, secoes, acharSecao, valorVisivel, cursoIdDaUrl, cursosDaPagina, nomeDoTutor, fold, clean, esc };
+  CRI.core = { MODELOS, campos, preencher, sanitizar, partesData, fmtData, lerLocal, coletar, definir, achaForm, montarEnvio, codificar, errosDoForm, obrigatoriosVazios, rotuloDoCampo, atividades, acharPorNome, secoes, acharSecao, valorVisivel, cursoIdDaUrl, cursosDaPagina, nomeDoTutor, fold, clean, esc };
 })(globalThis);
