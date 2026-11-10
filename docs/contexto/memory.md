@@ -176,3 +176,5 @@ Menu em aba + cor única + Meus dados com cronograma/aba. A v0.16.0 já existia 
 - 2026-11-05: Relatório da turma passa a mostrar turmas e matriculados (padrão: só participantes, leve; notas opcional). Saída HTML e/ou Excel. Aluno em várias UCs conta uma vez. Foto de números em `uas.turmas`, gravada só se a leitura veio completa. Fora desta rodada: filtro só das turmas em andamento (precisa ler vigência). Versão segue 0.17.0 até o teste no Moodle real.
 
 - 2026-11-05: HTML do Relatório da turma virou painel dinâmico (filtros, busca, Notas por UC com parcial/falha visível, Atenção no fim). Script embutido fixo, só lê data-* e usa textContent, sem recurso externo. Leitura de notas e de matrículas têm try separado: falha numa não apaga a outra. Nome do arquivo: painel-turmas-AAAAMMDD.html.
+
+- 2026-11-10: Análise de viabilidade de 'criar conteúdo no Moodle' (assign, fórum, HTML) registrada em docs/projeto/analise-criar-conteudo-moodle.md. Veredito: viável; recomendação Fase 1 = preencher o formulário e o usuário salva. Sem decisão tomada; aguardando versão do Moodle, permissões de edição dos tutores e escolha de modelos.
