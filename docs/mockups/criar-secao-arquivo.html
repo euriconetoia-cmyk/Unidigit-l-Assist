@@ -1,0 +1,56 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Criar conteúdo — seção e arquivo</title>
+<style>
+:root{--p:#1a4b9f;--o:#ef5e31;--bd:#d5dbe6;--s:#fff;--bg:#eef2f8;--t:#1c2433;--m:#5b667a;--ok:#1b7a3d;--w:#fff4ee}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:14px/1.45 system-ui,Segoe UI,Arial;color:var(--t);padding:20px}
+.wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1180px;margin:auto}
+.card{background:var(--s);border:1px solid var(--bd);border-radius:14px;padding:16px 18px}
+h2{margin:0 0 2px;font-size:17px;color:var(--p)}.sub{color:var(--m);margin:0 0 10px;font-size:12.5px}
+.tag{display:inline-block;background:var(--o);color:#fff;border-radius:99px;font-size:11px;padding:2px 9px;margin-bottom:8px;font-weight:600}
+.steps{display:flex;gap:6px;margin:6px 0 12px;padding:0;list-style:none;font-size:12px}.steps li{padding:3px 10px;border-radius:99px;background:#e6ebf4;color:var(--m)}.steps .on{background:var(--p);color:#fff}
+label.l{display:block;font-weight:600;font-size:12.5px;margin:10px 0 4px}
+input,select,textarea{width:100%;font:inherit;border:1px solid var(--bd);border-radius:8px;padding:7px 9px;background:#fff}
+.course{border:1px solid var(--bd);border-radius:10px;padding:9px 11px;margin:7px 0;background:#fafcff}
+.course b{display:block;margin-bottom:5px}.row{display:grid;grid-template-columns:1fr;gap:6px}
+.hint{font-size:12px;color:var(--m);margin-top:4px}.ok{color:var(--ok);font-weight:600}.warn{color:#b3411c;font-weight:600}
+.drop{border:2px dashed var(--p);border-radius:12px;padding:14px;text-align:center;color:var(--p);background:#f4f7fd;margin:6px 0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.chip{border:1px solid var(--bd);border-radius:99px;padding:3px 10px;font-size:12px;background:#fff}
+.chip.on{border-color:var(--p);background:#e6eefc;color:var(--p);font-weight:600}
+.prev{border:1px solid var(--bd);border-radius:10px;padding:10px 12px;background:#fff;max-height:150px;overflow:hidden;position:relative}
+.prev h4{margin:0 0 4px}.prev:after{content:"";position:absolute;left:0;right:0;bottom:0;height:34px;background:linear-gradient(transparent,#fff)}
+.foot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}button{font:inherit;border:1px solid var(--bd);background:#fff;border-radius:8px;padding:8px 14px}button.pri{background:var(--p);color:#fff;border-color:var(--p)}
+.bx{background:var(--w);border:1px solid #f3c3b0;border-radius:10px;padding:8px 10px;font-size:12.5px;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}td,th{border-bottom:1px solid var(--bd);padding:5px 6px;text-align:left}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}}
+</style>
+<div class="wrap">
+<section class="card"><span class="tag">NOVO · onde criar</span>
+<h2>Criar conteúdo</h2><p class="sub">Preencher</p>
+<ol class="steps"><li>1. Escolher</li><li class="on">2. Preencher</li><li>3. Prévia</li><li>4. Criar</li></ol>
+<label class="l">Onde criar (cada curso tem as suas seções)</label>
+<div class="hint">A lista abaixo é lida do próprio curso, só leitura. “Procurar seção por nome” já escolhe a certa em cada curso.</div>
+<label class="l">Procurar seção por nome <span style="font-weight:400;color:var(--m)">(opcional)</span></label>
+<input value="Unidade 2" aria-label="nome">
+<div class="course"><b>Redes de Computadores — Turma A <span class="ok">✓ achei “Unidade 2”</span></b>
+<select><option>0 · Geral</option><option>1 · Unidade 1 — Fundamentos de redes</option><option selected>2 · Unidade 2 — Endereçamento IP</option><option>3 · Unidade 3 — Roteamento</option><option>4 · Encerramento</option></select>
+<div class="hint">Seção oculta? aparece como “(oculta)”. O conteúdo novo fica oculto de qualquer jeito.</div></div>
+<div class="course"><b>Segurança em Redes — Turma B <span class="ok">✓ achei “Unidade 2”</span></b>
+<select><option>0 · Geral</option><option>1 · Unidade 1 — Introdução</option><option selected>2 · Unidade 2 — Criptografia</option><option>3 · Unidade 3 — Firewall</option></select></div>
+<div class="course"><b>Administração de Servidores — Turma A <span class="warn">⚠ não achei “Unidade 2”</span></b>
+<select><option selected disabled>Escolha a seção deste curso…</option><option>0 · Geral</option><option>1 · Módulo 1 — Linux</option><option>2 · Módulo 2 — Windows Server</option></select>
+<div class="hint">Sem escolha, este curso fica fora da criação (nunca chuta).</div></div>
+<div class="foot"><button>Voltar</button><button class="pri">Ver prévia</button></div>
+<div class="bx"><b>Na prévia</b> cada linha mostra o destino: “Redes de Computadores → Seção 2 · Unidade 2 — Endereçamento IP”. Se a seção sumir ou mudar de número entre a prévia e a criação, a criação daquele curso é <b>cancelada</b> e avisada.</div>
+</section>
+
+<section class="card"><span class="tag">NOVO · importar arquivo</span>
+<h2>Importar modelo ou documento</h2><p class="sub">Dentro de “Preencher”, no lugar do campo “Ou importe um modelo”</p>
+<div class="drop"><b>Arraste ou escolha:</b> HTML · TXT · <b>DOCX</b> · <b>PDF</b><br><span class="hint">tudo é lido no seu computador; nada vai para fora</span></div>
+<div class="chips"><span class="chip on">Arquivo: Plano-de-ensino-UC2.docx</span></div>
+<label class="l">O que fazer com o arquivo?</label>
+<div class="chips"><span class="chip on">● Virar texto da descrição (DOCX)</span><span class="chip">○ Anexar o arquivo à atividade (DOCX/PDF)</span><span class="chip">○ Os dois</span></div>
+<div class="prev"><h4>Plano de ensino — UC 2</h4><p>Olá, <b>{{uc}}</b>! Esta atividade vale <b>{{valor}}</b> pontos.</p><ul><li>Leia o material da unidade</li><li>Entregue em PDF até {{prazo}}</li></ul><table><tr><th>Critério</th><th>Peso</th></tr><tr><td>Clareza</td><td>40%</td></tr></table></div>
+<div class="hint">Títulos, negrito, listas, links e tabelas do Word são mantidos. Imagens, macros e estilos soltos são descartados. Campos <code>{{assim}}</code> viram os campos de preencher.</div>
+<div class="bx"><b>PDF:</b> não dá para extrair texto de PDF com qualidade (colunas, tabelas, escaneado). Por isso o PDF vai <b>anexado</b> à atividade/fórum, como arquivo para o aluno baixar. Só entra se o formulário do Moodle aceitar anexos; se não aceitar, a prévia avisa “anexo indisponível neste Moodle” e nada é criado pela metade.</div>
+<div class="bx" style="background:#f4f7fd;border-color:#c9d6ef"><b>Novo cuidado:</b> a prévia mostra, por curso, o nome do arquivo e o que será feito com ele. O envio do anexo só acontece depois do “Criar”.</div>
+<div class="foot"><button>Trocar arquivo</button><button class="pri">Usar este arquivo</button></div>
+</section></div></html>
