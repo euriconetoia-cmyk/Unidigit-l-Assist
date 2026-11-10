@@ -1,11 +1,18 @@
 # Changelog
 
-## 0.17.0 — 2026-11-01
+## 0.18.0 — 2026-11-10
 
 ### Novo
 - **Criar conteúdo (teste)**: Ferramentas › Criar conteúdo cria fórum de apresentação, atividade de envio e texto de boas-vindas em um ou mais cursos. Fluxo em 4 passos (Escolher, Preencher, Prévia, Criar): a prévia só lê o Moodle e mostra por curso "Será criada", "Já existe: será pulada", "Sem permissão" ou "Formulário diferente"; nada é criado sem confirmar, tudo nasce **oculto** e é conferido depois. Aceita modelo HTML/texto com `{{campos}}` (uc, turma, tutor, abertura, prazo, hoje ou os seus). **Seção pelo nome:** cada curso mostra as suas próprias seções (lidas do curso, só leitura, com “(oculta)” quando for o caso); “Procurar seção por nome” escolhe a certa em cada curso e, se não achar uma só, deixa em branco (nunca chuta). Se a seção mudar de nome ou sumir entre a prévia e a criação, aquele curso não é criado. Se o curso não listar as seções, aparece o campo de número. **DOCX:** importa Word (títulos, negrito, listas, links e tabelas; imagens são descartadas), lido no computador, sem biblioteca nova. PDF e .doc antigo ainda não: a tela explica (PDF anexado fica para depois). Ainda sem teste no Moodle real (SENAI e FIEG).
 - **Painel das turmas (HTML dinâmico)**: filtro por turma, busca (turma, UC ou aluno), cartões clicáveis (ativos, suspensos, sem acesso), detalhe de UCs, seção **Notas por UC** (média, abaixo da faixa, recuperação, sem nota; leitura **parcial** aparece com “N de M alunos” e a UC que falhou aparece como “Não coletada” com o motivo) e **Atenção no fim**, com filtro, ordenação e “Copiar nomes”. Se as notas falharem, as matrículas já lidas continuam no painel. O script do arquivo é fixo, sem internet e sem recurso externo.
 - **Relatório da turma com matriculados**: lista as turmas e quantos alunos estão matriculados em cada uma (só alunos; o aluno em várias UCs conta uma vez), com ativos, suspensos e sem acesso há 7+ dias. Lê só a lista de participantes de cada UC (uma por vez, com pausa e botão Cancelar). Saída em **página HTML** (arquivo único, abre offline) e/ou **Excel** (abas Turmas, Por UC, Atenção, Avisos). Compara com a leitura anterior (só números, `uas.turmas`) e tem **Copiar resumo**. “Notas e situação por UC” continua disponível como opção.
+
+### Interno
+- Chaves `uas.turmas` (comparativo de matriculados) e módulo `criar` (sem permissão nova). Validado só no Moodle simulado; falta homologar no SENAI e no FIEG.
+
+## 0.17.0 — 2026-11-01
+
+### Novo
 - **Menu em aba na borda direita** (substitui o botão redondo, que cobria o VLibras): lingueta de 24 px (32 no hover, área de toque de 44 px) com o capelo, abaixo do VLibras e acima do chat; ao clicar, o painel desliza da direita. Atalho **Alt+U**; setas ↑ ↓ andam entre as ferramentas; **Esc** ou clique fora fecha. “Ferramentas” abre uma lista dentro do painel. Ícone próprio por ferramenta. Ferramenta que não serve para a página mostra “não se aplica aqui” e o motivo, com o texto legível. Anel de foco duplo (visível nos dois temas). **Cor única nos ícones** (azul `#1a4b9f` do manual do Sistema Indústria, com o laranja `#ef5e31` como detalhe na lingueta); o cinza só marca “não se aplica aqui”. **Mover aba** (↑ ↓ no rodapé do painel) ajusta a altura e a extensão lembra.
 - **Meus dados** agora inclui o cronograma importado (`crn.v1`) e a altura da aba (`uas.aba`): aparecem na medição, entram no backup e saem em “Apagar tudo”.
 

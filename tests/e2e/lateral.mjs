@@ -597,7 +597,7 @@ try {
   await sis('h2').waitFor();
   const sobre = await sis('.box').textContent();
   const link = await sis('a:has-text("Ver se há versão nova")').getAttribute('href');
-  check('Sobre: mostra a versão, os créditos e abre só a página de versões do GitHub', /0\.15\.0/.test(sobre) && /Julio Alves/.test(sobre) && /github\.com\/euriconetoia-cmyk\/Unidigit-l-Assist\/releases$/.test(link));
+  check('Sobre: mostra a versão, os créditos e abre só a página de versões do GitHub', sobre.includes(JSON.parse(fs.readFileSync(path.join(EXT, 'manifest.json'), 'utf8')).version) && /Julio Alves/.test(sobre) && /github\.com\/euriconetoia-cmyk\/Unidigit-l-Assist\/releases$/.test(link));
   await pg.screenshot({ path: path.join(SHOTS, '41-sobre.png') });
   await sis('button:has-text("Fechar")').click();
 
