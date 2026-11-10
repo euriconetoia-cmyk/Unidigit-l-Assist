@@ -23,6 +23,8 @@ button{font:inherit;min-height:38px;padding:0 16px;border-radius:9px;border:1px 
 table{width:100%;border-collapse:collapse;margin-top:6px}th,td{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:left;font-size:13px}th{background:var(--bg2);color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
 .msg{margin-top:10px;padding:8px 10px;border-radius:8px;font-size:13px;background:var(--wnb);color:var(--wn)}.msg.ok{background:var(--okb);color:var(--ok)}
 .prog{height:10px;border-radius:6px;background:var(--bd);overflow:hidden;margin:10px 0}.prog i{display:block;height:100%;background:var(--p);width:100%}
+.seg{display:inline-flex;border:1px solid var(--bd);border-radius:9px;overflow:hidden;margin-bottom:6px}.segb{border:0;border-radius:0;min-height:34px}.segb.on{background:var(--p);color:#fff;font-weight:700}
+.drop{border:2px dashed var(--bd);border-radius:12px;padding:14px;text-align:center;display:grid;gap:6px;justify-items:center;background:var(--bg)}.drop span{color:var(--mut);font-size:12.5px}.file{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}.file small{color:var(--mut)}
 .tag{font-size:11px;background:var(--o);color:#fff;border-radius:6px;padding:1px 7px;margin-left:8px;vertical-align:middle}
 [hidden]{display:none!important}
 </style></head><body>
@@ -51,20 +53,28 @@ const MODELOS={
 };
 const UCS=[['Redes de Computadores','Téc. Redes · Turma A'],['Segurança em Redes','Téc. Redes · Turma A'],['Administração de Servidores','Téc. Redes · Turma A'],['Lógica de Programação','Téc. Informática · Turma B']];
 const $=s=>document.querySelector(s),el=(t,c,x)=>{const n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n};
-const S={passo:0,tipo:'forum',sel:new Set([0,1,2]),nome:'',desc:'',secao:'Seção 0 (geral)',existe:new Set([1])};
+const S={fonte:'modelo',passo:0,tipo:'forum',sel:new Set([0,1,2]),nome:'',desc:'',secao:'Seção 0 (geral)',existe:new Set([1])};
 const NOMES=['Escolher','Preencher','Prévia','Criar'];
 function passos(){const o=$('#steps');o.replaceChildren();NOMES.forEach((n,i)=>{const l=el('li',i===S.passo?'on':i<S.passo?'done':'',`${i+1}. ${n}`);o.append(l)})}
 function tipos(){const c=$('#tipos');c.replaceChildren();Object.entries(MODELOS).forEach(([k,m])=>{const b=el('button','opt'+(S.tipo===k?' on':''));b.type='button';b.setAttribute('aria-pressed',String(S.tipo===k));b.append(el('div','ico',m.i),el('b','',m.n),el('span','',m.d));b.onclick=()=>{S.tipo=k;S.nome=MODELOS[k].nome;S.desc=MODELOS[k].desc;tipos()};c.append(b)})}
 function form(){const m=MODELOS[S.tipo],f=$('#form');f.replaceChildren();
  const campo=(rot,tag,val,set)=>{const l=el('label','',rot),i=el(tag);i.value=val;i.oninput=e=>set(e.target.value);f.append(l,i)};
- campo('Nome','input',S.nome,v=>S.nome=v);campo(S.tipo==='boas'?'Texto (HTML simples)':'Descrição','textarea',S.desc,v=>S.desc=v);
+ campo('Nome','input',S.nome,v=>S.nome=v);
+ const seg=el('div','seg');seg.setAttribute('role','group');seg.setAttribute('aria-label','Origem do texto');[['modelo','Texto do modelo'],['arquivo','Importar arquivo']].forEach(([k,r])=>{const b=el('button','segb'+(S.fonte===k?' on':''),r);b.type='button';b.setAttribute('aria-pressed',String(S.fonte===k));b.onclick=()=>{S.fonte=k;form();destinos()};seg.append(b)});
+ f.append(el('label','',S.tipo==='boas'?'Texto (HTML simples)':'Descrição'),seg);
+ if(S.fonte==='modelo'){const t=el('textarea');t.value=S.desc;t.oninput=e=>S.desc=e.target.value;f.append(t)}
+ else{const dz=el('div','drop');dz.append(el('b','','Arraste o arquivo ou escolha'),el('span','','HTML (modelo com {{campos}}), DOCX ou PDF · até 5 MB · lido só no seu navegador, nada é enviado'));const b=el('button','','Escolher arquivo…');b.type='button';dz.append(b);f.append(dz);
+  const ok=el('div','file');ok.append(el('span','st ok','Lido'),el('b','','roteiro-atividade1.docx'),el('small','','3 parágrafos, 1 lista · imagens e tabelas complexas não entram'));f.append(ok);
+  const t=el('table');t.innerHTML='';const hd=el('thead'),hr=el('tr');['Campo no arquivo','Valor','Origem'].forEach(x=>hr.append(el('th','',x)));hd.append(hr);const bd=el('tbody');
+  [['{{uc}}','Redes de Computadores','muda em cada UC','ok'],['{{turma}}','Téc. Redes · Turma A','página Meus cursos','ok'],['{{prazo}}','24/11/2026 23:59','Cronograma da turma','ok'],['{{tutor}}','Seu nome','seu perfil','ok'],['{{link_sala}}','(sem valor)','você preenche','er']].forEach(([c,v,o,t2])=>{const tr=el('tr');const a=el('td','',c);a.style.fontFamily='ui-monospace,monospace';const vv=el('td');if(t2==='er'){const i=el('input');i.placeholder='https://…';i.style.minHeight='30px';vv.append(i)}else vv.textContent=v;tr.append(a,vv,el('td','',o));bd.append(tr)});t.append(hd,bd);f.append(el('label','','Campos encontrados no arquivo'),t);
+  f.append(Object.assign(el('div','msg'),{textContent:'PDF: só o texto é aproveitado (sem formatação). Para anexar o PDF inteiro como arquivo da atividade é uma etapa seguinte. Scripts e estilos do HTML são removidos.'}))}
  const t=el('div','two');const a=el('div'),b=el('div');a.append(el('label','','Seção'));const sel=el('select');['Seção 0 (geral)','Seção 1','Seção 2'].forEach(x=>sel.append(new Option(x,x)));sel.value=S.secao;sel.onchange=e=>S.secao=e.target.value;a.append(sel);b.append(el('label','','Visibilidade'),Object.assign(el('input'),{value:'Oculto para alunos (padrão)',disabled:true}));t.append(a,b);f.append(t);
  if(S.tipo==='envio'){const g=el('div','two');[['Abertura','2026-11-10T08:00'],['Prazo','2026-11-24T23:59']].forEach(([r,v])=>{const w=el('div');w.append(el('label','',r),Object.assign(el('input'),{type:'datetime-local',value:v}));g.append(w)});f.append(g);const n=el('div','msg','Datas sugeridas pelo Cronograma da turma (editáveis).');n.className='msg ok';f.append(n)}}
 function destinos(){const l=$('#destinos');l.replaceChildren();UCS.forEach((u,i)=>{const d=el('label','it');d.style.cssText='text-transform:none;letter-spacing:0;color:inherit;font-size:13px;margin:0';const c=el('input');c.type='checkbox';c.style.width='auto';c.style.minHeight='auto';c.checked=S.sel.has(i);c.onchange=()=>{c.checked?S.sel.add(i):S.sel.delete(i);cnt()};d.append(c,el('b','',u[0]),el('small','',u[1]));if(S.tipo!=='boas'&&S.existe.has(i))d.append(el('span','st go','já tem “'+S.nome.slice(0,14)+'…”'));l.append(d)});cnt()}
 function cnt(){$('#cnt').textContent=`${S.sel.size} UC(s) selecionada(s)`;$('#seguir').disabled=S.passo===1&&!S.sel.size}
 function previa(){const m=MODELOS[S.tipo],p=$('#prev');p.replaceChildren();
  const v=el('div','view'),h=el('div','hd');h.append(el('span','',`${m.n} · Redes de Computadores · ${S.secao}`),el('span','eye','Oculto para alunos'));
- const b=el('div','bd');b.append(el('h3','',S.nome||'(sem nome)'));const d=el('p');if(S.tipo==='boas'){const x=document.createElement('div');x.innerHTML=S.desc.replace(/<(?!\/?b>)[^>]*>/g,'');d.append(x)}else d.textContent=S.desc;b.append(d);
+ const b=el('div','bd');b.append(el('h3','',S.nome||'(sem nome)'));const d=el('p');if(S.fonte==='arquivo'){S.desc='Olá! Nesta atividade de Redes de Computadores (Téc. Redes · Turma A) você deve seguir o roteiro anexo e enviar até 24/11/2026 23:59. Dúvidas: fale com seu tutor.'}if(S.tipo==='boas'){const x=document.createElement('div');x.innerHTML=S.desc.replace(/<(?!\/?b>)[^>]*>/g,'');d.append(x)}else d.textContent=S.desc;b.append(d);
  const dl=el('dl');m.extra.forEach(([k,x])=>{dl.append(el('dt','',k),el('dd','',x))});b.append(dl);v.append(h,b);p.append(el('label','','Como vai ficar (visão do aluno, depois de revelar)'),v);
  $('#aviso2').textContent='Nada foi gravado ainda. Ao confirmar, cada item é criado oculto, lido de volta no Moodle e só então marcado como criado.';
  const t=$('#alvos');t.replaceChildren();[...S.sel].forEach(i=>{const r=el('tr');const ja=S.tipo!=='boas'&&S.existe.has(i);r.append(el('td','',UCS[i][0]),el('td','',S.secao),Object.assign(el('td'),{}));const s=el('span','st '+(ja?'go':'ok'),ja?'Já existe: será pulada':'Será criada');r.lastChild.append(s);t.append(r)})}
