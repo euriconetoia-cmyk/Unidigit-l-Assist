@@ -265,11 +265,36 @@ test('errosDoForm: erro de campo vem com o rótulo e o nome do campo (para saber
   assert.ok(e.includes('Nome do fórum (name): Inserir um valor'), e.join('|')); assert.ok(e.includes('Há campos com erro'));
   assert.ok(!e.includes('Inserir um valor'), 'sem duplicar a mensagem solta');
 });
-test('montarEnvio: campo obrigatório do Moodle que iria vazio vira aviso na prévia (não bloqueia)', () => {
-  const w = load(); const html = formAssign().replace('<input type="submit" name="submitbutton"', '<div class="fitem"><label for="id_idnumber">Código da turma</label><input id="id_idnumber" type="text" name="idnumber" required value=""></div><input type="submit" name="submitbutton"');
-  const form = docDe(w, html).querySelector('form');
-  const r = w.CRI.core.montarEnvio(form, w.CRI.core.MODELOS.envio, { nome: 'A', html: '<p>x</p>', abertura: new w.Date(2026, 10, 10, 8), prazo: new w.Date(2026, 10, 20, 23, 59) });
-  assert.ok(r.pares, r.erro); assert.ok(r.avisos.some(a => /Código da turma \(idnumber\)/.test(a) && /obrigatório/.test(a)), r.avisos.join('|'));
-  const ok = w.CRI.core.montarEnvio(docDe(w, formAssign()).querySelector('form'), w.CRI.core.MODELOS.envio, { nome: 'A', html: '<p>x</p>', abertura: new w.Date(2026, 10, 10, 8), prazo: new w.Date(2026, 10, 20, 23, 59) });
-  assert.equal(ok.avisos.filter(a => /obrigatório/.test(a)).length, 0, 'formulário normal não gera aviso');
+const dadosEnvio = w => ({ nome: 'A', html: '<p>x</p>', abertura: new w.Date(2026, 10, 10, 8), prazo: new w.Date(2026, 10, 20, 23, 59) });
+const ACT = '<div class="fitem"><label for="id_activitytype">Tipo de atividade</label><select id="id_activitytype" name="activitytype" required><option value="" selected>Escolher…</option><option value="2">Formativa</option><option value="5">Somativa</option></select></div>';
+const comAct = html => html.replace('<input type="submit" name="submitbutton"', ACT + '<input type="submit" name="submitbutton"');
+test('montarEnvio: campo obrigatório vazio (lista) volta em "obrigatorios" com as opções reais; escolhido entra no envio; opção inventada é ignorada; formulário normal não tem nada', () => {
+  const w = load(); const f = () => docDe(w, comAct(formAssign())).querySelector('form');
+  const r = w.CRI.core.montarEnvio(f(), w.CRI.core.MODELOS.envio, dadosEnvio(w));
+  assert.ok(r.pares, r.erro); const o = eq(r.obrigatorios); assert.equal(o.length, 1);
+  assert.equal(o[0].nome, 'activitytype'); assert.equal(o[0].rotulo, 'Tipo de atividade'); assert.deepEqual(o[0].opcoes.map(x => x.valor), ['2', '5']);
+  const ok = w.CRI.core.montarEnvio(f(), w.CRI.core.MODELOS.envio, { ...dadosEnvio(w), extras: { activitytype: '5' } });
+  assert.equal(ok.obrigatorios.length, 0); assert.equal(mapa(ok.pares).activitytype, '5');
+  const falso = w.CRI.core.montarEnvio(f(), w.CRI.core.MODELOS.envio, { ...dadosEnvio(w), extras: { activitytype: '999', visible: '1', sesskey: 'X' } });
+  assert.equal(falso.obrigatorios.length, 1, 'opção que não existe não é aceita'); assert.equal(mapa(falso.pares).visible, '0', 'extras nunca mexem em visible/sesskey');
+  const normal = w.CRI.core.montarEnvio(docDe(w, formAssign()).querySelector('form'), w.CRI.core.MODELOS.envio, dadosEnvio(w));
+  assert.equal(normal.obrigatorios.length, 0);
+});
+test('checar/criar: obrigatório sem valor não envia nada e devolve os campos; com a escolha, cria e leva o valor', async () => {
+  const w = load(); const m = moodle(w, { form: comAct(formAssign()) });
+  const c = await w.CRI.api.checar({ origin: ORIGIN, curso: { id: '7', name: 'Redes' }, modelo: w.CRI.core.MODELOS.envio, nome: 'Atividade 1', secao: 0, opcoes: { fetchImpl: m.fetchImpl } });
+  assert.equal(c.estado, 'pronta'); assert.equal(c.obrigatorios.length, 1);
+  const sem = await w.CRI.api.criar(base(w, m.fetchImpl));
+  assert.equal(sem.estado, 'falhou'); assert.match(sem.detalhe, /Tipo de atividade/); assert.equal(sem.campos.length, 1); assert.equal(m.log.posts.length, 0);
+  const com = await w.CRI.api.criar({ ...base(w, m.fetchImpl), extras: { activitytype: '2' } });
+  assert.equal(com.estado, 'criada'); assert.equal(m.log.posts[0].get('activitytype'), '2');
+});
+test('criar: Moodle recusa um campo → falhou com o nome do campo e as opções para escolher e tentar de novo', async () => {
+  const w = load(); const formErro = comAct(formAssign()).replace('</select></div><input type="submit"', '</select><span class="invalid-feedback" id="id_error_activitytype">Inserir um valor</span></div><input type="submit"');
+  const form = formAssign().replace('<input type="submit" name="submitbutton"', '<input type="submit" name="submitbutton"'); // formulário "normal" na ida; o servidor devolve o com erro
+  const m = moodle(w, { form, pos: 'erro' });
+  const orig = m.fetchImpl; const fetchImpl = async (url, init = {}) => { if (init.method === 'POST') { m.log.posts.push(new URLSearchParams(init.body)); return { ok: true, status: 200, redirected: false, url: `${ORIGIN}/course/modedit.php`, text: async () => formErro }; } return orig(url, init); };
+  const r = await w.CRI.api.criar(base(w, fetchImpl));
+  assert.equal(r.estado, 'falhou'); assert.match(r.detalhe, /Tipo de atividade \(activitytype\): Inserir um valor/);
+  assert.equal(r.campos.length, 1); assert.deepEqual(eq(r.campos[0].opcoes.map(o => o.texto)), ['Formativa', 'Somativa']);
 });

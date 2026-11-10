@@ -8,6 +8,7 @@
     if (signal && signal.aborted) return rej(new Error('Cancelado.'));
     const t = setTimeout(res, ms); if (signal) signal.addEventListener('abort', () => { clearTimeout(t); rej(new Error('Cancelado.')); }, { once: true });
   });
+  const clean = t => String(t || '').replace(/\s+/g, ' ').trim();
   const parse = html => new root.DOMParser().parseFromString(html, 'text/html');
 
   async function pegar(url, { signal, fetchImpl } = {}) {
@@ -31,7 +32,7 @@
   }
 
   // Só leitura. Diz se dá para criar neste curso e se já existe algo com o mesmo nome.
-  async function checar({ origin, curso, modelo, nome, secao, secaoNome, opcoes = {} }) {
+  async function checar({ origin, curso, modelo, nome, secao, secaoNome, extras, opcoes = {} }) {
     const base = { curso, estado: 'pronta', detalhe: '', avisos: [] };
     try {
       const pag = await pegar(urlCurso(origin, curso.id), opcoes);
@@ -42,21 +43,22 @@
       const f = await pegar(urlForm(origin, modelo.modname, curso.id, secao), opcoes);
       const form = C.achaForm(f.doc);
       if (!form) return { ...base, estado: 'sem_permissao', detalhe: 'Sem permissão de edição neste curso (o Moodle não abriu o formulário).' };
-      const teste = C.montarEnvio(form, modelo, { nome, html: '<p>teste</p>', prazo: new Date(Date.now() + 864e5 * 10), abertura: new Date() });
+      const teste = C.montarEnvio(form, modelo, { nome, html: '<p>teste</p>', prazo: new Date(Date.now() + 864e5 * 10), abertura: new Date(), extras });
       if (teste.erro) return { ...base, estado: 'incompativel', detalhe: teste.erro };
-      return { ...base, avisos: teste.avisos };
+      return { ...base, avisos: teste.avisos, obrigatorios: teste.obrigatorios || [] };
     } catch (e) { return { ...base, estado: 'erro', detalhe: e && e.message ? e.message : String(e) }; }
   }
 
   // Cria UMA atividade, oculta, e lê de volta para confirmar. Devolve { estado: 'criada'|'incerta'|'falhou', detalhe, cmid }.
-  async function criar({ origin, curso, modelo, nome, html, secao, secaoNome, abertura, prazo, opcoes = {} }) {
+  async function criar({ origin, curso, modelo, nome, html, secao, secaoNome, abertura, prazo, extras, opcoes = {} }) {
     try {
       if (secaoNome != null) { const pg = await pegar(urlCurso(origin, curso.id), opcoes); const sc = secaoMudou(pg.doc, secao, secaoNome); if (sc) return { estado: 'falhou', detalhe: `${sc} Nada foi criado.` }; await sleep(PAUSA_MS / 3, opcoes.signal); }
       const f = await pegar(urlForm(origin, modelo.modname, curso.id, secao), opcoes);
       const form = C.achaForm(f.doc);
       if (!form) return { estado: 'falhou', detalhe: 'Sem permissão de edição neste curso (o Moodle não abriu o formulário).' };
-      const env = C.montarEnvio(form, modelo, { nome, html, abertura, prazo });
+      const env = C.montarEnvio(form, modelo, { nome, html, abertura, prazo, extras });
       if (env.erro) return { estado: 'falhou', detalhe: env.erro };
+      if (env.obrigatorios && env.obrigatorios.length) return { estado: 'falhou', detalhe: `Falta preencher o que o Moodle exige: ${env.obrigatorios.map(o => o.rotulo || o.nome).join(', ')}. Nada foi enviado.`, campos: env.obrigatorios };
       const alvo = new URL(form.getAttribute('action') || f.url, f.url);
       if (alvo.origin !== origin || !/\/course\/modedit\.php$/.test(alvo.pathname)) return { estado: 'falhou', detalhe: 'O formulário aponta para outro endereço. Nada foi enviado.' };
       const fetchImpl = opcoes.fetchImpl || root.fetch.bind(root);
@@ -65,7 +67,12 @@
       if (!res.ok) return { estado: 'falhou', detalhe: `O Moodle respondeu ${res.status}.` };
       const dep = parse(await res.text());
       // Se o Moodle devolveu o formulário (ou mensagens de erro), não criou. Quem confirma que criou é a leitura de volta abaixo.
-      if (C.achaForm(dep) || C.errosDoForm(dep).length) { const er = C.errosDoForm(dep); return { estado: 'falhou', detalhe: er.length ? `O Moodle recusou: ${er.slice(0, 3).join(' | ')}` : 'O Moodle devolveu o formulário sem criar (confira os campos).' }; }
+      if (C.achaForm(dep) || C.errosDoForm(dep).length) {
+        const er = C.errosDoForm(dep); const fd = C.achaForm(dep);
+        // Campos que o Moodle apontou com erro e que a pessoa pode preencher (lista ou texto), para tentar de novo.
+        const campos = fd ? [...dep.querySelectorAll('[id^="id_error_"]')].filter(n => clean(n.textContent)).map(n => C.descreverCampo(fd, n.id.replace(/^id_error_/, ''))).filter(Boolean) : [];
+        return { estado: 'falhou', detalhe: er.length ? `O Moodle recusou: ${er.slice(0, 3).join(' | ')}` : 'O Moodle devolveu o formulário sem criar (confira os campos).', campos };
+      }
       // leitura de volta: achou na página do curso? está oculta?
       await sleep(PAUSA_MS / 3, opcoes.signal);
       const pag = await pegar(urlCurso(origin, curso.id), opcoes);

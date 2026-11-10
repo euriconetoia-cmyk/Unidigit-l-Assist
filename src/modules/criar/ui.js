@@ -49,7 +49,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
     const amanha = new Date(); amanha.setDate(amanha.getDate() + 1); amanha.setHours(8, 0, 0, 0);
     const fim = new Date(amanha.getTime() + 14 * 864e5); fim.setHours(23, 59, 0, 0);
     const tutor = C.nomeDoTutor(doc);
-    const st = { passo: 0, modelo: C.MODELOS.forum, nome: C.MODELOS.forum.nome, texto: C.MODELOS.forum.texto, custom: {}, abertura: dtLocal(amanha), prazo: dtLocal(fim), secoes: new Map(), secaoPor: new Map(), busca: '', lendoSecoes: false, sel: new Set(cursoAtual ? [cursoAtual.id] : []), checks: new Map(), resultados: new Map(), running: false, ctl: null, msg: '', arquivo: '' };
+    const st = { passo: 0, modelo: C.MODELOS.forum, nome: C.MODELOS.forum.nome, texto: C.MODELOS.forum.texto, custom: {}, abertura: dtLocal(amanha), prazo: dtLocal(fim), extras: {}, secoes: new Map(), secaoPor: new Map(), busca: '', lendoSecoes: false, sel: new Set(cursoAtual ? [cursoAtual.id] : []), checks: new Map(), resultados: new Map(), running: false, ctl: null, msg: '', arquivo: '' };
     const box = h('div', { class: 'box', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Criar conteúdo' });
     const back = h('div', { class: 'back', onclick: e => { if (e.target === back && !st.running) close(); } }, box);
     shadow.append(back);
@@ -75,6 +75,33 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
         }
       } finally { st.lendoSecoes = false; }
       draw();
+    }
+    // Campos que o Moodle deste curso exige (ex.: "Tipo de atividade"): a pessoa escolhe com as opções reais lidas do formulário.
+    function campoCtl(campo, aoMudar) {
+      const rot = campo.rotulo || campo.nome; const atual = st.extras[campo.nome] || '';
+      const ctl = campo.opcoes
+        ? h('select', { 'aria-label': rot, onchange: e => aoMudar(e.target.value) }, h('option', { value: '' }, 'Escolha…'), campo.opcoes.map(o => h('option', { value: o.valor }, o.texto)))
+        : h('input', { type: 'text', 'aria-label': rot, onchange: e => aoMudar(C.clean(e.target.value)) });
+      ctl.value = atual;
+      return h('div', { class: 'sec', style: 'margin:6px 0 2px' }, h('label', { class: 'l' }, `${rot} — o Moodle exige`), ctl);
+    }
+    async function rechecar(nome) {
+      st.running = true; st.ctl = new AbortController(); const at = C.clean(st.nome); let primeiro = true;
+      try {
+        for (const c of escolhidos()) {
+          const k = st.checks.get(c.id); if (!k || !(k.obrigatorios || []).some(o => o.nome === nome)) continue;
+          if (!primeiro) await A.sleep(A.PAUSA_MS, st.ctl.signal); primeiro = false;
+          st.checks.set(c.id, { estado: 'lendo', detalhe: '' }); draw();
+          st.checks.set(c.id, await A.checar({ origin, curso: c, modelo: st.modelo, nome: at, secao: st.secaoPor.get(c.id), secaoNome: nomeDaSecao(c), extras: st.extras, opcoes: { signal: st.ctl.signal } }));
+        }
+      } catch (e) { st.msg = 'Conferência cancelada.'; }
+      st.running = false; st.ctl = null; draw();
+    }
+    const criarUm = c => A.criar({ origin, curso: c, modelo: st.modelo, nome: C.clean(st.nome), html: htmlPara(c), secao: st.secaoPor.get(c.id), secaoNome: nomeDaSecao(c), abertura: dAb(), prazo: dPr(), extras: st.extras, opcoes: { signal: st.ctl.signal } });
+    async function tentarDeNovo(c) {
+      st.running = true; st.ctl = new AbortController(); st.msg = `Tentando de novo — ${c.name}`; draw();
+      try { st.resultados.set(c.id, await criarUm(c)); st.msg = ''; } catch (e) { st.msg = 'Cancelado.'; }
+      st.running = false; st.ctl = null; draw();
     }
     // Procurar por nome: atualiza os seletores no lugar (sem redesenhar, para não perder o foco do campo).
     function aplicarBusca() {
@@ -172,7 +199,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
         const alvos = escolhidos();
         for (let i = 0; i < alvos.length; i++) {
           const c = alvos[i]; st.checks.set(c.id, { estado: 'lendo', detalhe: '' }); draw();
-          st.checks.set(c.id, await A.checar({ origin, curso: c, modelo: m, nome, secao: st.secaoPor.get(c.id), secaoNome: nomeDaSecao(c), opcoes: { signal: st.ctl.signal } }));
+          st.checks.set(c.id, await A.checar({ origin, curso: c, modelo: m, nome, secao: st.secaoPor.get(c.id), secaoNome: nomeDaSecao(c), extras: st.extras, opcoes: { signal: st.ctl.signal } }));
           if (i < alvos.length - 1) await A.sleep(A.PAUSA_MS, st.ctl.signal);
         }
         st.msg = '';
@@ -182,7 +209,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
     function alertaP1(t) { const m = box.querySelector('.alertap1'); if (m) m.remove(); box.insertBefore(h('div', { class: 'msg err alertap1', role: 'alert' }, t), box.querySelector('.row2:last-child')); }
     const rotulo = { lendo: ['lendo…', 'go'], pronta: ['Será criada', 'ok'], existe: ['Já existe: será pulada', 'go'], sem_permissao: ['Sem permissão', 'er'], incompativel: ['Formulário diferente', 'er'], erro: ['Não conferida', 'er'] };
     function p2() {
-      const m = st.modelo; const prontos = escolhidos().filter(c => (st.checks.get(c.id) || {}).estado === 'pronta');
+      const m = st.modelo; const prontos = escolhidos().filter(c => { const k = st.checks.get(c.id) || {}; return k.estado === 'pronta' && !(k.obrigatorios || []).length; });
       const ex = prontos[0] || escolhidos()[0];
       const prev = h('div', { class: 'bd' }, h('h3', {}, st.nome));
       if (ex) { const corpo = h('div', {}); const dd = new root.DOMParser().parseFromString(`<body>${htmlPara(ex)}`, 'text/html'); [...dd.body.childNodes].forEach(n => corpo.append(doc.importNode(n, true))); prev.append(corpo); }
@@ -192,7 +219,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
         h('div', { class: 'msg' }, 'Nada foi gravado ainda. Ao confirmar, cada item é criado oculto, lido de volta no Moodle e só então marcado como criado.'),
         h('label', { class: 'l' }, 'Como vai ficar (visão do aluno, depois de você revelar)'), view,
         h('label', { class: 'l' }, 'O que será criado'),
-        h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Curso'), h('th', {}, 'Situação'))), h('tbody', {}, escolhidos().map(c => { const k = st.checks.get(c.id) || { estado: 'lendo' }; const r = rotulo[k.estado] || [k.estado, '']; return h('tr', {}, h('td', {}, c.name, h('div', { class: 'sub' }, rotuloSecao(c))), h('td', {}, h('span', { class: `st ${r[1]}` }, r[0]), k.detalhe && k.estado !== 'pronta' ? h('div', { class: 'sub' }, k.detalhe) : null, (k.avisos || []).map(a => h('div', { class: 'sub' }, a)))); }))),
+        h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Curso'), h('th', {}, 'Situação'))), h('tbody', {}, escolhidos().map(c => { const k = st.checks.get(c.id) || { estado: 'lendo' }; const falta = k.estado === 'pronta' && (k.obrigatorios || []).length; const r = falta ? ['Falta escolher', 'go'] : (rotulo[k.estado] || [k.estado, '']); return h('tr', {}, h('td', {}, c.name, h('div', { class: 'sub' }, rotuloSecao(c))), h('td', {}, h('span', { class: `st ${r[1]}` }, r[0]), falta ? (k.obrigatorios || []).map(o => campoCtl(o, v => { if (v) st.extras[o.nome] = v; else delete st.extras[o.nome]; rechecar(o.nome); })) : null, k.detalhe && k.estado !== 'pronta' ? h('div', { class: 'sub' }, k.detalhe) : null, (k.avisos || []).map(a => h('div', { class: 'sub' }, a)))); }))),
         st.msg ? h('div', { class: 'msg in', role: 'status' }, st.msg) : null,
         rodape(st.running ? h('button', { type: 'button', onclick: cancelar }, 'Cancelar') : h('button', { type: 'button', onclick: () => { st.passo = 1; draw(); } }, 'Voltar'),
           h('button', { type: 'button', class: 'pri', disabled: st.running || !prontos.length, onclick: () => iniciar(prontos) }, `Criar (ocultas)${prontos.length ? ` — ${prontos.length}` : ''}`)));
@@ -203,7 +230,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
       try {
         for (let i = 0; i < alvos.length; i++) {
           const c = alvos[i]; st.pct = Math.round((i / alvos.length) * 100); st.msg = `Criando ${i + 1} de ${alvos.length} — ${c.name}`; draw();
-          st.resultados.set(c.id, await A.criar({ origin, curso: c, modelo: st.modelo, nome, html: htmlPara(c), secao: st.secaoPor.get(c.id), secaoNome: nomeDaSecao(c), abertura: dAb(), prazo: dPr(), opcoes: { signal: st.ctl.signal } }));
+          st.resultados.set(c.id, await criarUm(c));
           if (i < alvos.length - 1) await A.sleep(A.PAUSA_MS, st.ctl.signal);
         }
         st.msg = '';
@@ -217,7 +244,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
       mount(...cab(st.running ? 'Criando…' : 'Resultado da criação.'),
         st.running ? h('div', { class: 'prog', role: 'progressbar', 'aria-valuenow': String(st.pct || 0), 'aria-label': 'Progresso' }, h('i', { style: `width:${st.pct || 0}%` })) : null,
         st.msg ? h('div', { class: 'msg in', role: 'status', 'aria-live': 'polite' }, st.msg) : null,
-        h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Curso'), h('th', {}, 'Resultado'), h('th', {}, 'Conferido no Moodle'))), h('tbody', {}, alvos.map(c => { const x = r.get(c.id); const ex = (st.checks.get(c.id) || {}).estado === 'existe'; const rr = x ? rot[x.estado] : ex ? ['Pulada (já existe)', 'go'] : st.running ? ['aguardando', ''] : ['Não criada', '']; return h('tr', {}, h('td', {}, c.name), h('td', {}, h('span', { class: `st ${rr[1]}` }, rr[0])), h('td', {}, x ? x.detalhe : ex ? '—' : '')); }))),
+        h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Curso'), h('th', {}, 'Resultado'), h('th', {}, 'Conferido no Moodle'))), h('tbody', {}, alvos.map(c => { const x = r.get(c.id); const ex = (st.checks.get(c.id) || {}).estado === 'existe'; const rr = x ? rot[x.estado] : ex ? ['Pulada (já existe)', 'go'] : st.running ? ['aguardando', ''] : ['Não criada', '']; return h('tr', {}, h('td', {}, c.name), h('td', {}, h('span', { class: `st ${rr[1]}` }, rr[0])), h('td', {}, x ? x.detalhe : ex ? '—' : '', ...(x && x.campos && x.campos.length && !st.running ? [...x.campos.map(o => campoCtl(o, v => { if (v) st.extras[o.nome] = v; else delete st.extras[o.nome]; })), h('button', { type: 'button', class: 'pri', onclick: () => tentarDeNovo(c) }, 'Tentar de novo neste curso')] : []))); }))),
         !st.running ? h('div', { class: `msg ${n('falhou') || n('incerta') ? '' : 'ok'}`, role: 'status' }, `${n('criada')} criada(s), ${pulados} pulada(s)${n('incerta') ? `, ${n('incerta')} para conferir` : ''}${n('falhou') ? `, ${n('falhou')} com erro` : ''}. Tudo foi criado oculto: revele no Moodle depois de conferir.`) : null,
         rodape(st.running ? h('button', { type: 'button', onclick: cancelar }, 'Cancelar') : h('button', { type: 'button', onclick: close }, 'Fechar')));
     }

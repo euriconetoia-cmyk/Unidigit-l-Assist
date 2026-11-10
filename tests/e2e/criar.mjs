@@ -25,11 +25,16 @@ const acts = { 7: [], 8: [{ id: 800, nome: 'Fórum de apresentação', visivel: 
 let proxId = 1000; const log = { posts: [], gets: 0 };
 const opts = (n, a, b) => Array.from({ length: b - a + 1 }, (_, i) => `<option value="${a + i}"${a + i === n ? ' selected' : ''}>${a + i}</option>`).join('');
 const data = (base, on) => `<input type="checkbox" name="${base}[enabled]" value="1"${on ? ' checked' : ''}>` + [['day', 1, 31, 1], ['month', 1, 12, 1], ['year', 2020, 2035, 2026], ['hour', 0, 23, 0], ['minute', 0, 59, 0]].map(([k, a, b, v]) => `<select name="${base}[${k}]"${on ? '' : ' disabled'}>${opts(v, a, b)}</select>`).join('');
-const form = (tipo, curso, sec = '0') => `<html><body><div role="main"><h1>Adicionando ${tipo}</h1><form class="mform" id="mform1" method="post" action="/course/modedit.php">
+const EXTRA = {
+  7: '<div class="fitem"><label for="id_activitytype">Tipo de atividade</label><select id="id_activitytype" name="activitytype" required><option value="" selected>Escolher…</option><option value="2">Formativa</option><option value="5">Somativa</option></select></div>',
+  8: '<div class="fitem"><label for="id_fase">Fase</label><select id="id_fase" name="fase"><option value="" selected>Escolher…</option><option value="a">Fase A</option><option value="b">Fase B</option></select>@@ERRO@@</div>', // o servidor cobra, mas o formulário não marca como obrigatório
+};
+const form = (tipo, curso, sec = '0', erro = false) => `<html><body><div role="main"><h1>Adicionando ${tipo}</h1><form class="mform" id="mform1" method="post" action="/course/modedit.php">
 <input type="hidden" name="course" value="${curso}"><input type="hidden" name="section" value="${sec}"><input type="hidden" name="module" value="1"><input type="hidden" name="modulename" value="${tipo}"><input type="hidden" name="add" value="${tipo}"><input type="hidden" name="update" value="0"><input type="hidden" name="return" value="0"><input type="hidden" name="sesskey" value="SKSIM"><input type="hidden" name="_qf__mod_${tipo}_mod_form" value="1">
 ${tipo === 'label' ? '' : '<input type="text" name="name" value="">'}<textarea name="introeditor[text]"></textarea><input type="hidden" name="introeditor[format]" value="1"><input type="hidden" name="introeditor[itemid]" value="9">
 ${tipo === 'assign' ? data('allowsubmissionsfromdate', true) + data('duedate', true) + data('gradingduedate', true) + '<input type="checkbox" name="assignsubmission_file_enabled" value="1" checked><select name="assignsubmission_file_maxfiles">' + opts(20, 1, 20) + '</select>' : ''}
 ${tipo === 'forum' ? '<select name="type"><option value="general" selected>Geral</option><option value="eachuser">Cada pessoa inicia um tópico</option></select>' : ''}
+${tipo === 'assign' && EXTRA[curso] ? EXTRA[curso].replace('@@ERRO@@', erro ? '<span class="invalid-feedback" id="id_error_fase">Inserir um valor</span>' : '') : ''}
 <select name="visible"><option value="1" selected>Mostrar</option><option value="0">Ocultar</option></select>
 <input type="submit" name="submitbutton" value="Salvar e voltar ao curso"></form></div></body></html>`;
 const usuario = '<div class="usermenu"><span class="usertext">Tutora Exemplo</span></div>';
@@ -64,6 +69,8 @@ const handler = async route => {
       const p = new URLSearchParams(req.postData() || ''); log.posts.push(Object.fromEntries(p));
       const c = p.get('course'); if (c === '9') return html('<div class="errorbox">sem permissão</div>');
       if (falha503 && c === '8') return html('', 503);
+      if (p.get('modulename') === 'assign' && c === '7' && !p.get('activitytype')) return html(form('assign', c, p.get('section'), true));
+      if (p.get('modulename') === 'assign' && c === '8' && !p.get('fase')) return html(form('assign', c, p.get('section'), true));
       const id = proxId++; acts[c].push({ id, nome: p.get('name') || 'Texto', visivel: p.get('visible') });
       return html(cursoPage(c)); // o Moodle real redireciona; aqui a resposta já é a página do curso
     }
@@ -109,13 +116,24 @@ try {
   await sleep(300);
   const tab = await q('table').last().textContent();
   check('prévia mostra o destino de cada curso (seção e nome)', /Seção 2 · Unidade 2 — Endereçamento IP/.test(tab) && /Seção 2 · Unidade 2 — Criptografia/.test(tab));
-  check('prévia (só leitura, sem POST): curso 7 "Será criada", 9 "Sem permissão" e envio ocultos', log.posts.length === 0 && /Redes de Computadores[^]{0,90}Será criada/.test(tab) && /Administração de Servidores[^]{0,60}Sem permissão/.test(tab), tab.slice(0, 600));
+  check('prévia (só leitura, sem POST): curso 7 "Será criada", 9 "Sem permissão" e envio ocultos', log.posts.length === 0 && /Segurança em Redes[^]{0,90}Será criada/.test(tab) && /Administração de Servidores[^]{0,60}Sem permissão/.test(tab), tab.slice(0, 600));
   await pg.screenshot({ path: path.join(SHOTS, 'c3-previa.png') });
+  check('campo que o Moodle exige (marcado) aparece na prévia com as opções reais; o curso fica "Falta escolher" e só o 8 pode ser criado', /Redes de Computadores[^]{0,120}Falta escolher/.test(tab) && (await q('select[aria-label="Tipo de atividade"] option').allTextContents()).join('|').includes('Somativa') && await q('button.pri:has-text("Criar (ocultas) — 1")').count() === 1, tab.slice(0, 400));
+  await pg.screenshot({ path: path.join(SHOTS, 'c3b-obrigatorio.png') });
+  await q('select[aria-label="Tipo de atividade"]').selectOption('5');
+  await q('button.pri:has-text("Criar (ocultas) — 2"):not([disabled])').waitFor({ timeout: 30000 });
+  check('escolher o tipo libera o curso 7 (reconferido, ainda sem POST)', log.posts.length === 0);
   await q('button.pri:has-text("Criar (ocultas)")').click();
-  await q('button:has-text("Fechar")').waitFor({ timeout: 60000 });
+  await q('button:has-text("Tentar de novo neste curso")').waitFor({ timeout: 60000 });
+  await pg.screenshot({ path: path.join(SHOTS, 'c4a-recusado.png') });
+  check('Moodle recusou o campo "Fase" no curso 8: a tela mostra o nome do campo e as opções', /Fase \(fase\): Inserir um valor/.test(await q('table').last().textContent()) && (await q('select[aria-label="Fase"] option').allTextContents()).join('|').includes('Fase A') && log.posts.length === 2);
+  await q('select[aria-label="Fase"]').selectOption('a');
+  await q('button:has-text("Tentar de novo neste curso")').click();
+  await q('button:has-text("Tentar de novo neste curso")').waitFor({ state: 'detached', timeout: 60000 });
+  await q('button:has-text("Fechar")').waitFor({ timeout: 30000 });
   await pg.screenshot({ path: path.join(SHOTS, 'c4-resultado.png') });
   const res = await q('table').last().textContent();
-  check('criou nos cursos 7 e 8 (o 9 não tem permissão), tudo oculto e conferido', log.posts.length === 2 && log.posts[0].course === '7' && log.posts[1].course === '8' && log.posts.every(p => p.visible === '0') && log.posts[0].section === '2' && log.posts[1].section === '2' && log.posts[0].sesskey === 'SKSIM' && /Redes de Computadores\s*Criada \(oculta\)/.test(res) && /Administração de Servidores\s*Não criada/.test(res) && acts[7].length === 1 && acts[7][0].visivel === '0', res.slice(0, 500) + ' | ' + JSON.stringify(log.posts));
+  check('criou nos cursos 7 e 8 (o 9 não tem permissão), tudo oculto e conferido', log.posts.length === 3 && log.posts[0].course === '7' && log.posts[0].activitytype === '5' && log.posts[1].course === '8' && !log.posts[1].fase && log.posts[2].course === '8' && log.posts[2].fase === 'a' && log.posts.every(p => p.visible === '0') && log.posts[0].section === '2' && log.posts[2].section === '2' && log.posts[0].sesskey === 'SKSIM' && /Redes de Computadores\s*Criada \(oculta\)/.test(res) && /Segurança em Redes\s*Criada \(oculta\)/.test(res) && /Administração de Servidores\s*Não criada/.test(res) && acts[7].length === 1 && acts[7][0].visivel === '0', res.slice(0, 500) + ' | ' + JSON.stringify(log.posts));
   check('o texto foi com tutor, abertura e prazo preenchidos, e as datas do envio', /Tutora Exemplo/.test(log.posts[0]['introeditor[text]']) && /11\/11\/2026 08:00/.test(log.posts[0]['introeditor[text]']) && /Prazo de entrega/.test(log.posts[0]['introeditor[text]']) && log.posts[0]['duedate[enabled]'] === '1', log.posts[0]['introeditor[text]']);
   check('sem erro de script na página', erros.length === 0, erros.join(';'));
   await q('button:has-text("Fechar")').click();
@@ -130,7 +148,7 @@ try {
   check('na página do curso, o curso atual já vem marcado', await q('.list .it input:checked').count() === 1);
   await q('button.pri:has-text("Ver prévia")').click();
   await q('button:has-text("Voltar")').waitFor({ timeout: 30000 }); await sleep(300);
-  check('fórum com o mesmo nome: "Já existe: será pulada" e o botão Criar fica travado', /Já existe/.test(await q('table').last().textContent()) && await q('button.pri:has-text("Criar")').isDisabled() && log.posts.length === 2);
+  check('fórum com o mesmo nome: "Já existe: será pulada" e o botão Criar fica travado', /Já existe/.test(await q('table').last().textContent()) && await q('button.pri:has-text("Criar")').isDisabled() && log.posts.length === 3);
   await q('button:has-text("Voltar")').click();
   await q('button:has-text("Voltar")').click();
   await q('button.opt:has-text("Texto de boas-vindas")').click();

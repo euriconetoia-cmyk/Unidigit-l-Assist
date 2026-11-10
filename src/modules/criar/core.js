@@ -138,11 +138,16 @@
       definir(pares, 'assignsubmission_file_enabled', 1);
       const mf = opcoes(form, 'assignsubmission_file_maxfiles'); if (mf && mf.includes('1')) definir(pares, 'assignsubmission_file_maxfiles', 1);
     }
+    // Campos que o Moodle deste curso exige (ex.: "Tipo de atividade") e que a pessoa escolheu na tela: só entram se o campo existe e a opção é uma das reais.
+    Object.keys(dados.extras || {}).forEach(n => {
+      const v = dados.extras[n]; if (v == null || v === '' || BLOQ.test(n)) return;
+      const d = descreverCampo(form, n); if (!d) return; if (d.opcoes && !d.opcoes.some(o => o.valor === String(v))) return;
+      definir(pares, n, v);
+    });
     const botao = form.querySelector('input[type="submit"][name="submitbutton"], button[type="submit"][name="submitbutton"]');
     if (!botao) return { erro: 'Não achei o botão de salvar do formulário. Nada foi criado.' };
     pares.push([botao.getAttribute('name'), botao.value || botao.textContent || 'Save and return to course']);
-    const vazios = obrigatoriosVazios(form, pares); if (vazios.length) avisos.push(`O Moodle marca como obrigatório e vai sem valor: ${vazios.join(', ')}. Pode recusar.`);
-    return { pares, avisos };
+    return { pares, avisos, obrigatorios: obrigatoriosVazios(form, pares) };
   }
   const codificar = pares => { const u = new URLSearchParams(); pares.forEach(([k, v]) => u.append(k, v)); return u.toString(); };
 
@@ -162,17 +167,27 @@
     doc.querySelectorAll('.alert-danger, .errorbox, .notifyproblem, .form-control-feedback, .error').forEach(n => { const t = clean(n.textContent); if (t && !out.some(o => o.endsWith(`: ${t}`))) add(t); });
     return out;
   }
-  // Campos que o Moodle marca como obrigatórios e que iriam vazios no envio (só para avisar na prévia; não bloqueia).
+  // Descreve um campo do formulário para a pessoa preencher: nome, rótulo e, se for lista, as opções reais do Moodle. Só lista e texto.
+  const BLOQ = /^(visible|name|sesskey|course|section|module|modulename|add|update|return|introeditor\[.*|_qf_.*|submitbutton.*)$/;
+  function descreverCampo(form, nome) {
+    let el = form.elements[nome]; if (el && !el.tagName && el.length) el = el[0]; if (!el || !el.tagName) return null;
+    const tag = el.tagName.toLowerCase(); const type = (el.getAttribute('type') || '').toLowerCase();
+    const rotulo = rotuloDoCampo(form.ownerDocument, nome);
+    if (tag === 'select' && !el.multiple) return { nome, rotulo, opcoes: [...el.options].filter(o => o.value !== '').map(o => ({ valor: o.value, texto: clean(o.textContent) })) };
+    if (tag === 'textarea' || (tag === 'input' && ['', 'text', 'number', 'url', 'email'].includes(type))) return { nome, rotulo, opcoes: null };
+    return null;
+  }
+  // Campos que o Moodle marca como obrigatórios e que iriam vazios no envio (a pessoa preenche na prévia).
   function obrigatoriosVazios(form, pares) {
     const vistos = new Set(); const out = [];
     [...form.elements].forEach(el => {
-      const nome = el.getAttribute && el.getAttribute('name'); if (!nome || el.disabled || vistos.has(nome)) return;
+      const nome = el.getAttribute && el.getAttribute('name'); if (!nome || el.disabled || vistos.has(nome) || BLOQ.test(nome)) return;
       if (['hidden', 'submit', 'button', 'checkbox', 'radio', 'file'].includes((el.type || '').toLowerCase())) return;
       const fi = el.closest && el.closest('.fitem, .form-group');
       const obrig = el.required || el.getAttribute('aria-required') === 'true' || !!(fi && fi.querySelector('[title="Obrigatório"], [title="Required"], [title="Obligatorio"]'));
       if (!obrig) return; vistos.add(nome);
       const v = pares.filter(x => x[0] === nome).map(x => String(x[1]).trim()).join('');
-      if (!v) { const r = textoDe((form.ownerDocument || document).querySelector(`label[for="${el.id}"]`)); out.push(`${r ? `${r} ` : ''}(${nome})`); }
+      if (!v) { const d = descreverCampo(form, nome); if (d) out.push(d); }
     });
     return out;
   }
@@ -222,5 +237,5 @@
   }
   function nomeDoTutor(doc) { const n = doc.querySelector('.usermenu .usertext, [data-region="usermenu"] .usertext, .userbutton .usertext, .usermenu .login .usertext'); return textoDe(n); }
 
-  CRI.core = { MODELOS, campos, preencher, sanitizar, partesData, fmtData, lerLocal, coletar, definir, achaForm, montarEnvio, codificar, errosDoForm, obrigatoriosVazios, rotuloDoCampo, atividades, acharPorNome, secoes, acharSecao, valorVisivel, cursoIdDaUrl, cursosDaPagina, nomeDoTutor, fold, clean, esc };
+  CRI.core = { MODELOS, campos, preencher, sanitizar, partesData, fmtData, lerLocal, coletar, definir, achaForm, montarEnvio, codificar, errosDoForm, obrigatoriosVazios, descreverCampo, rotuloDoCampo, atividades, acharPorNome, secoes, acharSecao, valorVisivel, cursoIdDaUrl, cursosDaPagina, nomeDoTutor, fold, clean, esc };
 })(globalThis);
