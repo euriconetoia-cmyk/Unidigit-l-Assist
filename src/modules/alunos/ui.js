@@ -4,10 +4,11 @@
   'use strict';
   const ALN = root.ALN;
   const HOST_ID = 'hub-aln-host';
-  const TABS = [['resumo', 'Resumo'], ['alunos', 'Alunos'], ['notas', 'Notas'], ['acomp', 'Acompanhamento'], ['relatorio', 'Relatório da UC'], ['ajustes', 'Ajustes']];
+  const TABS = [['resumo', 'Resumo'], ['alunos', 'Alunos'], ['acomp', 'Acompanhamento'], ['relatorio', 'Relatório']]; // 'notas' é uma visão da aba Alunos; 'ajustes' abre pela engrenagem do cabeçalho
   const ICON = {
     refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>', close: '<path d="M6 6l12 12M18 6L6 18"/>',
     down: '<path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/>', copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/>',
+    gear: '<path d="M12 8.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4zM19.4 13.5a7.5 7.5 0 0 0 0-3l1.9-1.5-2-3.4-2.3.9a7.6 7.6 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5a7.6 7.6 0 0 0-2.6 1.5l-2.3-.9-2 3.4L4.6 10.5a7.5 7.5 0 0 0 0 3L2.7 15l2 3.4 2.3-.9c.8.7 1.7 1.2 2.6 1.5l.4 2.5h4l.4-2.5c.9-.3 1.8-.8 2.6-1.5l2.3.9 2-3.4z"/>',
     search: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/>', send: '<path d="M21 4L3 11l7 3 3 7z"/><path d="M10 14l11-10"/>'
   };
   const CSS = `
@@ -56,7 +57,8 @@ th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--bd);font-si
 .fbar{height:10px;border-radius:6px;background:var(--bd);overflow:hidden;margin:10px 0 2px}.fbar i{display:block;height:100%;background:var(--p,#0b5cad);width:0;transition:width .3s}
 .res{margin-top:10px;padding:8px 10px;border-radius:var(--r1);font-size:13px}.res.ok{background:var(--okbg);color:var(--ok)}.res.warn{background:var(--wnbg);color:var(--wn)}.res.bad{background:var(--erbg);color:var(--er)}
 
-nav button.off{opacity:.55}
+nav button.off{opacity:.55}.ib.off{opacity:.55}.ib[aria-pressed=true]{background:#fff;color:#0a3f78}
+.seg{display:inline-flex;align-self:flex-start;margin:10px 16px 0;padding:3px;border-radius:10px;background:var(--bg2);gap:2px}.seg button{border:0;background:none;padding:6px 16px;border-radius:8px;color:var(--mut);cursor:pointer;min-height:32px}.seg button[aria-pressed=true]{background:var(--s);color:var(--p);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.15)}
 .panelbody{padding:16px;overflow:auto;flex:1}
 .box{background:var(--s);border:1px solid var(--bd);border-radius:var(--r2);padding:16px}
 .big{font-size:17px;font-weight:700;margin:0 0 4px}.sub{color:var(--mut);margin:0 0 14px}.hint{color:var(--mut);font-size:12.5px;margin:10px 0 0}
@@ -456,7 +458,7 @@ label.inl{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-siz
           k(`${ov.entregues}/${s.itemCount}`, ov.readEntregas ? 'atividades entregues' : 'itens com nota'), k(String(s.pendCount), ov.readEntregas ? 'sem entrega' : 'sem nota', s.pendCount ? 'low' : ''), k(s.accessKnown ? (s.lastAccessDays >= 9999 ? 'Nunca' : `${s.lastAccessDays} d`) : '—', 'último acesso', F.accessTone(s) === 'old' ? 'low' : '')),
         h('div', { class: 'sec' }, 'Por que está nesta situação'), h('ul', { class: 'why2' }, reasons), h('p', { class: 'why' }, `Sugestão: ${s.risk.action}`),
         h('div', { class: 'sec' }, 'Atividades ', h('span', { class: 'why' }, '· marca preta = média da turma')), h('div', { class: 'scroll' }, h('table', { class: 'ftable' }, h('thead', {}, h('tr', {}, h('th', {}, 'Atividade'), h('th', {}, 'Situação'), h('th', { class: 'n' }, 'Nota'), h('th', {}, 'Prazo'))), h('tbody', {}, rows))),
-        ov.readEntregas ? null : h('p', { class: 'why note2' }, 'Entregas ainda não lidas: “sem nota” pode ser atividade enviada que espera a sua correção. Use “Ler entregas” na aba Relatório da UC.'),
+        ov.readEntregas ? null : h('p', { class: 'why note2' }, 'Entregas ainda não lidas: “sem nota” pode ser atividade enviada que espera a sua correção. Use “Ler entregas” na aba Relatório.'),
         h('div', { class: 'sec' }, 'Contatos'), contacts)];
     }
 
@@ -754,13 +756,19 @@ label.inl{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-siz
       if (st.error) out.unshift(h('div', { class: 'err', role: 'alert' }, st.error));
       if ((st.tab === 'alunos' || (st.tab === 'relatorio' && !st.ficha))) out.splice(1, 0, entregasCard());
       const banner = partialBanner(); if (banner) out.unshift(banner);
+      if (st.tab === 'alunos' || st.tab === 'notas') out.splice(banner ? 1 : 0, 0, visaoSeg());
       return out.filter(Boolean);
+    }
+    // Aba Alunos: duas visões da mesma turma (lista com filtros ou notas por atividade).
+    function visaoSeg() {
+      return h('div', { class: 'seg', role: 'group', 'aria-label': 'Visão dos alunos' }, [['alunos', 'Lista'], ['notas', 'Notas']].map(([k, t]) =>
+        h('button', { type: 'button', 'aria-pressed': st.tab === k ? 'true' : 'false', onclick: () => { st.tab = k; render(); } }, t)));
     }
     function render() {
       const course = st.data ? st.data.course.name : '';
       drawer.replaceChildren(
-        h('header', {}, h('div', {}, h('b', {}, 'Alunos e notas'), h('small', {}, course || 'Somente leitura · nada é gravado no Moodle')), iconBtn('ib', 'close', 'Fechar', () => api.close())),
-        h('nav', { role: 'tablist' }, TABS.map(([k, t]) => h('button', { type: 'button', role: 'tab', class: st.data ? '' : 'off', title: st.data ? null : 'Leia a turma para liberar', 'aria-selected': st.tab === k ? 'true' : 'false', onclick: () => { st.tab = k; render(); } }, t))),
+        h('header', {}, h('div', {}, h('b', {}, 'Alunos e notas'), h('small', {}, course || 'Somente leitura · nada é gravado no Moodle')), h('button', { type: 'button', 'aria-label': 'Ajustes', title: 'Ajustes desta UC', 'aria-pressed': st.tab === 'ajustes' ? 'true' : 'false', class: st.data ? 'ib' : 'ib off', onclick: () => { if (!st.data) return; st.tab = 'ajustes'; render(); } }, svg('gear')), iconBtn('ib', 'close', 'Fechar', () => api.close())),
+        h('nav', { role: 'tablist' }, TABS.map(([k, t]) => { const sel = st.tab === k || (k === 'alunos' && st.tab === 'notas'); return h('button', { type: 'button', role: 'tab', class: st.data ? '' : 'off', title: st.data ? null : 'Leia a turma para liberar', 'aria-selected': sel ? 'true' : 'false', onclick: () => { st.tab = k; render(); } }, t); })),
         h('div', { 'data-content': '', style: 'display:flex;flex-direction:column;flex:1;min-height:0' }, content()));
     }
     const onKey = e => { if (e.key !== 'Escape') return; if (st.modal) { if (!st.modalBusy) closeModal(); return; } api.close(); };

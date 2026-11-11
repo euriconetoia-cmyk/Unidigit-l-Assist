@@ -187,7 +187,7 @@ try {
   check('Resumo do dia é a primeira tela: alunos, risco alto, sem acesso, a corrigir, retornos e piorou', await shadow('nav button[aria-selected=true]').textContent() === 'Resumo' && /alunos/.test(resumo) && /risco alto/.test(resumo) && /sem acesso \+15d/.test(resumo) && /a corrigir/.test(resumo) && /Retornos de hoje/.test(resumo) && /Piorou desde a última leitura/.test(resumo) && /Ler agora/.test(resumo));
   check('Resumo: "a corrigir" sem ler as entregas fica em "—", nunca zero', /—\s*a corrigir/.test(resumo));
   await pg.screenshot({ path: path.join(SHOTS, '7b-resumo.png') });
-  await shadow('nav button:has-text("Ajustes")').click();
+  await shadow('header button[aria-label="Ajustes"]').click();
   check('Ajustes: mostra padrão e valor da UC com os 5 campos', await shadow('tbody tr').count() === 5 && /Nota mínima/.test(await shadow('tbody').textContent()));
   await shadow('input[aria-label="Dias sem acesso (atenção)"]').fill('abc');
   await shadow('button:has-text("Salvar")').click();
@@ -197,7 +197,7 @@ try {
   check('Ajustes: salvar mostra confirmação e marca "ajustado"', /Ajustes salvos/.test(await shadow('[role=status]').textContent()) && /ajustado/.test(await shadow('tbody').textContent()));
   await pg.screenshot({ path: path.join(SHOTS, '7c-ajustes.png') });
   await shadow('nav button:has-text("Acompanhamento")').click();
-  await shadow('nav button:has-text("Ajustes")').click();
+  await shadow('header button[aria-label="Ajustes"]').click();
   await shadow('button:has-text("Voltar ao padrão")').click();
   check('Ajustes: "Voltar ao padrão" restaura', /Ajustes restaurados/.test(await shadow('[role=status]').textContent()) && !/ajustado/.test(await shadow('tbody').textContent()));
   await shadow('nav button:has-text("Alunos")').click();
@@ -219,7 +219,7 @@ try {
   await shadow('.thbtn:has-text("Último acesso")').click();
   check('ordenar por Último acesso (decrescente) põe quem está há mais tempo sem acessar primeiro', /Fábio/.test(await shadow('table tbody tr').first().textContent()));
   // ---- Relatório da UC centrado no aluno + ficha ----
-  await shadow('nav button:has-text("Relatório da UC")').click();
+  await shadow('nav button:has-text("Relatório")').click();
   await shadow('.stud').first().waitFor();
   const cards = await shadow('.stud').count();
   await pg.screenshot({ path: path.join(SHOTS, '17-relatorio-alunos.png') });
@@ -236,7 +236,7 @@ try {
   check('busca filtra a lista', await shadow('table tbody tr').count() === 1);
   await shadow('input[type=search]').fill('');
 
-  await shadow('nav button:has-text("Notas")').click();
+  await shadow('.seg button:has-text("Notas")').click();
   const head = await shadow('thead th').allTextContents();
   check('Notas: colunas por atividade com nota máxima e total', head.length === 6 && /AV1/.test(head[1]) && /máx\. 10/.test(head[1]), head.join('|'));
   check('Notas: sem nota aparece como "—" e há linha de média da turma', (await shadow('td.blank').count()) === 7 && /Média da turma/.test(await shadow('tbody tr:last-child').textContent()));
@@ -252,7 +252,8 @@ try {
   check('copiar mensagem coloca o texto na área de transferência (nada é enviado)', /^Olá, /.test(copied), copied);
 
   // ---- Excel (.xlsx) ----
-  await shadow('nav button:has-text("Notas")').click();
+  await shadow('nav button:has-text("Alunos")').click();
+  await shadow('.seg button:has-text("Notas")').click();
   const [dlX] = await Promise.all([pg.waitForEvent('download', { timeout: 10000 }), shadow('.bar button:has-text("Excel")').click()]);
   const xPath = path.join(SHOTS, 'notas-exportadas.xlsx'); await dlX.saveAs(xPath);
   const xb = fs.readFileSync(xPath);
@@ -368,7 +369,7 @@ try {
   await sw.evaluate(() => chrome.storage.local.remove('uas.modelos')); // volta aos modelos padrão para os próximos testes
 
 
-  await shadow('nav button:has-text("Relatório da UC")').click();
+  await shadow('nav button:has-text("Relatório")').click();
   const rel = await shadow('.body').textContent();
   check('Relatório da UC: faixa-resumo (média 63,8), filtros "Ver" e resumo por atividade', /63,8/.test(rel) && /média da turma/.test(rel) && /Precisam de atenção/.test(rel) && /Resumo por atividade/.test(rel));
   await shadow('details.more summary').click();
@@ -381,7 +382,7 @@ try {
   check('Esc fecha o painel', !(await shadow('.drawer').isVisible()));
   await pg.click('#hub-ead-launcher .tab');
   await abrirItem(pg, 'alunos-notas');
-  await shadow('button[role="tab"]:has-text("Relatório da UC")').click(); // Relatório da UC agora é aba dentro de Alunos
+  await shadow('button[role="tab"]:has-text("Relatório")').click(); // Relatório da UC agora é aba dentro de Alunos
   await sleep(500);
   check('reabrir mostra os dados já lidos, sem nova consulta', await shadow('.drawer').isVisible() && state.graderHits === g0 + 1 && /média da turma|Precisam de atenção/.test(await shadow('.body').textContent()));
 
@@ -406,7 +407,7 @@ try {
   check('"Continuar" lê só os participantes (livro de notas não é pedido de novo) e fecha a leitura completa', state.graderHits === gC + 1 && await shadow('.partial:has-text("Leitura incompleta")').count() === 0 && /Leitura completa/.test(await shadow('.cov').textContent()), `consultas ao livro de notas: ${state.graderHits - gC}`);
 
   // ---- entregas: quem entregou cada atividade (leitura sob demanda, com "Continuar") + relatório completo em HTML ----
-  await shadow('nav button:has-text("Relatório da UC")').click();
+  await shadow('nav button:has-text("Relatório")').click();
   const tBase = state.tarefaHits;
   check('Relatório da UC lista TODOS os alunos (6), não só quem tem pendência', await shadow('.stud').count() === 6 && /Mostrando 6 de 6/.test(await shadow('.resline').first().textContent()));
   check('antes de ler entregas, o painel explica que “pendente” é só “sem nota” e não consultou tarefas', /Ler entregas/.test(await shadow('.partial').first().textContent()) && state.tarefaHits === tBase);
