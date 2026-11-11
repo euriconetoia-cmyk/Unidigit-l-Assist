@@ -1,5 +1,7 @@
 # Como contribuir
 
+Ao participar, você concorda com o [Código de conduta](CODE_OF_CONDUCT.md). Para configuração do repositório e publicação de versões, veja [`docs/projeto/GITHUB.md`](../docs/projeto/GITHUB.md).
+
 ## Antes de mexer
 1. Leia tudo em [`docs/contexto/`](../docs/contexto): `prd.md`, `architecture.md`, `rules.md` (restrições que não podem ser violadas), `design.md` (vale para toda tela nova), `task.md` (fila, uma tarefa por vez, na ordem) e `memory.md` (histórico de decisões).
 2. Trabalhe em um branch a partir de `main` (`feat/…`, `fix/…`, `docs/…`) e abra um Pull Request. `main` só recebe código com o CI verde.

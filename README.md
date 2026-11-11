@@ -57,7 +57,7 @@ npm run test:e2e    # Chromium real + Moodle simulado (precisa de Playwright glo
 
 - `npm run sync` atualiza a cópia do código dos projetos de origem (Importar Notas e Assistente EaD) em `vendor/`; só é preciso quando esses projetos mudam, e eles devem estar em pastas ao lado deste.
 - Estrutura e decisões: [`docs/contexto/`](docs/contexto) (produto, arquitetura, regras, design, tarefas e histórico de decisões).
-- Fluxo de contribuição: [`CONTRIBUTING.md`](.github/CONTRIBUTING.md). Histórico de versões: [`CHANGELOG.md`](CHANGELOG.md).
+- Fluxo de contribuição: [`CONTRIBUTING.md`](.github/CONTRIBUTING.md), [Código de conduta](.github/CODE_OF_CONDUCT.md) e [GitHub e releases](docs/projeto/GITHUB.md). Histórico de versões: [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Estrutura do repositório
 

@@ -196,3 +196,5 @@ Menu em aba + cor única + Meus dados com cronograma/aba. A v0.16.0 já existia 
 - 2026-11-10: Usuário pediu que o menu enxuto saia como versão 0.18.1 (0.18.0 fica com Criar conteúdo/painel das turmas). Sem push/tag até o 'pode subir'.
 
 - 2026-11-11: Usuário disse 'vamos subir': push da main feito (18 commits). A sessão não pode criar tags/releases nem alterar configurações do repositório (proxy bloqueia). Solução: release.yml ganhou disparo manual (Actions > Release > Run workflow, informando tag e commit); v0.18.0 deve apontar para ec7e7ec e v0.18.1 para a main; v0.17.0 para 2272104. README ganhou selos, prints (docs/imagens, dados fictícios) e tabela atual do menu.
+
+- 2026-11-11: Releases v0.17.0, v0.18.0 e v0.18.1 publicadas pelo workflow Release (Run workflow, via Chrome do usuário). Adicionados CODE_OF_CONDUCT, docs/projeto/GITHUB.md (config, publicação e histórico), config de issues sem link para Discussões desativadas, script de configuração com descrição/tópicos novos. Social preview e alertas de segurança só pelo site.

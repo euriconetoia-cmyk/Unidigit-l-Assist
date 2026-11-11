@@ -9,10 +9,10 @@ falha() { printf '  ! %s (veja a mensagem acima; pode depender do plano do GitHu
 
 echo "Repositório: $R"
 gh repo edit "$R" \
-  --description "Unidigit@l Assist — ferramentas do tutor EaD para o Moodle (correção, pendências, alunos e relatórios)" \
+  --description "Extensão do Chrome para tutores EaD no Moodle (SENAI/FIEG): correção, pendências, alunos, criar conteúdo e relatórios — nada roda sozinho." \
   --enable-wiki=false --enable-projects=false \
   --delete-branch-on-merge --enable-squash-merge --enable-merge-commit=false --enable-rebase-merge=false \
-  --add-topic moodle --add-topic chrome-extension --add-topic ead --add-topic tutoria --add-topic senai \
+  --add-topic moodle --add-topic chrome-extension --add-topic ead --add-topic tutoria --add-topic senai --add-topic manifest-v3 --add-topic education --add-topic javascript \
   && ok "descrição, tópicos e modo de merge (somente squash, apaga branch ao mesclar)" || falha "ajustes gerais"
 
 if [ "${1:-}" = "--privado" ]; then

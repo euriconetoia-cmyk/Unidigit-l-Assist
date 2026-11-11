@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Dúvida de uso
-    url: https://github.com/euriconetoia-cmyk/Unidigit-l-Assist/discussions
-    about: Para perguntas gerais, use as Discussões (se estiverem ativas) ou fale com o mantenedor.
+  - name: Vulnerabilidade de segurança
+    url: https://github.com/euriconetoia-cmyk/Unidigit-l-Assist/security/advisories/new
+    about: Não abra issue pública. Relate em particular, sem dados reais de alunos.
