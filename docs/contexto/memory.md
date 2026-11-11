@@ -200,3 +200,5 @@ Menu em aba + cor única + Meus dados com cronograma/aba. A v0.16.0 já existia 
 - 2026-11-11: Releases v0.17.0, v0.18.0 e v0.18.1 publicadas pelo workflow Release (Run workflow, via Chrome do usuário). Adicionados CODE_OF_CONDUCT, docs/projeto/GITHUB.md (config, publicação e histórico), config de issues sem link para Discussões desativadas, script de configuração com descrição/tópicos novos. Social preview e alertas de segurança só pelo site.
 
 - 2026-11-11: Painel Alunos implementado com 4 abas (Resumo, Alunos [Lista|Notas], Acompanhamento, Relatório) e Ajustes na engrenagem do cabeçalho (e2e 125/125). Mockup docs/mockups/telas-enxutas.png (Relatório da turma e Criar conteúdo) enviado ao usuário; implementar só após aprovação. Versão (provável 0.18.2) ainda não definida.
+
+- 2026-11-11: Usuário aprovou o mockup `telas-enxutas` e pediu para implementar. Relatório da turma: modo só-notas removido (Com notas = matrículas + notas). Criar conteúdo: visibilidade vira etiqueta fixa 'sempre oculto'. Versão 0.18.2 (visual/organização; sem função nova). Sem push até o 'pode subir'.

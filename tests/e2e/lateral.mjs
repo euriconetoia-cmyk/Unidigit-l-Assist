@@ -476,24 +476,24 @@ try {
   const achados = await tshadow('.list .it').count();
   check('busca por curso: filtra a lista sem diferenciar maiúsculas/acentos e diz quantos achou', achados >= 1 && achados <= 3 && /na busca/.test(await tshadow('.bar .sp').textContent()), `${termo}: ${achados}`);
   await pg.screenshot({ path: path.join(SHOTS, '31-turma-busca.png') });
-  await tshadow('button:has-text("Selecionar os encontrados")').click();
+  await tshadow('button:has-text("Marcar encontrados")').click();
   check('selecionar os encontrados marca só os da busca e libera o botão', await tshadow('.list .it.on').count() === achados && !(await tshadow('button.pri').isDisabled()));
   await tshadow('input.q').fill('zzzzqq');
   check('busca sem resultado mostra aviso e mantém a seleção fora da busca', await tshadow('.list .it').count() === 0 && /Nenhum curso encontrado/.test(await tshadow('.list').textContent()) && /fora da busca/.test(await tshadow('.bar .sp').textContent()));
   await tshadow('input.q').fill('');
-  if (achados < 3) await tshadow('button:has-text("Selecionar todas")').click();
-  await tshadow('button:has-text("Limpar seleção")').click();
+  if (achados < 3) await tshadow('button:has-text("Marcar todas")').click();
+  await tshadow('.srow button:has-text("Limpar")').click();
   check('apagar a busca volta às 3 UCs e a seleção pode ser limpa', await tshadow('.list .it').count() === 3 && await tshadow('button.pri').isDisabled());
-  await tshadow('button:has-text("Selecionar todas")').click();
+  await tshadow('button:has-text("Marcar todas")').click();
   await pg.screenshot({ path: path.join(SHOTS, '32-turma-selecao.png') });
   let baixouSozinho = 0; const contaDl = () => { baixouSozinho += 1; }; pg.on('download', contaDl);
-  await tshadow('.opt label:has-text("Matrículas por turma") input').uncheck();
-  await tshadow('.opt label:has-text("Notas e situação") input').check();
+  await tshadow('.seg button:has-text("Com notas")').click();
+  await tshadow('.chip:has-text("HTML")').click(); // só Excel, como no teste antigo
   await tshadow('button.pri').click();
   await tshadow('button:has-text("Tentar só as não verificadas")').waitFor({ timeout: 40000 });
   await sleep(500);
   await pg.screenshot({ path: path.join(SHOTS, '33-turma-incompleta.png') });
-  check('leitura incompleta NÃO gera o Excel sozinha: avisa e oferece "Tentar só as não verificadas (1)" e "Gerar assim mesmo"', baixouSozinho === 0 && /Nada foi gerado/.test(await tshadow('.msg').last().textContent()) && /\(1\)/.test(await tshadow('button:has-text("Tentar só as não verificadas")').textContent()) && await tshadow('button:has-text("Gerar assim mesmo")').count() === 1 && /não verificada/.test(await tshadow('.list').textContent()), `downloads=${baixouSozinho}`);
+  check('leitura incompleta NÃO gera o Excel sozinha: avisa e oferece "Tentar só as não verificadas (1)" e "Gerar assim mesmo"', baixouSozinho === 0 && /Nada foi gerado/.test(await tshadow('.msg').last().textContent()) && /\(1\)/.test(await tshadow('button:has-text("Tentar só as não verificadas")').textContent()) && await tshadow('button:has-text("Gerar assim mesmo")').count() === 1 && /parcial|não verificada/.test(await tshadow('.list').textContent()), `downloads=${baixouSozinho}`);
   const gh2 = state.graderHits;
   await tshadow('button:has-text("Tentar só as não verificadas")').click();
   await tshadow('button:has-text("Tentar só as não verificadas")').waitFor({ timeout: 40000 });
@@ -504,11 +504,11 @@ try {
   await tshadow('.msg').last().waitFor();
   await pg.screenshot({ path: path.join(SHOTS, '33-turma-resultado.png') });
   check('"Baixar assim mesmo": uma aba por turma + Situação + Avisos (a UC que falhou)', /^relatorio-turma-.*\.xlsx$/.test(dlT.suggestedFilename()) && ['Téc. Redes · Turma A', 'Situação', 'Avisos', 'Redes de Computadores', 'Segurança em Redes'].every(t => tb.includes(Buffer.from(t))) && tb.includes(Buffer.from('Lógica de Programação')), dlT.suggestedFilename());
-  check('a UC que falhou não vira nota zero nem some: aparece em Avisos e as outras seguem', /não verificada/.test(await tshadow('.list').textContent()) && state.graderHits - gh0 === 2 && /Atenção/i.test(await tshadow('.msg').last().textContent()));
+  check('a UC que falhou não vira nota zero nem some: aparece em Avisos e as outras seguem', /parcial|não verificada/.test(await tshadow('.list').textContent()) && state.graderHits - gh0 === 2 && /Atenção/i.test(await tshadow('.msg').last().textContent()));
   state.modoMeus = false; // o Moodle voltou: agora a tentativa só da que faltava completa tudo e baixa sozinha
   const [dlOk] = await Promise.all([pg.waitForEvent('download', { timeout: 40000 }), tshadow('button:has-text("Tentar só as não verificadas")').click()]);
   await tshadow('button:has-text("Ler de novo")').waitFor({ timeout: 20000 });
-  check('depois que a pendente é lida, o Excel completo sai sozinho e sem a lista de pendências', /^relatorio-turma-/.test(dlOk.suggestedFilename()) && state.graderHits - gh0 === 3 && /Gerado: Excel — 3 unidade/.test(await tshadow('.msg').last().textContent()) && await tshadow('button:has-text("Tentar só")').count() === 0, `${state.graderHits - gh0} consultas`);
+  check('depois que a pendente é lida, o Excel completo sai sozinho e sem a lista de pendências', /^relatorio-turma-/.test(dlOk.suggestedFilename()) && state.graderHits - gh0 === 3 && /Gerado: Excel — \d+ matriculados em \d turma/.test(await tshadow('.msg').last().textContent()) && await tshadow('button:has-text("Tentar só")').count() === 0, `${state.graderHits - gh0} consultas`);
   pg.off('download', contaDl);
   await tshadow('button:has-text("Fechar")').click();
 
@@ -520,8 +520,8 @@ try {
   await abrirItem(pg, 'relatorio-turma');
   await pg.waitForSelector('#hub-aln-turma', { state: 'attached', timeout: 15000 });
   await tshadow('.list .it').first().waitFor();
-  check('padrão: lê só matrículas (leve) e gera HTML e Excel; notas desligadas', await tshadow('.opt label:has-text("Matrículas por turma") input').isChecked() && !(await tshadow('.opt label:has-text("Notas e situação") input').isChecked()) && await tshadow('.opt label:has-text("Página HTML") input').isChecked());
-  await tshadow('button:has-text("Selecionar todas")').click();
+  check('padrão: lê só matrículas (leve) e gera HTML e Excel; notas desligadas', (await tshadow('.seg button:has-text("Só matrículas")').getAttribute('aria-pressed')) === 'true' && (await tshadow('.seg button:has-text("Com notas")').getAttribute('aria-pressed')) === 'false' && (await tshadow('.chip:has-text("HTML")').getAttribute('aria-pressed')) === 'true' && (await tshadow('.chip:has-text("Excel")').getAttribute('aria-pressed')) === 'true');
+  await tshadow('button:has-text("Marcar todas")').click();
   const matGh = state.graderHits; const matBaixados = [];
   const matColeta = d => matBaixados.push(d); pg.on('download', matColeta);
   await tshadow('button.pri').click();
@@ -566,9 +566,9 @@ try {
   await abrirItem(pg, 'relatorio-turma');
   await pg.waitForSelector('#hub-aln-turma', { state: 'attached', timeout: 15000 });
   await tshadow('.list .it').first().waitFor();
-  await tshadow('button:has-text("Selecionar todas")').click();
-  await tshadow('.opt label:has-text("Notas e situação") input').check();
-  await tshadow('.opt label:has-text("Excel") input').uncheck();
+  await tshadow('button:has-text("Marcar todas")').click();
+  await tshadow('.seg button:has-text("Com notas")').click();
+  await tshadow('.chip:has-text("Excel")').click();
   await tshadow('button.pri').click();
   await tshadow('button:has-text("Gerar assim mesmo")').waitFor({ timeout: 60000 });
   const [dlN] = await Promise.all([pg.waitForEvent('download', { timeout: 40000 }), tshadow('button:has-text("Gerar assim mesmo")').click()]);

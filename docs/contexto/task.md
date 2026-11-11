@@ -74,6 +74,7 @@ Trabalhar uma por vez, na ordem. Decisões importantes vão para `memory.md`.
 - [x] N10 Criar conteúdo (fórum, envio, texto) com prévia, oculto e conferido — código e e2e prontos; HOMOLOGAR no SENAI e FIEG antes de chamar de validado.
 - [x] N11 Criar conteúdo: seção pelo nome em cada curso (com trava se mudar) e importar DOCX — HOMOLOGAR no Moodle real.
 - [x] N13 Menu enxuto contextual (estilo C), apoio atrás da engrenagem.
-- [ ] N14 Painel Alunos com 4 abas (Resumo, Alunos, Acompanhamento, Relatório).
+- [x] N14 Painel Alunos com 4 abas (Resumo, Alunos, Acompanhamento, Relatório).
+- [x] N15 Relatório da turma e Criar conteúdo enxutos (0.18.2).
 - [ ] N12 Criar conteúdo fase 3: anexar PDF (precisa mapear o upload do Moodle real), bloco HTML lateral, desfazer, lote por turma, integração com Cronograma.
 - [x] N9 Painel HTML dinâmico das turmas + Notas por UC com leitura parcial — testar no Moodle real.

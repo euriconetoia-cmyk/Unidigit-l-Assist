@@ -2,6 +2,7 @@
 (function (root) {
   'use strict';
   root.ALN.novidades = [
+    { versao: '0.18.2', itens: ['Painel Alunos com 4 abas (Resumo, Alunos, Acompanhamento, Relatório); Notas virou Lista | Notas e Ajustes ficou na engrenagem', 'Relatório da turma e Criar conteúdo mais enxutos: menos texto, escolhas rápidas e cada curso em uma linha'] },
     { versao: '0.18.1', itens: ['Menu enxuto: só o que serve para a página, sem descrições, com o apoio atrás da engrenagem e ícones em quadrado arredondado azul'] },
     { versao: '0.18.0', itens: ['Criar conteúdo (teste): fórum de apresentação, atividade de envio e texto de boas-vindas, com prévia, tudo criado oculto e conferido', 'Seção escolhida pelo nome em cada curso, com trava se a seção mudar', 'Importar modelo em DOCX, HTML ou texto, com {{campos}}', 'Relatório da turma com matriculados e painel dinâmico (HTML), com Notas por UC e Atenção no fim'] },
     { versao: '0.17.0', itens: ['Menu em aba na borda direita (não cobre mais o VLibras), com atalho Alt+U e setas', 'Ícone próprio por ferramenta, cor única (azul SENAI) e aviso “não se aplica aqui”', 'Mover aba: ajusta a altura e lembra', 'Meus dados inclui o cronograma importado e a altura da aba'] },

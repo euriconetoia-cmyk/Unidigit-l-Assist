@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.18.2 — 2026-11-11
+
+### Mudou
+- **Painel Alunos com 4 abas**: Resumo, Alunos, Acompanhamento e Relatório. “Notas” virou uma visão dentro de Alunos (seletor **Lista | Notas**) e “Ajustes” passou para a engrenagem ⚙ do cabeçalho do painel. Nenhuma função saiu.
+- **Relatório da turma mais enxuto**: busca e “Limpar” na mesma linha; “O que ler” virou **Só matrículas | Com notas**; a saída virou dois botões (**HTML**, **Excel**); o botão final mostra o total (“Gerar (3 UCs)”). “Com notas” agora lê também as matrículas (não existe mais o modo só de notas).
+- **Criar conteúdo mais enxuto**: etiqueta “sempre oculto” no título (a caixa de visibilidade saiu), botão **Importar DOCX ou HTML**, tabela de campos recolhida em “Campos do modelo (N)” (abre sozinha quando há campo para preencher) e cada curso em uma linha, com o nome ao lado da escolha da seção.
+
+### Interno
+- Só visual e organização; sem permissão nova. Validado só no Moodle simulado.
+
 ## 0.18.1 — 2026-11-10
 
 ### Mudou

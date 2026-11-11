@@ -14,6 +14,7 @@ h2{margin:0 0 2px;font-size:18px}.sub{color:var(--m);font-size:12.5px;margin:0 0
 button{font:inherit;min-height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--bd);background:var(--s);color:inherit;cursor:pointer}
 button.pri{background:var(--p);border-color:var(--p);color:#fff}button:disabled{opacity:.5;cursor:default}
 button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offset:2px}
+.srow{display:flex;gap:8px;align-items:center;margin-top:8px}.srow .q{margin-top:0;flex:1;width:auto}.srow button{white-space:nowrap}
 .q{width:100%;min-height:38px;margin-top:8px;padding:0 12px;border-radius:8px;border:1px solid var(--bd);background:var(--s);color:inherit;font:inherit}
 .list{display:grid;gap:6px;max-height:46vh;overflow:auto}
 .it{display:flex;gap:10px;align-items:center;border:1px solid var(--bd);background:var(--c);border-radius:10px;padding:8px 10px}
@@ -22,6 +23,11 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
 .prog{height:10px;border-radius:6px;background:var(--bd);overflow:hidden;margin:8px 0}.prog i{display:block;height:100%;background:var(--p);width:0;transition:width .3s}
 .msg{margin-top:10px;padding:8px 10px;border-radius:8px;font-size:13px;background:var(--c)}.msg.warn{background:var(--wnbg);color:var(--wn)}.msg.ok{background:var(--okbg);color:var(--ok)}.msg.err{background:var(--erbg);color:var(--er)}
 .opt{margin-top:10px;padding:8px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--c);display:grid;gap:4px;font-size:13px}.opt strong{font-size:12px;color:var(--m);text-transform:uppercase;letter-spacing:.05em}.opt label{display:flex;gap:8px;align-items:center;cursor:pointer;min-height:28px}.opt label.off{opacity:.55;cursor:default}.opt .hint{color:var(--m);font-size:12px;margin-left:26px}
+.opts{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}.opts .sp{flex:1}
+.seg{display:inline-flex;padding:3px;border-radius:10px;background:var(--bd);gap:2px}.seg button{border:0;background:none;min-height:32px;border-radius:8px;color:var(--m);padding:0 12px}.seg button[aria-pressed=true]{background:var(--s);color:var(--p);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.chips{display:flex;gap:6px}.chip{border-radius:999px;min-height:32px;padding:0 12px}.chip[aria-pressed=true]{background:#e4edfa;border-color:var(--p);color:#1a4b9f;font-weight:600}
+@media (prefers-color-scheme:dark){.chip[aria-pressed=true]{background:#1d3358;color:#cfe0ff}}
+.hintx{margin:6px 0 0;color:var(--m);font-size:12.5px}
 .row2{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}.empty{padding:14px;color:var(--m);text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}`;
 
@@ -57,16 +63,17 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
     const countOn = () => courses.filter(c => sel.has(c.id)).length;
     function draw() {
       box.replaceChildren(h('h2', {}, 'Relatório da turma'),
-        h('p', { class: 'sub' }, 'Escolha as unidades curriculares. Lê a lista de participantes de cada uma (uma por vez, com pausa) e mostra as turmas com o número de matriculados. Nada é gravado no Moodle.'));
+        h('p', { class: 'sub' }, 'Só leitura: nada é gravado no Moodle.'));
       if (!courses.length) { box.append(h('div', { class: 'empty' }, 'Não encontrei cursos nesta página. Role a página até os cursos aparecerem (ou use o filtro “Em andamento” do Moodle) e abra de novo.'), h('div', { class: 'row2' }, h('button', { type: 'button', onclick: close }, 'Fechar'))); return; }
       const fold = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
       const visible = () => { const q = fold(st.q).trim(); return q ? courses.filter(c => fold(`${c.name} ${c.category || ''}`).includes(q)) : courses; };
       const searchIn = h('input', { type: 'search', class: 'q', placeholder: 'Buscar curso ou categoria', 'aria-label': 'Buscar curso ou categoria', value: st.q || '', disabled: st.running });
-      const barEl = h('div', { class: 'bar' }), listEl = h('div', { class: 'list' });
+      const barEl = h('div', { class: 'bar' }), listEl = h('div', { class: 'list' }), toggleEl = h('span');
       function refresh() {
         const vis = visible(); const allOn = vis.length > 0 && vis.every(c => sel.has(c.id)); const hidden = countOn() - vis.filter(c => sel.has(c.id)).length;
-        const all = h('button', { type: 'button', disabled: st.running || !vis.length, onclick: () => { if (allOn) vis.forEach(c => sel.delete(c.id)); else vis.forEach(c => sel.add(c.id)); draw(); } }, st.q && st.q.trim() ? (allOn ? 'Limpar os encontrados' : 'Selecionar os encontrados') : (allOn ? 'Limpar seleção' : 'Selecionar todas'));
-        barEl.replaceChildren(all, h('span', { class: 'sp', role: 'status', 'aria-live': 'polite' }, `${countOn() ? `${countOn()} unidade(s) selecionada(s)` : 'Nenhuma unidade selecionada'}${st.q && st.q.trim() ? ` · ${vis.length} de ${courses.length} na busca${hidden ? ` · ${hidden} selecionada(s) fora da busca` : ''}` : ''}`));
+        const all = h('button', { type: 'button', disabled: st.running || !vis.length, onclick: () => { if (allOn) vis.forEach(c => sel.delete(c.id)); else vis.forEach(c => sel.add(c.id)); draw(); } }, st.q && st.q.trim() ? (allOn ? 'Limpar' : 'Marcar encontrados') : (allOn ? 'Limpar' : 'Marcar todas'));
+        toggleEl.replaceChildren(all);
+        barEl.replaceChildren(h('span', { class: 'sp', role: 'status', 'aria-live': 'polite' }, `${countOn() ? `${countOn()} unidade(s) selecionada(s)` : 'Nenhuma unidade selecionada'}${st.q && st.q.trim() ? ` · ${vis.length} de ${courses.length} na busca${hidden ? ` · ${hidden} selecionada(s) fora da busca` : ''}` : ''}`));
         listEl.replaceChildren(...(vis.length ? vis.map(c => {
           const s = st.status.get(c.id);
           const chk = h('input', { type: 'checkbox', checked: sel.has(c.id), disabled: st.running, onchange: e => { if (e.target.checked) sel.add(c.id); else sel.delete(c.id); draw(); } });
@@ -74,14 +81,14 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
         }) : [h('div', { class: 'empty' }, `Nenhum curso encontrado para “${st.q.trim()}”.`)]));
       }
       searchIn.addEventListener('input', () => { st.q = searchIn.value; refresh(); });
-      box.append(searchIn, barEl, listEl);
+      box.append(h('div', { class: 'srow' }, searchIn, toggleEl), barEl, listEl);
       refresh();
-      const chk2 = (obj, key, label, hint, dis) => h('label', { class: dis ? 'off' : '' }, h('input', { type: 'checkbox', checked: obj[key], disabled: st.running || dis, onchange: e => { obj[key] = e.target.checked; draw(); } }), label);
-      box.append(h('div', { class: 'opt' }, h('strong', {}, 'O que ler'),
-        chk2(st.inc, 'mat', 'Matrículas por turma (leve)'),
-        chk2(st.inc, 'notas', 'Notas e situação por UC (mais pesado)'), h('span', { class: 'hint' }, 'Lê também o livro de notas de cada UC.')),
-        h('div', { class: 'opt' }, h('strong', {}, 'Saída'),
-          chk2(st.out, 'html', 'Página HTML', '', !st.inc.mat), chk2(st.out, 'xlsx', 'Excel', '')));
+      const seg = (txt, on, fn) => h('button', { type: 'button', 'aria-pressed': on ? 'true' : 'false', disabled: st.running, onclick: fn }, txt);
+      const chip = (txt, obj, key) => h('button', { type: 'button', class: 'chip', 'aria-pressed': obj[key] ? 'true' : 'false', disabled: st.running, onclick: () => { obj[key] = !obj[key]; draw(); } }, txt);
+      box.append(h('div', { class: 'opts' },
+        h('div', { class: 'seg', role: 'group', 'aria-label': 'O que ler' }, seg('Só matrículas', !st.inc.notas, () => { st.inc.mat = true; st.inc.notas = false; draw(); }), seg('Com notas', st.inc.notas, () => { st.inc.mat = true; st.inc.notas = true; draw(); })),
+        h('span', { class: 'sp' }), h('div', { class: 'chips', role: 'group', 'aria-label': 'Saída' }, chip('HTML', st.out, 'html'), chip('Excel', st.out, 'xlsx'))),
+        h('p', { class: 'hintx' }, st.inc.notas ? '“Com notas” é mais lento: lê também o livro de notas de cada UC.' : 'Lê só a lista de participantes de cada UC (uma por vez, com pausa).'));
       if (st.running) box.append(h('div', { class: 'prog', role: 'progressbar', 'aria-label': 'Progresso' }, h('i', { style: `width:${st.pct || 0}%` })), h('div', { class: 'msg', role: 'status', 'aria-live': 'polite' }, st.msg || 'Lendo…'));
       if (st.result) box.append(h('div', { class: `msg ${st.result.tone}`, role: 'status' }, st.result.text));
       const pend = st.running ? [] : pendentes(); const lidas = courses.filter(c => sel.has(c.id) && lido(c.id)).length;
@@ -89,7 +96,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--f);outline-offs
         !st.running && pend.length ? h('button', { type: 'button', class: 'pri', onclick: () => generate(pend.map(c => c.id)) }, `Tentar só as não verificadas (${pend.length})`) : null,
         !st.running && pend.length && lidas ? h('button', { type: 'button', onclick: entregar }, 'Gerar assim mesmo') : null,
         !st.running && st.resumo ? h('button', { type: 'button', onclick: copiar }, 'Copiar resumo') : null,
-        st.running || pend.length ? null : h('button', { class: 'pri', type: 'button', disabled: !countOn() || !(st.inc.mat || st.inc.notas) || !(st.out.html || st.out.xlsx), onclick: () => generate() }, st.reports.size || st.mat.size ? 'Ler de novo' : 'Gerar relatório')));
+        st.running || pend.length ? null : h('button', { class: 'pri', type: 'button', disabled: !countOn() || !(st.inc.mat || st.inc.notas) || !(st.out.html || st.out.xlsx), onclick: () => generate() }, st.reports.size || st.mat.size ? 'Ler de novo' : (countOn() ? `Gerar (${countOn()} UC${countOn() > 1 ? 's' : ''})` : 'Gerar relatório'))));
     }
 
     // Leituras já feitas nesta janela. notas: st.reports (id → {students, complete, reason}); matrículas: st.mat (id → {alunos, complete, reason}).

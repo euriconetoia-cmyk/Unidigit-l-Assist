@@ -27,7 +27,10 @@ button{font:inherit;min-height:38px;padding:0 16px;border-radius:9px;border:1px 
 table{width:100%;border-collapse:collapse;margin-top:6px}th,td{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:left;font-size:13px;vertical-align:top}th{background:var(--c);color:var(--m);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
 .msg{margin-top:10px;padding:8px 10px;border-radius:8px;font-size:13px;background:var(--wnbg);color:var(--wn)}.msg.ok{background:var(--okbg);color:var(--ok)}.msg.err{background:var(--erbg);color:var(--er)}.msg.in{background:var(--c);color:inherit}
 .prog{height:10px;border-radius:6px;background:var(--bd);overflow:hidden;margin:10px 0}.prog i{display:block;height:100%;background:var(--p);transition:width .3s}
-.cw{margin:4px 0}.sec{margin:2px 0 6px 26px}.okd{color:#1b7a3d;font-weight:600}.avd{color:#b3411c;font-weight:600}
+.cw{margin:4px 0}.sec{margin:2px 0 6px 26px}.cw.on{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:8px;align-items:start}.cw.on .sec{margin:0}@media(max-width:560px){.cw.on{grid-template-columns:1fr}.cw.on .sec{margin:0 0 4px 26px}}
+.tag{display:inline-block;margin-left:8px;padding:2px 9px;border-radius:99px;background:var(--soft);color:var(--p);font-size:12px;font-weight:700;vertical-align:middle}
+details.cmp{margin:8px 0;border:1px dashed var(--bd);border-radius:8px;padding:6px 10px}details.cmp summary{cursor:pointer;color:var(--m)}
+.imp{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}.okd{color:#1b7a3d;font-weight:600}.avd{color:#b3411c;font-weight:600}
 code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}`;
 
@@ -139,7 +142,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
     const htmlPara = c => C.preencher(textoLimpo(), valoresPara(c)).html;
 
     const passos = () => h('ol', { class: 'steps', 'aria-label': 'Passos' }, ['Escolher', 'Preencher', 'Prévia', 'Criar'].map((n, i) => h('li', { class: i === st.passo ? 'on' : i < st.passo ? 'done' : '', 'aria-current': i === st.passo ? 'step' : null }, `${i + 1}. ${n}`)));
-    const cab = sub => [h('div', { class: 'top' }, h('div', {}, h('h2', {}, 'Criar conteúdo'), h('p', { class: 'sub' }, sub))), passos()];
+    const cab = sub => [h('div', { class: 'top' }, h('div', {}, h('h2', {}, 'Criar conteúdo', h('span', { class: 'tag', title: 'Tudo é criado oculto para os alunos' }, 'sempre oculto')), h('p', { class: 'sub' }, sub))), passos()];
     const rodape = (...bt) => h('div', { class: 'row2' }, ...bt);
 
     function draw() {
@@ -169,22 +172,24 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
         const t = await f.text(); st.texto = /\.txt$/i.test(f.name) ? t.split(/\n{2,}/).map(p => `<p>${C.esc(p.trim()).replace(/\n/g, '<br>')}</p>`).join('') : t;
         st.arquivo = `Lido: ${f.name}. Scripts, estilos, imagens e eventos foram removidos.`; draw();
       } });
+      const impBtn = h('button', { type: 'button', onclick: () => arq.click() }, 'Importar DOCX ou HTML'); arq.style.display = 'none';
       const ehAuto = c => AUTO.includes(c) && !(c === 'tutor' && !tutor);
       const nCampos = camposDoTexto().filter(c => !ehAuto(c));
       const aut = camposDoTexto().filter(ehAuto);
-      const tab = (nCampos.length || aut.length) ? h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Campo'), h('th', {}, 'Valor'))), h('tbody', {},
+      const tabela = (nCampos.length || aut.length) ? h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Campo'), h('th', {}, 'Valor'))), h('tbody', {},
         aut.map(c => h('tr', {}, h('td', {}, h('code', {}, `{{${c}}}`)), h('td', {}, 'automático'))),
         nCampos.map(c => h('tr', {}, h('td', {}, h('code', {}, `{{${c}}}`)), h('td', {}, h('input', { type: 'text', placeholder: c === 'tutor' ? 'não achei seu nome: digite aqui' : 'preencha', 'aria-label': `Valor de ${c}`, value: st.custom[c] || '', oninput: e => { st.custom[c] = e.target.value; } })))))) : null;
+      const tab = h('details', { class: 'cmp', open: nCampos.length > 0 }, h('summary', {}, `Campos do modelo (${nCampos.length + aut.length})`), h('p', { class: 'sub' }, 'Use campos como {{uc}}, {{turma}}, {{tutor}}, {{prazo}} ou crie os seus ({{link_sala}}).'), tabela);
       const datas = m.modname === 'assign' ? h('div', { class: 'two' }, h('div', {}, h('label', { class: 'l' }, 'Abertura'), h('input', { type: 'datetime-local', value: st.abertura, 'aria-label': 'Abertura', onchange: e => { st.abertura = e.target.value; } })), h('div', {}, h('label', { class: 'l' }, 'Prazo'), h('input', { type: 'datetime-local', value: st.prazo, 'aria-label': 'Prazo de entrega', onchange: e => { st.prazo = e.target.value; } }))) : null;
-      const lista = cursos.length ? h('div', { class: 'list' }, cursos.map(c => h('div', { class: 'cw' }, h('label', { class: 'it' }, h('input', { type: 'checkbox', checked: st.sel.has(c.id), 'aria-label': c.name, onchange: e => { if (e.target.checked) st.sel.add(c.id); else st.sel.delete(c.id); draw(); carregarSecoes(); } }), h('b', {}, c.name), c.category ? h('small', {}, c.category) : null), st.sel.has(c.id) ? secaoCtl(c) : null))) : h('div', { class: 'msg' }, 'Não achei cursos nesta página. Abra a página de um curso ou “Meus cursos”.');
-      mount(...cab('Edite o texto e escolha onde criar.'),
+      const lista = cursos.length ? h('div', { class: 'list' }, cursos.map(c => h('div', { class: `cw${st.sel.has(c.id) ? ' on' : ''}` }, h('label', { class: 'it' }, h('input', { type: 'checkbox', checked: st.sel.has(c.id), 'aria-label': c.name, onchange: e => { if (e.target.checked) st.sel.add(c.id); else st.sel.delete(c.id); draw(); carregarSecoes(); } }), h('b', {}, c.name), c.category ? h('small', {}, c.category) : null), st.sel.has(c.id) ? secaoCtl(c) : null))) : h('div', { class: 'msg' }, 'Não achei cursos nesta página. Abra a página de um curso ou “Meus cursos”.');
+      mount(...cab('Passo 2 de 4 · Preencher'),
         h('label', { class: 'l' }, 'Nome'), nome,
         h('label', { class: 'l' }, m.modname === 'label' ? 'Texto (HTML simples)' : 'Descrição (HTML simples)'), txt,
-        h('div', { class: 'row2', style: 'justify-content:flex-start;margin-top:6px;align-items:center' }, h('span', {}, 'Ou importe um modelo:'), arq),
+        h('div', { class: 'imp' }, impBtn, arq),
         st.arquivo ? h('div', { class: 'msg in', role: 'status' }, st.arquivo) : null,
-        h('p', { class: 'sub' }, 'Use campos como {{uc}}, {{turma}}, {{tutor}}, {{prazo}} ou crie os seus ({{link_sala}}).'), tab,
+        tab,
         datas,
-        h('div', { class: 'two' }, h('div', {}, h('label', { class: 'l' }, 'Procurar seção por nome (opcional)'), h('input', { type: 'text', value: st.busca, placeholder: 'ex.: Unidade 2', 'aria-label': 'Procurar seção por nome', oninput: e => { st.busca = C.clean(e.target.value); aplicarBusca(); } }), h('p', { class: 'sub' }, 'Cada curso tem as suas seções. Escolha a certa em cada curso abaixo.')), h('div', {}, h('label', { class: 'l' }, 'Visibilidade'), h('input', { type: 'text', value: 'Oculto para alunos (sempre)', disabled: true }))),
+        h('div', {}, h('div', {}, h('label', { class: 'l' }, 'Procurar seção por nome (opcional)'), h('input', { type: 'text', value: st.busca, placeholder: 'ex.: Unidade 2', 'aria-label': 'Procurar seção por nome', oninput: e => { st.busca = C.clean(e.target.value); aplicarBusca(); } }), h('p', { class: 'sub' }, 'Cada curso tem as suas seções. Escolha a certa em cada curso abaixo.'))),
         h('label', { class: 'l' }, cursoAtual ? 'Onde criar' : 'Onde criar (escolha os cursos)'), lista,
         rodape(h('span', { class: 'sp', role: 'status' }, `${st.sel.size} curso(s) selecionado(s)`), h('button', { type: 'button', onclick: () => { st.passo = 0; draw(); } }, 'Voltar'), h('button', { type: 'button', class: 'pri', disabled: !ok, onclick: irPrevia }, 'Ver prévia')));
     }

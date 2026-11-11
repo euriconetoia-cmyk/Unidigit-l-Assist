@@ -134,7 +134,8 @@ try {
   await pg.screenshot({ path: path.join(SHOTS, 'c4-resultado.png') });
   const res = await q('table').last().textContent();
   check('criou nos cursos 7 e 8 (o 9 não tem permissão), tudo oculto e conferido', log.posts.length === 3 && log.posts[0].course === '7' && log.posts[0].activitytype === '5' && log.posts[1].course === '8' && !log.posts[1].fase && log.posts[2].course === '8' && log.posts[2].fase === 'a' && log.posts.every(p => p.visible === '0') && log.posts[0].section === '2' && log.posts[2].section === '2' && log.posts[0].sesskey === 'SKSIM' && /Redes de Computadores\s*Criada \(oculta\)/.test(res) && /Segurança em Redes\s*Criada \(oculta\)/.test(res) && /Administração de Servidores\s*Não criada/.test(res) && acts[7].length === 1 && acts[7][0].visivel === '0', res.slice(0, 500) + ' | ' + JSON.stringify(log.posts));
-  check('o texto foi com tutor, abertura e prazo preenchidos, e as datas do envio', /Tutora Exemplo/.test(log.posts[0]['introeditor[text]']) && /11\/11\/2026 08:00/.test(log.posts[0]['introeditor[text]']) && /Prazo de entrega/.test(log.posts[0]['introeditor[text]']) && log.posts[0]['duedate[enabled]'] === '1', log.posts[0]['introeditor[text]']);
+  const AMANHA_BR = (() => { const d = new Date(Date.now() + 864e5); return `${String(d.getDate()).padStart(2, '0')}\\/${String(d.getMonth() + 1).padStart(2, '0')}\\/${d.getFullYear()}`; })();
+  check('o texto foi com tutor, abertura e prazo preenchidos, e as datas do envio', /Tutora Exemplo/.test(log.posts[0]['introeditor[text]']) && new RegExp(AMANHA_BR + ' 08:00').test(log.posts[0]['introeditor[text]']) && /Prazo de entrega/.test(log.posts[0]['introeditor[text]']) && log.posts[0]['duedate[enabled]'] === '1', log.posts[0]['introeditor[text]']);
   check('sem erro de script na página', erros.length === 0, erros.join(';'));
   await q('button:has-text("Fechar")').click();
 

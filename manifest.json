@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Unidigit@l Assist",
-  "version": "0.18.1",
+  "version": "0.18.2",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAycKQBkPpjD7qGaHCixoR8ZSCfRt9BsfpVPMsDcBmdhPSZgowpeUBcvtI2cdz1JWzbbrROvV04XuLEb0nb80uFkJHq5tlHdHSBQbak/xuGQXoeKpmXoE/SgJUTyUNmkmBZYpFeIVvoZ6MPfYlioB6aGylmARw1nuzCUygOG+pVoPUkQWvq/+F+jjeauiUmoS94n+KmLLKNiog5q7MgozpPp0KAAWWc9sHGrk9435U8qw6smI5Z+ruXUU0mOrNTjb7z22rXdDnFg85Y3+shVxPCuxj4B3wpTnUKbEMfijnMU62EddJiczaE0Ww/XJlVcId/Euj3qjSyMYCRhUakw5N4wIDAQAB",
   "description": "Ferramentas do tutor EaD para o Moodle (correção, pendências, alunos e relatórios) — botão lateral. Nada roda sozinho.",
   "minimum_chrome_version": "108",

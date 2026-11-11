@@ -29,6 +29,7 @@ Repositório: <https://github.com/euriconetoia-cmyk/Unidigit-l-Assist> · Licen�
 ## Histórico de releases
 | Versão | Base | Conteúdo |
 |---|---|---|
+| v0.18.2 | `main` | Painel Alunos com 4 abas; Relatório da turma e Criar conteúdo enxutos (a publicar) |
 | v0.18.1 | `main` (558a9f4) | Menu enxuto contextual (ícones estilo C), apoio atrás da engrenagem |
 | v0.18.0 | `ec7e7ec` | Criar conteúdo (seção por nome, DOCX, campos obrigatórios), painel das turmas |
 | v0.17.0 | `2272104` | Menu em aba, cor única nos ícones, Meus dados com cronograma |
