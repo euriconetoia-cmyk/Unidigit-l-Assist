@@ -22,7 +22,7 @@ Mensagens curtas no imperativo, em português, com prefixo: `feat:`, `fix:`, `do
 
 ## Nova versão
 1. Atualize a versão em `package.json` **e** `manifest.json` (devem ser iguais) e descreva no `CHANGELOG.md` (`## X.Y.Z — AAAA-MM-DD`).
-2. Depois do merge em `main`: `git tag vX.Y.Z && git push origin vX.Y.Z`. O workflow **Release** confere tag × manifesto, roda tudo e publica o ZIP em *Releases* com as notas do `CHANGELOG`.
+2. Depois do merge em `main`: `git tag vX.Y.Z && git push origin vX.Y.Z` **ou**, sem terminal, *Actions › Release › Run workflow* informando a tag (e, se quiser, o commit). O workflow **Release** confere tag × manifesto, roda tudo e publica o ZIP em *Releases* com as notas do `CHANGELOG`.
 
 ## Código vindo de outros projetos
 `src/modules/importar-notas/vendor` e `src/modules/alunos/vendor` são cópias geradas por `npm run sync`. Não edite à mão: mude no projeto de origem e sincronize.
