@@ -11,7 +11,8 @@ Repositório: <https://github.com/euriconetoia-cmyk/Unidigit-l-Assist> · Licen�
 | CI | `.github/workflows/ci.yml` em push na `main` e em PR (testes unitários, build, validação) |
 | E2E | `.github/workflows/e2e.yml`, **manual** (Chromium real + Moodle simulado) |
 | Dependabot | `.github/dependabot.yml` (npm e GitHub Actions) |
-| Comunidade | `README`, `LICENSE`, `CONTRIBUTING`, `CODE_OF_CONDUCT`, `SECURITY`, modelos de issue (erro, melhoria) e de PR |
+| Perfil de comunidade | **100%** (11/11/2026) |
+| Arquivos de comunidade | `README`, `LICENSE`, `CONTRIBUTING`, `CODE_OF_CONDUCT`, `SECURITY`, modelos de issue (erro, melhoria) e de PR |
 | Modelos de issue | `blank_issues_enabled: false`; contato de segurança leva ao aviso privado |
 
 `scripts/configurar-github.sh` reaplica essa configuração (precisa do `gh` logado com a conta do dono).
@@ -33,9 +34,11 @@ Repositório: <https://github.com/euriconetoia-cmyk/Unidigit-l-Assist> · Licen�
 | v0.17.0 | `2272104` | Menu em aba, cor única nos ícones, Meus dados com cronograma |
 | v0.16.0 e anteriores | tags originais | Veja o `CHANGELOG.md` |
 
+## Segurança (conferido em 11/11/2026)
+Ligados: relato privado de vulnerabilidade, grafo de dependências, alertas do Dependabot, atualizações de segurança do Dependabot e *push protection* de segredos. Desligados (opcionais): alertas de malware, atualizações agrupadas, CodeQL e varreduras por IA.
+
 ## Só pelo site do GitHub
-- **Imagem de compartilhamento:** *Settings › General › Social preview* (sugestão: `docs/imagens/menu.png`).
-- **Alertas de segurança:** *Settings › Code security* (Dependabot alerts, secret scanning, relato privado de vulnerabilidade).
+- **Imagem de compartilhamento:** *Settings › General › Social preview* (sugestão: `docs/imagens/menu.png`). Ainda não enviada.
 
 ## Registro de homologação
 Todas as versões foram validadas no Moodle simulado. A criação de conteúdo foi confirmada no Moodle real do SENAI (0.18.0). Falta homologar no FIEG.
