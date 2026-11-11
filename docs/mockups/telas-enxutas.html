@@ -1,0 +1,67 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Telas enxutas — Relatório da turma e Criar conteúdo</title>
+<style>
+:root{--p:#1a4b9f;--ink:#14202e;--mut:#5b6b7c;--bd:#dbe3ec;--bg:#eef2f7;--tint:#e4edfa;--ok:#13795b;--wn:#9a5b00}
+*{box-sizing:border-box}body{margin:0;padding:24px;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,Segoe UI,Arial,sans-serif}
+h1{font-size:20px;margin:0 0 4px}.sub{color:var(--mut);margin:0 0 20px}
+h2{font-size:15px;margin:28px 0 10px;color:var(--p)}
+.par{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.col>b{display:block;margin-bottom:6px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.col.novo>b{color:var(--ok)}
+.card{background:#fff;border-radius:14px;padding:16px;box-shadow:0 6px 24px rgba(10,40,90,.15)}
+.card h3{margin:0 0 4px;font-size:16px}.card p{margin:0 0 10px;color:var(--mut);font-size:12.5px}
+.in{border:1px solid var(--bd);border-radius:8px;padding:8px 10px;color:var(--mut);background:#fff;margin-bottom:8px}
+.row{display:flex;gap:8px;align-items:center;margin-bottom:8px}.row>*{flex:1}.row .fit{flex:none}
+.uc{display:flex;gap:8px;align-items:center;border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin-bottom:6px;background:#f8fafc}
+.uc.on{border-color:var(--p);background:#f4f8ff}.uc small{margin-left:auto;color:var(--mut)}
+.box{border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin-bottom:8px;background:#f8fafc}.box b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:4px}
+.btn{border:1px solid var(--bd);background:#fff;border-radius:8px;padding:8px 14px;font-weight:600}.pri{background:var(--p);color:#fff;border-color:var(--p)}
+.foot{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.seg{display:inline-flex;background:#e8eef5;border-radius:10px;padding:3px;gap:2px}.seg span{padding:6px 12px;border-radius:8px;color:var(--mut)}.seg .on{background:#fff;color:var(--p);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.chip{display:inline-block;padding:6px 12px;border-radius:999px;border:1px solid var(--bd);background:#fff;margin-right:6px}.chip.on{background:var(--tint);border-color:var(--p);color:var(--p);font-weight:600}
+.tag{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--tint);color:var(--p);font-size:12px;font-weight:600}
+.dis{border:1px dashed var(--bd);border-radius:8px;padding:6px 10px;color:var(--mut);margin-bottom:8px;display:flex;justify-content:space-between}
+.ok{color:var(--ok);font-size:12px}.lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:6px 0 4px}
+.nota{margin-top:6px;color:var(--mut);font-size:12.5px}
+</style>
+<h1>Telas internas mais enxutas</h1><p class="sub">Mesma lógica do menu: menos texto, menos blocos, o que é raro fica recolhido. Dados fictícios.</p>
+
+<h2>1 · Relatório da turma</h2>
+<div class="par">
+<div class="col"><b>Hoje</b><div class="card"><h3>Relatório da turma</h3><p>Escolha as unidades curriculares. Lê a lista de participantes de cada uma (uma por vez, com pausa) e mostra as turmas com o número de matriculados. Nada é gravado no Moodle.</p>
+<div class="in">Buscar curso ou categoria</div><div class="row"><span class="btn fit">Limpar seleção</span><span style="color:var(--mut)">3 unidade(s) selecionada(s)</span></div>
+<div class="uc on">☑ <b>Redes de Computadores</b><small>Téc. Redes · Turma A</small></div><div class="uc on">☑ <b>Segurança em Redes</b><small>Téc. Redes · Turma A</small></div><div class="uc on">☑ <b>Lógica de Programação</b><small>Téc. Informática · Turma B</small></div>
+<div class="box"><b>O que ler</b>☑ Matrículas por turma (leve)<br>☐ Notas e situação por UC (mais pesado)<div class="nota">Lê também o livro de notas de cada UC.</div></div>
+<div class="box"><b>Saída</b>☑ Página HTML &nbsp; ☑ Excel</div>
+<div class="foot"><span class="btn">Fechar</span><span class="btn pri">Gerar relatório</span></div></div></div>
+<div class="col novo"><b>Proposta</b><div class="card"><h3>Relatório da turma</h3><p>Só leitura: nada é gravado no Moodle.</p>
+<div class="row"><div class="in" style="margin:0">Buscar curso ou categoria</div><span class="btn fit">Limpar</span></div>
+<div class="uc on">☑ <b>Redes de Computadores</b><small>Téc. Redes · Turma A</small></div><div class="uc on">☑ <b>Segurança em Redes</b><small>Téc. Redes · Turma A</small></div><div class="uc on">☑ <b>Lógica de Programação</b><small>Téc. Informática · Turma B</small></div>
+<div class="row" style="margin-top:10px"><div class="seg"><span class="on">Só matrículas</span><span>Com notas</span></div><div class="fit"><span class="chip on">HTML</span><span class="chip on">Excel</span></div></div>
+<div class="nota">“Com notas” é mais lento: lê também o livro de notas de cada UC.</div>
+<div class="foot"><span class="btn">Fechar</span><span class="btn pri">Gerar (3 UCs)</span></div></div></div>
+</div>
+
+<h2>2 · Criar conteúdo — passo “Preencher”</h2>
+<div class="par">
+<div class="col"><b>Hoje</b><div class="card"><h3>Criar conteúdo</h3><p>Escreva ou importe o texto e escolha onde criar.</p>
+<div class="in" style="height:54px">&lt;p&gt;Dúvidas? Fale com o(a) tutor(a) {{tutor}}.&lt;/p&gt;</div>
+<div class="lbl">Ou importe um modelo:</div><div class="in">Choose File · No file chosen</div><div class="nota" style="margin:0 0 8px">Use campos como {{uc}}, {{turma}}, {{tutor}}, {{prazo}}…</div>
+<div class="box"><b>Campo · Valor</b>{{abertura}} automático<br>{{prazo}} automático<br>{{tutor}} automático</div>
+<div class="row"><div class="in" style="margin:0">Abertura 11/11/2026 08:00</div><div class="in" style="margin:0">Prazo 25/11/2026 23:59</div></div>
+<div class="row"><div class="in" style="margin:0">Procurar seção por nome (opcional)</div><div class="in" style="margin:0">Visibilidade: Oculto (sempre)</div></div>
+<div class="lbl">Onde criar (escolha os cursos)</div>
+<div class="uc on">☑ Redes de Computadores <small>Téc. Redes · Turma A</small></div><div class="in">2 · Unidade 2 — Endereçamento IP</div><div class="ok">✓ achei “unidade 2”</div>
+<div class="uc on">☑ Segurança em Redes <small>Téc. Redes · Turma A</small></div><div class="in">2 · Unidade 2 — Criptografia</div></div></div>
+<div class="col novo"><b>Proposta</b><div class="card"><h3>Criar conteúdo <span class="tag">sempre oculto</span></h3><p>Passo 2 de 4 · Preencher</p>
+<div class="in" style="height:54px">&lt;p&gt;Dúvidas? Fale com o(a) tutor(a) {{tutor}}.&lt;/p&gt;</div>
+<div class="row"><span class="btn fit">Importar DOCX ou HTML</span><span class="dis" style="margin:0">Campos do modelo (3) ▸</span></div>
+<div class="row"><div class="in" style="margin:0">Abertura 11/11 08:00</div><div class="in" style="margin:0">Prazo 25/11 23:59</div></div>
+<div class="lbl">Onde criar · 3 cursos</div>
+<div class="row"><div class="in" style="margin:0">Procurar seção: unidade 2</div><span class="ok fit">achei em 2 de 3</span></div>
+<div class="uc on" style="display:grid;grid-template-columns:auto 1fr 1.2fr;gap:8px">☑<b>Redes de Computadores</b><span class="in" style="margin:0">2 · Unidade 2 — Endereçamento IP ▾</span></div>
+<div class="uc on" style="display:grid;grid-template-columns:auto 1fr 1.2fr;gap:8px">☑<b>Segurança em Redes</b><span class="in" style="margin:0">2 · Unidade 2 — Criptografia ▾</span></div>
+<div class="uc on" style="display:grid;grid-template-columns:auto 1fr 1.2fr;gap:8px">☑<b>Admin. de Servidores</b><span class="in" style="margin:0;border-color:var(--wn)">Nº da seção: 0</span></div>
+<div class="foot"><span class="btn">Voltar</span><span class="btn pri">Ver prévia</span></div></div></div>
+</div>
+<p class="nota" style="margin-top:20px"><b>O que muda:</b> descrições longas viram uma linha; “O que ler” e “Saída” viram duas escolhas rápidas; a tabela de campos e a visibilidade (sempre oculto) saem do caminho; cada curso ocupa uma linha só (nome + seção). Nenhuma função some e nada deixa de pedir confirmação.</p>
+</html>
