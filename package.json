@@ -41,7 +41,7 @@
     "test:e2e:criar": "node tests/e2e/criar.mjs"
   },
   "devDependencies": {
-    "blockly": "^13.4.0",
+    "blockly": "^13.5.0",
     "esbuild": "^0.25.0",
     "jsdom": "^29.1.1"
   }
